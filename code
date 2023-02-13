@@ -1,0 +1,180 @@
+
+window.onload = () => (function () {
+  /* stylesheet declaration */
+  let style = document.createElement('style');
+  style.textContent = ` @keyframes spin{ 0%{ transform: rotate(-360deg); } 100%{ transform: rotate(0deg); } } @keyframes flyin { to { filter: blur(0); transform: scale(1); opacity: 1; border-radius: 25px; } } box { animation: 3s linear 0s 1 intro; background-color: #0c0421; width: 125px; height: 125px; position: fixed; left: calc(50% - 62.5px); top: calc(50% - 62.5px); opacity: 0; transition-duration: 0.5s; z-index: 999999999; outline-style: inset; border-radius: 25px; } #imagetagyessir{ position: absolute: width: 100px; height: 100px; margin-left: 10px; margin-top: 10px; transition-duration: 1.5s; } BigText{ position: relative; font-size: 45px; top: -30px; left: 10px; line-height: 45px; color: white; font-family: "Times New Roman", Times, serif; opacity: 0; transition-duration: 0.5s; } whiteDivider{ width: 390px; height: 3px; left: 5px; position: absolute; opacity: 0; background-color: white; } #div1{ top: 125px; transition-duration: 0.5s; } #inputField{ position: relative; background-color: black; color: white; border-style: none none solid none; border-color: white; border-width: 2px; width: 90%; left: 5%; height: 30px; top: 35px; margin-bottom: 25px; opacity: 0; transition-duration: 0.5s; text-align: center; border-radius: 25px; } #checkbox{ width: 25px; height: 25px; border-style: solid; } genericText{ position: relative; color: white; font-family: "Times New Roman", Times, serif; font-family: 15px; opacity: 0; left: 26px; } pseudobtn{ position: absolute; background-color: #78db97; color: black; width: 250px; height: 50px; border-radius: 200px; border-color: #2d293d; border-style: solid; opacity: 0; bottom: 15px; left: 72px; font-size: 30px; font-family: "Times New Roman", Times, serif; text-align: center; line-height: 50px; transition-duration: 0.5s; user-select: none; } pseudobtn:hover{ background-color: gray; border-color: white; color: white; cursor: pointer; } .loadAnim{ animation: 1.5s ease-in-out 0s infinite spin; animation: flyin .5s ease forwards; opacity: 0; transform: scale(2); filter: blur(4px); } ::placeholder { color: #FF6F91; text-align: center; } @keyframes change { from { color: red } to { color: #78db97 } } } `;
+  document.head.appendChild(style);
+  let allowToggle = true; /* modularity */
+  function makeRShiftClose(element) {
+    document.addEventListener('keydown', function (e) {
+      var key = e.key + e.location;
+      if (key === 'Alt2' || key === '\\0') {
+        if (element.style.visibility === 'visible') {
+          setTransDuration('0s');
+          element.style.visibility = 'hidden';
+        } else {
+          element.style.visibility = 'visible';
+          setTransDuration('0.5s');
+        }
+      }
+    });
+  } /* creates main window for launcher*/
+  let launcher = document.createElement('box');
+  launcher.style.visibility = 'visible';
+  launcher.style.borderRadius = '25px';
+  launcher.id = 'hehehaha'
+  document.body.appendChild(launcher);
+  setTimeout(function () {
+    launcher.style.opacity = '1';
+  }, 1);
+
+  function setTransDuration(time) {
+    for (i = 0; i < launcher.children.length; i++) {
+      launcher.children[i].style.transitionDuration = time;
+      launcher.transitionDuration = time;
+      launcher.style.borderRadius = '25px';
+    }
+  } /* new element function to save some space */
+  function newElement(elementType, parent, id) {
+    let gerbil = document.createElement(elementType);
+    parent.appendChild(gerbil);
+    gerbil.id = id.toString();
+    return gerbil;
+  } /* makes logo and title text */
+  let logo = newElement('img', launcher, 'imagetagyessir');
+  logo.style = "width: 250; height: 100;";
+  logo.style.position = "relative";
+logo.style.opacity = 0
+   logo.style.left = "15%";
+  let brr = document.createElement("br")
+   document.getElementById('hehehaha').appendChild(brr)
+  let titleText = newElement('BigText', launcher, 'BigText');
+  titleText.textContent = 'Operation Liberty'; /* makes white divider */
+  
+  titleText.style.position = "relative";
+  titleText.style.left = "10%"
+  let whiteDiv = newElement(
+    'whiteDivider',
+    launcher,
+    'div1'
+  ); /* make text field for user and password */
+  let userField = newElement('input', launcher, 'inputField');
+  let passField = newElement('input', launcher, 'inputField');
+  userField.placeholder = 'Username';
+  passField.placeholder = 'Password';
+  passField.type = 'password'; /* make login button */
+  let loginBtn = newElement('pseudobtn', launcher, 'loginbtn');
+  loginBtn.textContent = 'Login'; /* manage opening animation */
+  function openAnim() {
+    setTimeout(function () {
+      launcher.style.opacity = '1';
+      launcher.style.width = '400px';
+      launcher.style.left = 'calc(50% - 200px)';
+      launcher.style.borderRadius = '3px';
+      setTimeout(function () {
+        titleText.style.opacity = '1';
+      }, 250);
+      setTimeout(function () {
+        logo.style.opacity = '1';
+      }, 250);
+      setTimeout(function () {
+        launcher.style.height = '500px';
+        launcher.style.top = 'calc(50% - 250px)';
+        launcher.style.borderRadius = '0px';
+        setTimeout(function () {
+          /* make all elements visible */
+          whiteDiv.style.opacity = '1';
+          userField.style.opacity = '1';
+          passField.style.opacity = '1';
+          loginBtn.style.opacity = '1';
+        }, 500);
+      }, 1000);
+    }, 1150);
+  } /* checks if password is stored, and if the password stored is correct */
+  if (localStorage.getItem('injinfo') === null) {
+    openAnim();
+  } else {
+    logo.classList.add('loadAnim');
+    console.log(`User credentials found!`);
+    launcher.style.opacity = '1';
+    let passRequest = new XMLHttpRequest();
+
+    /* function success() {
+      eval(passRequest.responseText);
+    } */
+    passRequest.open('POST', 'https://inject0r.repl.co/login');
+    passRequest.send(localStorage.getItem('injinfo'));
+    passRequest.onreadystatechange = e => {
+      if (passRequest.readyState === 4) {
+        success();
+        if (passRequest.status === 401) {
+          console.log('Saved credentials incorrect. Resetting...');
+          localStorage.clear('injinfo');
+          logo.classList.remove('loadAnim');
+          openAnim();
+          loginBtn.textContent = 'Login';
+        }
+      }
+    };
+  }
+  var input = document.getElementById('inputField');
+  input.addEventListener('keyup', function (event) {
+    if (event.keyCode === 13) {
+      event.preventDefault();
+      entersubmit();
+    }
+  });
+
+  function entersubmit() {
+    let username1 = userField.value;
+    let password1 = passField.value;
+
+    function success() {
+      eval(passRequest.responseText);
+    }
+    let passRequest = new XMLHttpRequest();
+    passRequest.open('POST', 'https://inject0r.repl.co/login');
+    passRequest.send(username1 + ':' + password1);
+    loginBtn.textContent = 'Checking info...';
+    passRequest.onreadystatechange = e => {
+      if (passRequest.readyState > 1 && passRequest.readyState < 4) {
+        loginBtn.textContent = 'Loading...';
+      }
+      if (passRequest.readyState === 4) {
+        success();
+        if (passRequest.status === 200) {
+          localStorage.setItem('injinfo', username1 + ':' + password1);
+        } else {
+        }
+      }
+    };
+  } /* when the login button is clicked, send an HTTP request to the server with the username and password. */
+  loginBtn.addEventListener('click', function () {
+    let passRequest = new XMLHttpRequest();
+
+    function success() {
+      eval(passRequest.responseText);
+    }
+    passRequest.open('POST', 'https://inject0r.repl.co/login');
+    let username1 = userField.value;
+    let password1 = passField.value;
+    passRequest.send(username1 + ':' + password1);
+    loginBtn.textContent = 'Checking info...';
+    passRequest.onreadystatechange = e => {
+      if (passRequest.readyState > 1 && passRequest.readyState < 4) {
+        loginBtn.textContent = 'Loading...';
+      }
+      if (passRequest.readyState === 4) {
+        success();
+        if (passRequest.status === 200) {
+          localStorage.setItem('injinfo', username1 + ':' + password1);
+        } else {
+        }
+      }
+    };
+  });
+  makeRShiftClose(
+    launcher
+  ); /* leave this at the bottom, it's base64 and its a mess*/
+  logo.src = 'https://i.ibb.co/FX5LT6s/image.png';
+})();
