@@ -1,190 +1,104 @@
-// JavaScript Document
+// JavaScript - modern dark theme interactions and canvas particles
 
-/*
+// Safe DOM helpers
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
 
-TemplateMo 597 Neural Glass
+// Mobile menu (safe guards)
+const mobileMenuToggle = $('.mobile-menu-toggle');
+const mobileNav = $('.mobile-nav');
+if (mobileMenuToggle && mobileNav) {
+  mobileMenuToggle.addEventListener('click', () => {
+    mobileMenuToggle.classList.toggle('active');
+    mobileNav.classList.toggle('active');
+  });
+  mobileNav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
+    mobileMenuToggle.classList.remove('active'); mobileNav.classList.remove('active');
+  }));
+  document.addEventListener('click', (e) => {
+    if (!mobileMenuToggle.contains(e.target) && !mobileNav.contains(e.target)) {
+      mobileMenuToggle.classList.remove('active'); mobileNav.classList.remove('active');
+    }
+  });
+}
 
-https://templatemo.com/tm-597-neural-glass
+// Smooth scrolling
+$$('a[href^="#"]').forEach(a => a.addEventListener('click', function(e){
+  const href = this.getAttribute('href'); if(href === '#') return;
+  const target = document.querySelector(href);
+  if (target) { e.preventDefault(); target.scrollIntoView({behavior:'smooth', block:'start'}); }
+}));
 
-*/
+// Header scrolled state
+const header = $('header');
+window.addEventListener('scroll', () => {
+  if (!header) return;
+  header.classList.toggle('scrolled', window.pageYOffset > 48);
+});
 
-// Mobile menu functionality
-        const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
-        const mobileNav = document.querySelector('.mobile-nav');
+// Active menu highlighting
+function updateActiveMenuItem(){
+  const sections = $$('section[id]');
+  const navLinks = $$('.nav-links a, .mobile-nav a');
+  const scrollPos = window.pageYOffset + 120;
+  let current = '';
+  sections.forEach(s => { if (scrollPos >= s.offsetTop && scrollPos < s.offsetTop + s.offsetHeight) current = s.id; });
+  navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === `#${current}`));
+}
+window.addEventListener('scroll', updateActiveMenuItem);
+window.addEventListener('load', updateActiveMenuItem);
 
-        mobileMenuToggle.addEventListener('click', () => {
-            mobileMenuToggle.classList.toggle('active');
-            mobileNav.classList.toggle('active');
-        });
+// Intersection observer animations
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(en => {
+    if (en.isIntersecting) { en.target.style.opacity = '1'; en.target.style.transform = 'translateY(0)'; }
+  });
+},{threshold:0.12, rootMargin:'0px 0px -80px 0px'});
+$$('.timeline-content, .hexagon, .feature-content').forEach(el => {
+  el.style.opacity = '0'; el.style.transform = 'translateY(30px)'; el.style.transition = 'opacity .7s ease, transform .7s ease'; io.observe(el);
+});
 
-        // Close mobile menu when clicking on links
-        document.querySelectorAll('.mobile-nav a').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenuToggle.classList.remove('active');
-                mobileNav.classList.remove('active');
-            });
-        });
+// Canvas particle system (background, subtle, reactive)
+(function initCanvasParticles(){
+  const canvas = document.createElement('canvas');
+  canvas.className = 'neural-canvas';
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  let W, H, DPR = Math.max(1, window.devicePixelRatio || 1);
+  function resize(){ W = canvas.width = Math.floor(window.innerWidth * DPR); H = canvas.height = Math.floor(window.innerHeight * DPR); canvas.style.width = window.innerWidth+'px'; canvas.style.height = window.innerHeight+'px'; ctx.setTransform(DPR,0,0,DPR,0,0); }
+  window.addEventListener('resize', resize); resize();
 
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!mobileMenuToggle.contains(e.target) && !mobileNav.contains(e.target)) {
-                mobileMenuToggle.classList.remove('active');
-                mobileNav.classList.remove('active');
-            }
-        });
+  const particles = [];
+  const max = 90;
+  const colors = ['rgba(0,229,255,0.12)','rgba(100,240,240,0.08)','rgba(160,230,255,0.06)'];
 
-        // Enhanced smooth scrolling
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                
-                // Skip if href is just "#"
-                if (targetId === '#') return;
-                
-                const target = document.querySelector(targetId);
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
+  function spawn(){ if (particles.length >= max) return; particles.push({ x: Math.random()*W/DPR, y: Math.random()*H/DPR, vx:(Math.random()-0.5)*0.2, vy:(Math.random()-0.5)*0.2, r: Math.random()*2+0.6, c: colors[Math.floor(Math.random()*colors.length)], life: Math.random()*120+60 }); }
+  for(let i=0;i<max/2;i++) spawn();
 
-        // Enhanced header functionality
-        window.addEventListener('scroll', () => {
-            const header = document.querySelector('header');
-            const scrolled = window.pageYOffset;
-            
-            if (scrolled > 50) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
-        });
+  let mouse = {x: W/DPR/2, y: H/DPR/2};
+  window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+  window.addEventListener('pointerdown', () => { for(let i=0;i<6;i++) spawn(); });
 
-        // Active menu item highlighting
-        function updateActiveMenuItem() {
-            const sections = document.querySelectorAll('section[id]');
-            const navLinks = document.querySelectorAll('.nav-links a, .mobile-nav a');
-            
-            let currentSection = '';
-            const scrollPos = window.pageYOffset + 100;
-            
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop;
-                const sectionHeight = section.offsetHeight;
-                
-                if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
-                    currentSection = section.getAttribute('id');
-                }
-            });
-            
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href') === `#${currentSection}`) {
-                    link.classList.add('active');
-                }
-            });
-        }
+  function step(){ ctx.clearRect(0,0,W/DPR,H/DPR);
+    // subtle radial ambient
+    const g = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, Math.max(W,H)/2);
+    g.addColorStop(0, 'rgba(0,230,255,0.03)'); g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle = g; ctx.fillRect(0,0,W/DPR,H/DPR);
 
-        window.addEventListener('scroll', updateActiveMenuItem);
-        window.addEventListener('load', updateActiveMenuItem);
+    for(let i=particles.length-1;i>=0;i--){ const p = particles[i]; p.x += p.vx + (mouse.x - p.x)*0.0006; p.y += p.vy + (mouse.y - p.y)*0.0006; p.life -= 1; if(p.life<=0){ particles.splice(i,1); continue; }
+      ctx.beginPath(); ctx.fillStyle = p.c; ctx.globalCompositeOperation = 'lighter'; ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); ctx.closePath();
+      // subtle trailing line
+      ctx.strokeStyle = 'rgba(0,200,230,0.05)'; ctx.lineWidth = 0.6; ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(p.x - p.vx*8, p.y - p.vy*8); ctx.stroke();
+    }
+    if (Math.random() < 0.6) spawn();
+    ctx.globalCompositeOperation='source-over';
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+})();
 
-        // Parallax effect for geometric shapes
-        window.addEventListener('scroll', () => {
-            const shapes = document.querySelectorAll('.shape');
-            const scrolled = window.pageYOffset;
-            
-            shapes.forEach((shape, index) => {
-                const speed = (index + 1) * 0.3;
-                shape.style.transform = `translateY(${scrolled * speed}px) rotate(${scrolled * 0.1}deg)`;
-            });
-        });
+// small UX: form button
+const submitBtn = $('.submit-btn');
+if (submitBtn) submitBtn.addEventListener('click', (e) => { e.preventDefault(); submitBtn.disabled=true; submitBtn.textContent='Sending...'; setTimeout(()=>{ submitBtn.textContent='Sent'; setTimeout(()=>{ submitBtn.disabled=false; submitBtn.textContent='Send'; },1200); },1200); });
 
-        // Neural lines pulse effect
-        const neuralLines = document.querySelectorAll('.neural-line');
-        setInterval(() => {
-            neuralLines.forEach((line, index) => {
-                setTimeout(() => {
-                    line.style.opacity = '1';
-                    line.style.transform = 'scaleX(1.2)';
-                    setTimeout(() => {
-                        line.style.opacity = '0.2';
-                        line.style.transform = 'scaleX(0.5)';
-                    }, 200);
-                }, index * 300);
-            });
-        }, 2000);
-
-        // Enhanced particle generation
-        function createQuantumParticle() {
-            const particle = document.createElement('div');
-            particle.style.position = 'fixed';
-            particle.style.width = Math.random() * 4 + 1 + 'px';
-            particle.style.height = particle.style.width;
-            particle.style.background = ['#00ffff', '#ff0080', '#8000ff'][Math.floor(Math.random() * 3)];
-            particle.style.borderRadius = '50%';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.top = '100vh';
-            particle.style.pointerEvents = 'none';
-            particle.style.zIndex = '-1';
-            particle.style.boxShadow = `0 0 10px ${particle.style.background}`;
-            
-            document.body.appendChild(particle);
-            
-            const duration = Math.random() * 3000 + 2000;
-            const drift = (Math.random() - 0.5) * 200;
-            
-            particle.animate([
-                { transform: 'translateY(0px) translateX(0px)', opacity: 0 },
-                { transform: `translateY(-100vh) translateX(${drift}px)`, opacity: 1 }
-            ], {
-                duration: duration,
-                easing: 'ease-out'
-            }).onfinish = () => particle.remove();
-        }
-
-        // Generate quantum particles
-        setInterval(createQuantumParticle, 1500);
-
-        // Intersection Observer for animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        // Observe timeline items and hexagons
-        document.querySelectorAll('.timeline-content, .hexagon').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(50px)';
-            el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-            observer.observe(el);
-        });
-
-        // Form submission effect
-        document.querySelector('.submit-btn').addEventListener('click', function(e) {
-            e.preventDefault();
-            this.innerHTML = 'TRANSMITTING...';
-            this.style.background = 'linear-gradient(45deg, #8000ff, #00ffff)';
-            
-            setTimeout(() => {
-                this.innerHTML = 'TRANSMISSION COMPLETE';
-                this.style.background = 'linear-gradient(45deg, #00ff00, #00ffff)';
-                
-                setTimeout(() => {
-                    this.innerHTML = 'TRANSMIT TO MATRIX';
-                    this.style.background = 'linear-gradient(45deg, #00ffff, #ff0080)';
-                }, 2000);
-            }, 1500);
-        });
+// end of file
