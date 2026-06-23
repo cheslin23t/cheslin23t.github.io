@@ -5,6 +5,7 @@ html {
     radial-gradient(circle at right 20%, rgba(168, 85, 247, 0.16), transparent 22%),
     linear-gradient(180deg, #020617 0%, #081024 45%, #020617 100%);
   overscroll-behavior-y: none;
+  overflow-x: hidden;
 }
 
 body {
@@ -16,6 +17,7 @@ body {
     radial-gradient(circle at right 20%, rgba(168, 85, 247, 0.16), transparent 22%),
     linear-gradient(180deg, #020617 0%, #081024 45%, #020617 100%);
   overscroll-behavior-y: none;
+  overflow-x: hidden;
 }
 
 .page-bg {
@@ -104,4 +106,22 @@ body {
   transform: translateY(-4px);
   border-color: rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.08);
+}
+
+.status-online {
+  color: rgba(52, 211, 153, 1);
+  text-shadow: 0 0 12px rgba(52, 211, 153, 0.5);
+}
+
+.status-offline {
+  color: rgba(239, 68, 68, 1);
+  text-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+}
+
+@media (max-width: 640px) {
+  main {
+    overflow-x: hidden !important;
+    width: 100vw;
+    max-width: 100vw;
+  }
 }

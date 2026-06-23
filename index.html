@@ -35,7 +35,7 @@
           
           <div class="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75 backdrop-blur">
             <span class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_18px_rgba(52,211,153,0.8)]"></span>
-            Open to internships, freelance, and collaborations
+            <span>Open to internships, freelance, and collaborations</span>
           </div>
 
           <div class="space-y-6">
@@ -167,15 +167,14 @@
     <article class="glass-panel project-card p-6">
       <p class="text-sm text-cyan-200/80 ">01</p>
       <h4 class="mt-3 text-xl text-blue-500 font-semibold"><a href="https://badavo.ai" target="_blank" rel="noopener noreferrer">BadAvo</a></h4>
-      <figure class="relative max-w-sm mx-auto">
-  <a href="https://badavo.ai">
-    <img class="rounded-base mx-auto" src="https://i.postimg.cc/HsgjmmLg/Screenshot-2026-06-22-at-9-11-05-PM.jpg">
-  </a>
-  <figcaption class="absolute px-4 mx-auto text-md text-black bottom-10">
-      <p>BadAvo is an IOS application on the Apple Appstore featuring a custom image recognition model that runs on-device to assess avocados for their ripeness.
+      <figure class="relative mx-auto mt-4">
+        <a href="https://badavo.ai" target="_blank" rel="noopener noreferrer">
+          <img class="rounded-xl mx-auto w-full max-w-xs h-auto object-cover" src="https://i.postimg.cc/HsgjmmLg/Screenshot-2026-06-22-at-9-11-05-PM.jpg" alt="BadAvo App Screenshot">
+        </a>
+      </figure>
+      <p class="mt-4 text-sm leading-6 text-white/68">
+        BadAvo is an iOS application on the Apple App Store featuring a custom image recognition model that runs on-device to assess avocados for their ripeness.
       </p>
-  </figcaption>
-</figure>
     </article>
 
     <article class="glass-panel project-card p-6">
@@ -196,6 +195,46 @@
 
   </div>
 </section>
+
+      <div class="divider my-10"><span></span></div>
+
+      <!-- ACTIVE PROJECTS -->
+      <section id="active-projects" class="space-y-6">
+        <div class="flex items-end justify-between gap-4">
+          <div>
+            <p class="section-label">Active Projects</p>
+            <h3 class="mt-3 text-3xl font-semibold">Projects in Development</h3>
+          </div>
+        </div>
+
+        <div id="active-projects-grid" class="grid gap-5 lg:grid-cols-2">
+          <article class="glass-panel project-card p-6">
+            <div class="flex items-start justify-between">
+              <div>
+                <h4 class="text-xl text-blue-500 font-semibold"><a href="https://badavo.ai" target="_blank" rel="noopener noreferrer">BadAvo</a></h4>
+                <p class="mt-2 text-sm text-white/68">iOS app for avocado ripeness detection using ML</p>
+              </div>
+              <div id="status-badavo" class="flex items-center gap-2">
+                <span class="inline-block h-2 w-2 rounded-full bg-slate-500 animate-pulse"></span>
+                <span class="text-xs text-white/50">Checking...</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="glass-panel project-card p-6">
+            <div class="flex items-start justify-between">
+              <div>
+                <h4 class="text-xl text-blue-500 font-semibold"><a href="https://ches.dev" target="_blank" rel="noopener noreferrer">Portfolio</a></h4>
+                <p class="mt-2 text-sm text-white/68">Personal portfolio and project showcase</p>
+              </div>
+              <div id="status-portfolio" class="flex items-center gap-2">
+                <span class="inline-block h-2 w-2 rounded-full bg-slate-500 animate-pulse"></span>
+                <span class="text-xs text-white/50">Checking...</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
 
       <div class="divider my-10"><span></span></div>
       <!-- CONTACT -->
@@ -220,5 +259,48 @@
       </section>
 
     </main>
+
+    <script>
+      async function checkProjectStatus() {
+        const projects = [
+          { id: 'badavo', url: 'https://badavo.ai', name: 'BadAvo' },
+          { id: 'portfolio', url: 'https://ches.dev', name: 'Portfolio' }
+        ];
+
+        for (const project of projects) {
+          try {
+            const response = await fetch(project.url, { 
+              method: 'HEAD', 
+              mode: 'no-cors',
+              cache: 'no-store'
+            });
+            updateStatus(project.id, true);
+          } catch (error) {
+            updateStatus(project.id, false);
+          }
+        }
+      }
+
+      function updateStatus(projectId, isOnline) {
+        const statusEl = document.getElementById(`status-${projectId}`);
+        if (!statusEl) return;
+
+        const statusDot = statusEl.querySelector('span:first-child');
+        const statusText = statusEl.querySelector('span:last-child');
+
+        if (isOnline) {
+          statusDot.className = 'inline-block h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.8)]';
+          statusText.textContent = 'Online';
+          statusText.className = 'text-xs text-emerald-300';
+        } else {
+          statusDot.className = 'inline-block h-2 w-2 rounded-full bg-red-500';
+          statusText.textContent = 'Offline';
+          statusText.className = 'text-xs text-red-300';
+        }
+      }
+
+      checkProjectStatus();
+      setInterval(checkProjectStatus, 30000);
+    </script>
   </body>
 </html>
