@@ -30,6 +30,7 @@ updateScrollEffects();
 
 if (window.matchMedia('(pointer: fine)').matches && !reduced) {
   const cursor = document.querySelector('.cursor');
+  document.body.classList.add('has-custom-cursor');
   window.addEventListener('pointermove', (event) => {
     cursor.style.left = `${event.clientX}px`;
     cursor.style.top = `${event.clientY}px`;
