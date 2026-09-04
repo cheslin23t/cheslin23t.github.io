@@ -30,10 +30,18 @@ updateScrollEffects();
 
 if (window.matchMedia('(pointer: fine)').matches && !reduced) {
   const cursor = document.querySelector('.cursor');
+  let cursorFrame = 0;
+  let cursorX = 0;
+  let cursorY = 0;
   document.body.classList.add('has-custom-cursor');
   window.addEventListener('pointermove', (event) => {
-    cursor.style.left = `${event.clientX}px`;
-    cursor.style.top = `${event.clientY}px`;
+    cursorX = event.clientX;
+    cursorY = event.clientY;
+    if (cursorFrame) return;
+    cursorFrame = requestAnimationFrame(() => {
+      cursor.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0)`;
+      cursorFrame = 0;
+    });
   });
   document.querySelectorAll('a').forEach((link) => {
     link.addEventListener('pointerenter', () => cursor.classList.add('active'));
@@ -45,7 +53,7 @@ if (window.matchMedia('(pointer: fine)').matches && !reduced) {
     const bounds = art.getBoundingClientRect();
     const x = (event.clientX - bounds.left) / bounds.width - .5;
     const y = (event.clientY - bounds.top) / bounds.height - .5;
-    art.style.transform = `rotateY(${x * 12}deg) rotateX(${-y * 10}deg)`;
+    art.style.transform = `rotateY(${x * 7}deg) rotateX(${-y * 6}deg)`;
   });
   art.addEventListener('pointerleave', () => { art.style.transform = ''; });
 
