@@ -1,138 +1,270 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#020617">
-  <meta name="description" content="Colin Heslin — a New York developer building backend systems, APIs, and data-driven software.">
-  <title>Colin Heslin — Developer</title>
-  <link rel="icon" type="image/png" href="/static/assets/favicon.png">
-  <link rel="apple-touch-icon" href="/static/assets/favicon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/index.css">
-</head>
-<body>
-  <div class="cursor" aria-hidden="true"></div>
-  <div class="progress" aria-hidden="true"><span></span></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#020617" />
+    <meta
+      name="description"
+      content="Colin Heslin — a New York developer building backend systems, APIs, and data-driven software."
+    />
+    <title>Colin Heslin — Developer</title>
+    <link rel="icon" type="image/png" href="/static/assets/favicon.png" />
+    <link rel="apple-touch-icon" href="/static/assets/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/index.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="cursor" aria-hidden="true"></div>
+    <div class="progress" aria-hidden="true"><span></span></div>
 
-  <header class="site-header">
-    <a class="logo" href="#top" aria-label="Colin Heslin, home"><img src="/static/assets/ch-logo-black-gold.png" alt=""></a>
-    <nav aria-label="Primary navigation">
-      <a href="#work">Work</a><a href="#about">About</a><a href="#contact">Contact</a>
-    </nav>
-    <a class="header-cta magnetic" href="mailto:colin@ches.dev"><i></i> Let’s talk <span>↗</span></a>
-  </header>
+    <header class="site-header">
+      <a class="logo" href="#top" aria-label="Colin Heslin, home"
+        ><img src="/static/assets/ch-logo-black-gold.png" alt=""
+      /></a>
+      <nav aria-label="Primary navigation">
+        <a href="#work">Work</a><a href="#about">About</a
+        ><a href="#contact">Contact</a>
+      </nav>
+      <a class="header-cta magnetic" href="mailto:colin@ches.dev"
+        ><i></i> Let’s talk <span>↗</span></a
+      >
+    </header>
 
-  <main>
-    <section class="hero" id="top" aria-labelledby="hero-title">
-      <div class="side-index" aria-hidden="true"><span>01</span><i><b></b></i><span>05</span></div>
-      <div class="hero-copy">
-        <p class="overline reveal">Colin Heslin — New York</p>
-        <h1 id="hero-title">
-          <span class="line"><i>I build things.</i></span>
-          <span class="line"><i>Then make them</i></span>
-          <span class="line"><i><em>better.</em></i></span>
-        </h1>
-        <p class="hero-intro reveal">I’m Colin, a high school developer in New York. Most of my work is backend, but I like shipping the whole thing.</p>
-        <div class="hero-actions reveal">
-          <a class="button button-primary magnetic" href="#work">Explore projects <span>↘</span></a>
-          <a class="button button-secondary magnetic" href="mailto:colin@ches.dev">Let’s talk <span>↗</span></a>
-        </div>
-      </div>
-
-      <div class="hero-mark" data-tilt aria-label="Colin Heslin monogram">
-        <img src="/static/assets/ch-logo-black-gold.png" alt="">
-        <div class="mark-caption"><span>Independent developer</span><span>New York / 2026</span></div>
-      </div>
-      <a class="scroll-hint" href="#work"><span>Scroll to explore</span><i>↓</i></a>
-    </section>
-
-    <section class="intro" aria-label="Current interests">
-      <p class="reveal">Right now I’m focused on</p>
-      <div class="interest-list reveal"><span>fintech,</span><span>real-time systems,</span><span>and tools people use.</span></div>
-    </section>
-
-    <section class="work" id="work" aria-labelledby="work-title">
-      <header class="section-head reveal">
-        <p>Selected work</p>
-        <h2 id="work-title">A few things<br><span>I’ve built.</span></h2>
-        <span>(03)</span>
-      </header>
-
-      <article class="project" data-project>
-        <div class="project-copy reveal">
-          <span class="project-number">01 / Mobile · ML</span>
-          <h3>BadAvo</h3>
-          <p>An iOS app with a custom image-recognition model that runs on-device to assess avocado ripeness.</p>
-          <div class="project-tech">Swift <i>•</i> Core ML <i>•</i> Vision</div>
-          <a class="round-link magnetic" href="https://badavo.ai" target="_blank" rel="noopener noreferrer" aria-label="Visit BadAvo">↗</a>
-        </div>
-        <a class="project-media badavo" id="badavo-preview" href="https://badavo.ai" target="_blank" rel="noopener noreferrer" aria-label="Visit BadAvo">
-          <div class="project-glow"></div>
-          <div class="avocado"></div>
-          <div class="phone">
-            <i class="phone-island"></i>
-            <div class="app-mark"><i></i><strong>BadAvo</strong></div>
-            <div class="app-copy"><b>Pick the perfect avocado</b><span>Take a clear photo and get an instant on-device ripeness estimate.</span></div>
-            <div class="latest-scan"><i></i><span>Latest scan</span><b>Ripe in 2–3 days</b></div>
-            <div class="scan-button"><span>▣</span> Scan another</div>
-            <div class="app-tabs"><i>●<small>About</small></i><i class="active">◆<small>Home</small></i><i>⚙<small>Settings</small></i></div>
+    <main id="main" tabindex="-1">
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="overline reveal">Colin Heslin — New York</p>
+          <h1 id="hero-title">
+            <span class="line"><i>I build things.</i></span>
+            <span class="line"><i>And make</i></span>
+            <span class="line"
+              ><i><em>them better.</em></i></span
+            >
+          </h1>
+          <p class="hero-intro reveal">
+            I’m Colin, a high school developer in New York. Most of my work is
+            backend, but I like shipping the whole thing.
+          </p>
+          <div class="hero-actions reveal">
+            <a class="button button-primary magnetic" href="#work"
+              >Explore projects <span>↘</span></a
+            >
+            <a
+              class="button button-secondary magnetic"
+              href="mailto:colin@ches.dev"
+              >Let’s talk <span>↗</span></a
+            >
           </div>
-          <span class="media-note">On-device intelligence</span>
-        </a>
-      </article>
-
-      <article class="project project-flip" data-project>
-        <div class="project-copy reveal">
-          <span class="project-number">02 / Full stack</span>
-          <h3>Printed</h3>
-          <p>An order management system for a 3D-printing business—covering inventory, referrals, and daily operations.</p>
-          <div class="project-tech">Python <i>•</i> Flask <i>•</i> MySQL</div>
-          <a class="round-link magnetic" href="https://ches.dev/3D-Printing-Order-Management/index.html" target="_blank" rel="noopener noreferrer" aria-label="View Printed">↗</a>
         </div>
-        <a class="project-media printed" href="https://ches.dev/3D-Printing-Order-Management/index.html" target="_blank" rel="noopener noreferrer" aria-label="View Printed">
-          <div class="print-grid"></div><div class="print-orb"></div>
-          <div class="dashboard"><span>PRINTED / OPS</span><h4>Orders at a glance.</h4><div class="dash-row"><i></i><i></i><i></i></div><div class="dash-chart"></div></div>
-          <span class="media-note">Open project ↗</span>
-        </a>
-      </article>
 
-      <article class="project" data-project>
-        <div class="project-copy reveal">
-          <span class="project-number">03 / Systems</span>
-          <h3>Systems lab</h3>
-          <p>Smaller experiments in automation, performance, and real-time behavior that don’t need a product page of their own.</p>
-          <div class="project-tech">Python <i>•</i> C++ <i>•</i> Luau</div>
-          <a class="round-link magnetic" href="https://github.com/cheslin23t" target="_blank" rel="noopener noreferrer" aria-label="Explore Colin's GitHub">↗</a>
+        <div class="hero-mark" data-tilt aria-hidden="true">
+          <img src="/static/assets/ch-logo-black-gold.png" alt="" />
+          <div class="mark-caption">
+            <span>Independent developer</span><span>New York</span>
+          </div>
         </div>
-        <a class="project-media systems" href="https://github.com/cheslin23t" target="_blank" rel="noopener noreferrer" aria-label="Explore Colin's GitHub">
-          <div class="systems-word"><span>Build.</span><span>Break.</span><span>Better.</span></div>
-          <div class="system-lines"></div><span class="media-note">GitHub ↗</span>
-        </a>
-      </article>
-    </section>
+        <a class="scroll-hint" href="#work"
+          ><span>Scroll to explore</span><i>↓</i></a
+        >
+      </section>
 
-    <section class="about" id="about" aria-labelledby="about-title">
-      <div class="about-sticky"><p class="overline">About / 04</p><h2 id="about-title">A little<br><span>about me.</span></h2></div>
-      <div class="about-story">
-        <p class="reveal">I’m a high school student from New York. I spend most of my time building backend systems, APIs, and data-driven apps.</p>
-        <p class="reveal">I’m especially interested in fintech and large-scale data infrastructure. I like figuring out how systems are put together—and how to make them hold up.</p>
-        <div class="capabilities reveal">
-          <span>What I work with</span>
-          <ul><li>Python</li><li>JavaScript / Node.js</li><li>Java + C++</li><li>MySQL</li><li>WebSockets + APIs</li><li>Luau</li></ul>
+      <section class="intro" aria-label="Current interests">
+        <p class="reveal">Right now I’m focused on</p>
+        <div class="interest-list reveal">
+          <span>fintech,</span><span>real-time systems,</span
+          ><span>and tools people use.</span>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="contact" id="contact" aria-labelledby="contact-title">
-      <p class="overline reveal">Contact / 05</p>
-      <h2 id="contact-title" class="reveal">Want to talk?<br><span>Email me.</span></h2>
-      <a class="contact-email reveal" href="mailto:colin@ches.dev">colin@ches.dev <span>↗</span></a>
-      <footer><span class="footer-brand"><img src="/static/assets/ch-logo-black-gold.png" alt=""> © <span id="year"></span> Colin Heslin</span><a href="https://github.com/cheslin23t" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="#top">Back to top ↑</a></footer>
-    </section>
-  </main>
-  <script src="/static/index.js"></script>
-</body>
+      <section class="work" id="work" aria-labelledby="work-title">
+        <header class="section-head reveal">
+          <p>Selected work</p>
+          <h2 id="work-title">A few things<br /><span>I’ve built.</span></h2>
+          <span>(03)</span>
+        </header>
+
+        <article class="project" data-project>
+          <div class="project-copy reveal">
+            <span class="project-number">01 / Mobile · ML</span>
+            <h3>BadAvo</h3>
+            <p>
+              An iOS app with a custom image-recognition model that runs
+              on-device to assess avocado ripeness.
+            </p>
+            <div class="project-tech">
+              Swift <i>•</i> Core ML <i>•</i> Vision
+            </div>
+            <a
+              class="round-link magnetic"
+              href="https://badavo.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visit BadAvo"
+              >↗</a
+            >
+          </div>
+          <a
+            class="project-media badavo"
+            id="badavo-preview"
+            href="https://badavo.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Visit BadAvo"
+          >
+            <div class="project-glow"></div>
+            <div class="avocado"></div>
+            <div class="phone">
+              <i class="phone-island"></i>
+              <div class="app-mark"><i></i><strong>BadAvo</strong></div>
+              <div class="app-copy">
+                <b>Pick the perfect avocado</b
+                ><span
+                  >Take a clear photo and get an instant on-device ripeness
+                  estimate.</span
+                >
+              </div>
+              <div class="latest-scan">
+                <i></i><span>Latest scan</span><b>Ripe in 2–3 days</b>
+              </div>
+              <div class="scan-button"><span>▣</span> Scan another</div>
+              <div class="app-tabs">
+                <i>●<small>About</small></i
+                ><i class="active">◆<small>Home</small></i
+                ><i>⚙<small>Settings</small></i>
+              </div>
+            </div>
+            <span class="media-note">On-device intelligence</span>
+          </a>
+        </article>
+
+        <article class="project project-flip" data-project>
+          <div class="project-copy reveal">
+            <span class="project-number">02 / Full stack</span>
+            <h3>Printed</h3>
+            <p>
+              In 2024, my friends and I started a 3D-printing business. I built
+              the system we used to manage orders, inventory, and referrals.
+            </p>
+            <div class="project-tech">Python <i>•</i> Flask <i>•</i> MySQL</div>
+            <a
+              class="round-link magnetic"
+              href="https://ches.dev/3D-Printing-Order-Management/index.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View Printed"
+              >↗</a
+            >
+          </div>
+          <a
+            class="project-media printed"
+            href="https://ches.dev/3D-Printing-Order-Management/index.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="View Printed"
+          >
+            <div class="print-grid"></div>
+            <div class="print-orb"></div>
+            <div class="dashboard">
+              <span>PRINTED / OPS</span>
+              <h4>Orders at a glance.</h4>
+              <div class="dash-row"><i></i><i></i><i></i></div>
+              <div class="dash-chart"></div>
+            </div>
+            <span class="media-note">Open project ↗</span>
+          </a>
+        </article>
+
+        <article class="project" data-project>
+          <div class="project-copy reveal">
+            <span class="project-number">03 / Systems</span>
+            <h3>Systems lab</h3>
+            <p>
+              Smaller experiments in automation, performance, and real-time
+              behavior that don’t need a product page of their own.
+            </p>
+            <div class="project-tech">Python <i>•</i> C++ <i>•</i> Luau</div>
+            <a
+              class="round-link magnetic"
+              href="https://github.com/cheslin23t"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Explore Colin's GitHub"
+              >↗</a
+            >
+          </div>
+          <a
+            class="project-media systems"
+            href="https://github.com/cheslin23t"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Explore Colin's GitHub"
+          >
+            <div class="systems-word">
+              <span>Build.</span><span>Break.</span><span>Better.</span>
+            </div>
+            <div class="system-lines"></div>
+            <span class="media-note">GitHub ↗</span>
+          </a>
+        </article>
+      </section>
+
+      <section class="about" id="about" aria-labelledby="about-title">
+        <div class="about-sticky">
+          <p class="overline">About</p>
+          <h2 id="about-title">A little<br /><span>about me.</span></h2>
+        </div>
+        <div class="about-story">
+          <p class="reveal">
+            I’m a high school student from New York. I spend most of my time
+            building backend systems, APIs, and data-driven apps.
+          </p>
+          <p class="reveal">
+            I’m especially interested in fintech and large-scale data
+            infrastructure. I like figuring out how systems are put together—and
+            how to make them hold up.
+          </p>
+          <div class="capabilities reveal">
+            <span>What I work with</span>
+            <ul>
+              <li>Python</li>
+              <li>JavaScript / Node.js</li>
+              <li>Java + C++</li>
+              <li>MySQL</li>
+              <li>WebSockets + APIs</li>
+              <li>Luau</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="contact" id="contact" aria-labelledby="contact-title">
+        <p class="overline reveal">Contact</p>
+        <h2 id="contact-title" class="reveal">
+          Want to talk?<br /><span>Email me.</span>
+        </h2>
+        <a class="contact-email reveal" href="mailto:colin@ches.dev"
+          >colin@ches.dev <span>↗</span></a
+        >
+        <footer>
+          <span class="footer-brand"
+            ><img src="/static/assets/ch-logo-black-gold.png" alt="" /> ©
+            <span id="year">2026</span> Colin Heslin</span
+          ><a
+            href="https://github.com/cheslin23t"
+            target="_blank"
+            rel="noopener noreferrer"
+            >GitHub ↗</a
+          ><a href="#top">Back to top ↑</a>
+        </footer>
+      </section>
+    </main>
+    <script src="/static/index.js"></script>
+  </body>
 </html>
