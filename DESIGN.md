@@ -37,7 +37,7 @@ Manrope is the established display and body family; system-ui is its fallback. L
 
 ## Layout
 
-A two-column hero leads into interests, three projects, About, and Contact. Alternating projects give the wider column to the visual. Below 1000px, projects stack in reading order. Mobile retains every navigation destination and places the hero mark below the copy rather than over it. Use natural content height rather than clipping copy into a viewport.
+A two-column hero leads into interests, three projects (BadAvo, Printed, and JB-X), About, and Contact. The JB-X card shows a representative terminal scene and links to the public source repository. Alternating projects give the wider column to the visual. Below 1000px, projects stack in reading order. Mobile retains every navigation destination and places the hero mark below the copy rather than over it. Use natural content height rather than clipping copy into a viewport.
 
 ## Elevation & Depth
 
