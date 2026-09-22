@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#020617" />
     <meta
       name="description"
-      content="Colin Heslin — a New York developer building backend systems, APIs, and data-driven software."
+      content="Colin Heslin — a New York developer building mobile apps, backend systems, APIs, real-time software, and developer tools."
     />
     <title>Colin Heslin — Developer</title>
     <link rel="icon" type="image/png" href="/static/assets/favicon.png" />
@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/static/index.css" />
@@ -49,8 +49,9 @@
             >
           </h1>
           <p class="hero-intro reveal">
-            I’m Colin, a high school developer in New York. Most of my work is
-            backend, but I like shipping the whole thing.
+            I’m Colin, a high school developer in New York. I’ve moved from
+            bots and real-time experiments to business software, developer
+            tools, and on-device machine learning.
           </p>
           <div class="hero-actions reveal">
             <a class="button button-primary magnetic" href="#work"
@@ -90,9 +91,9 @@
           <span>(03)</span>
         </header>
 
-        <article class="project" data-project>
+        <article class="project" id="project-badavo" data-project>
           <div class="project-copy reveal">
-            <span class="project-number">01 / Mobile · ML</span>
+            <span class="project-number">01 / Mobile · ML · Product</span>
             <h3>BadAvo</h3>
             <p>
               An iOS app with a custom image-recognition model that runs
@@ -144,13 +145,14 @@
           </a>
         </article>
 
-        <article class="project project-flip" data-project>
+        <article class="project project-flip" id="project-printed" data-project>
           <div class="project-copy reveal">
-            <span class="project-number">02 / Full stack</span>
+            <span class="project-number">02 / Business software · Full stack</span>
             <h3>Printed</h3>
             <p>
               In 2024, my friends and I started a 3D-printing business. I built
-              the system we used to manage orders, inventory, and referrals.
+              its customer order intake and admin workflow, turning approved
+              submissions into tracked print jobs.
             </p>
             <div class="project-tech">Python <i>•</i> Flask <i>•</i> MySQL</div>
             <a
@@ -181,7 +183,7 @@
           </a>
         </article>
 
-        <article class="project" data-project>
+        <article class="project" id="project-jbx" data-project>
           <div class="project-copy reveal">
             <span class="project-number">03 / Developer tools · Python</span>
             <h3>JB-X</h3>
@@ -225,6 +227,148 @@
         </article>
       </section>
 
+      <section class="journey" id="journey" aria-labelledby="journey-title">
+        <header class="journey-head reveal">
+          <p class="overline">Build log · 2021 to now</p>
+          <h2 id="journey-title">The work<br /><span>between the highlights.</span></h2>
+          <p>
+            The featured projects are the strongest finished stories. This is
+            the wider path: selected tools, prototypes, and experiments that
+            expanded what I could build next.
+          </p>
+        </header>
+
+        <ol class="journey-list">
+          <li class="journey-item reveal">
+            <div class="journey-meta">
+              <time datetime="2021">2021</time>
+              <span>Early project</span>
+            </div>
+            <div class="journey-copy">
+              <p class="journey-area">Bots · Event-driven JavaScript</p>
+              <h3>Spade</h3>
+              <p>
+                An early Discord bot organized around command files and event
+                handlers, with per-server prefixes and music controls. It was
+                my entry point into asynchronous, event-driven software.
+              </p>
+              <a href="https://github.com/cheslin23t/Spade" target="_blank" rel="noopener noreferrer">View the early code <span aria-hidden="true">↗</span></a>
+            </div>
+          </li>
+
+          <li class="journey-item reveal">
+            <div class="journey-meta">
+              <time datetime="2022">2022</time>
+              <span>Experiment</span>
+            </div>
+            <div class="journey-copy">
+              <p class="journey-area">Real-time software · Node.js</p>
+              <h3>spaceChat</h3>
+              <p>
+                A learning project for accounts, direct messages, and live
+                Socket.IO events backed by MongoDB. It is earlier exploratory
+                work, not a production chat system.
+              </p>
+              <a href="https://github.com/cheslin23t/spaceChat" target="_blank" rel="noopener noreferrer">Explore the experiment <span aria-hidden="true">↗</span></a>
+            </div>
+          </li>
+
+          <li class="journey-item reveal">
+            <div class="journey-meta">
+              <time datetime="2023">2023–24</time>
+              <span>Prototype</span>
+            </div>
+            <div class="journey-copy">
+              <p class="journey-area">Backend · Accounts · Data</p>
+              <h3>ProveIt</h3>
+              <p>
+                A Flask and MySQL prototype with blueprint-based features,
+                account routes, sessions, and a database-backed dashboard—an
+                early step toward more structured backend applications.
+              </p>
+              <a href="https://github.com/cheslin23t/ProveIt" target="_blank" rel="noopener noreferrer">See the prototype <span aria-hidden="true">↗</span></a>
+            </div>
+          </li>
+
+          <li class="journey-item journey-featured reveal">
+            <div class="journey-meta">
+              <time datetime="2024">2024–26</time>
+              <span>Featured system</span>
+            </div>
+            <div class="journey-copy">
+              <p class="journey-area">Business software · Flask / MySQL</p>
+              <h3>Printed</h3>
+              <p>
+                Customer order intake, admin review, and tracked print records
+                for a 3D-printing business. This turned the patterns from
+                earlier prototypes into software for a real workflow.
+              </p>
+              <a href="#project-printed">See the featured project <span aria-hidden="true">↑</span></a>
+            </div>
+          </li>
+
+          <li class="journey-item journey-featured reveal">
+            <div class="journey-meta">
+              <time datetime="2025-12">Late 2025–26</time>
+              <span>Featured tool</span>
+            </div>
+            <div class="journey-copy">
+              <p class="journey-area">Developer tools · APIs</p>
+              <h3>JB-X</h3>
+              <p>
+                A Python CLI that made Jailbreak item APIs faster to explore,
+                with a decorator-based command registry, aliases, contextual
+                help, and interactive selection for ambiguous searches.
+              </p>
+              <a href="#project-jbx">See the featured project <span aria-hidden="true">↑</span></a>
+            </div>
+          </li>
+
+          <li class="journey-item reveal">
+            <div class="journey-meta">
+              <time datetime="2026">2026</time>
+              <span>Reusable starter</span>
+            </div>
+            <div class="journey-copy">
+              <p class="journey-area">Backend architecture · Flask / MySQL</p>
+              <h3>Modular Flask Template</h3>
+              <p>
+                A starter organized into feature modules, with account routes,
+                shared database helpers, environment configuration, and setup
+                guidance for the next Flask project.
+              </p>
+              <a href="https://github.com/cheslin23t/Modular-Flask-Template" target="_blank" rel="noopener noreferrer">Browse the starter <span aria-hidden="true">↗</span></a>
+            </div>
+          </li>
+
+          <li class="journey-item journey-featured reveal">
+            <div class="journey-meta">
+              <span class="journey-now">Now</span>
+              <span>Featured product</span>
+            </div>
+            <div class="journey-copy">
+              <p class="journey-area">iOS · On-device machine learning</p>
+              <h3>BadAvo</h3>
+              <p>
+                An iOS product that brings image recognition into a focused
+                everyday experience: assessing avocado ripeness with a model
+                that runs on the device.
+              </p>
+              <a href="#project-badavo">See the featured project <span aria-hidden="true">↑</span></a>
+            </div>
+          </li>
+        </ol>
+
+        <aside class="journey-aside reveal" aria-label="Work beyond public repositories">
+          <span>Beyond the repositories</span>
+          <p>
+            I’ve also built CPUs in Minecraft as a hands-on way to explore
+            computer architecture. That work is not presented here as a public
+            code project, but it is part of how I learn systems from the bottom up.
+          </p>
+        </aside>
+      </section>
+
       <section class="about" id="about" aria-labelledby="about-title">
         <div class="about-sticky">
           <p class="overline">About</p>
@@ -237,18 +381,18 @@
           </p>
           <p class="reveal">
             I’m especially interested in fintech and large-scale data
-            infrastructure. I like figuring out how systems are put together—and
-            how to make them hold up.
+            infrastructure. I like going all the way from the system underneath
+            a product to the experience someone actually uses.
           </p>
           <div class="capabilities reveal">
             <span>What I work with</span>
             <ul>
-              <li>Python</li>
-              <li>JavaScript / Node.js</li>
-              <li>Java + C++</li>
-              <li>MySQL</li>
+              <li>Swift + Core ML</li>
+              <li>Python + Flask</li>
+              <li>JavaScript + Node.js</li>
+              <li>MySQL + MongoDB</li>
               <li>WebSockets + APIs</li>
-              <li>Luau</li>
+              <li>CLI + backend architecture</li>
             </ul>
           </div>
         </div>
