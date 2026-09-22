@@ -792,6 +792,76 @@ a:focus-visible {
     );
   border-bottom: 1px solid #334155;
 }
+.terminal {
+  background:
+    radial-gradient(circle at 85% 12%, rgba(34, 211, 238, 0.18), transparent 38%),
+    radial-gradient(circle at 8% 90%, rgba(168, 85, 247, 0.17), transparent 42%),
+    #090d18;
+}
+.terminal-window {
+  position: absolute;
+  inset: 13% 10% 16%;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 14px;
+  background: #080f21;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.45);
+  transform: rotate(-3deg);
+  transition: transform 0.7s var(--ease);
+}
+.terminal:hover .terminal-window,
+.terminal:focus-visible .terminal-window {
+  transform: rotate(0) translateY(-2%);
+}
+.terminal-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1.3rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+  font: 600 clamp(0.62rem, 1vw, 0.85rem) ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+.terminal-top i {
+  color: var(--cyan);
+  font-style: normal;
+  letter-spacing: 0.2em;
+}
+.terminal-body {
+  padding: clamp(1rem, 3vw, 2.5rem);
+  font: clamp(0.66rem, 1.2vw, 1rem)/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+.terminal-body p { margin: 0 0 1.3rem; }
+.terminal-prompt { color: var(--cyan); margin-right: 0.7rem; }
+.terminal-result {
+  color: var(--gold);
+  font-size: clamp(1rem, 2vw, 1.8rem);
+  font-weight: 700;
+}
+.terminal-result span {
+  color: var(--muted);
+  font-size: 0.58em;
+  font-weight: 400;
+}
+.terminal-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem 1rem;
+  padding: 1rem 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+.terminal-fields span { color: var(--muted); }
+.terminal-fields b { font-weight: 500; color: var(--white); }
+.terminal-hint { margin-top: 1rem !important; color: var(--muted); }
+.terminal-hint strong { color: var(--cyan); }
+.terminal-caret { color: var(--cyan); margin-left: 0.4rem; }
+@media (max-width: 640px) {
+  .terminal-window { inset: 16% 7% 18%; }
+  .terminal-body { font-size: clamp(0.58rem, 2.7vw, 0.8rem); }
+  .terminal-result { font-size: clamp(0.9rem, 4vw, 1.3rem); }
+}
 .systems {
   background: #090d18;
 }
