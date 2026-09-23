@@ -709,88 +709,140 @@ a:focus-visible {
   transform: rotate(-7deg) translateY(-3%);
 }
 .printed {
-  background: #0a2652;
+  overflow: hidden;
+  background: #05081b;
 }
-.print-grid {
+.printed-ambient {
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(rgba(34, 211, 238, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(34, 211, 238, 0.08) 1px, transparent 1px);
-  background-size: 34px 34px;
+  background:
+    radial-gradient(circle at 50% 39%, rgba(126, 54, 98, 0.17), transparent 27%),
+    radial-gradient(circle at 50% 94%, rgba(114, 222, 123, 0.08), transparent 28%),
+    linear-gradient(180deg, #020419 0%, #070919 70%, #111522 100%);
 }
-.print-orb {
+.printed-ambient:before,
+.printed-ambient:after {
   position: absolute;
-  width: 48%;
-  aspect-ratio: 1;
-  right: -8%;
-  top: -15%;
-  border-radius: 50%;
-  background: linear-gradient(140deg, var(--cyan), var(--violet));
-  filter: blur(2px);
-  box-shadow: 0 0 80px rgba(168, 85, 247, 0.35);
-  transition: transform 0.8s var(--ease);
+  content: "";
+  width: 38%;
+  height: 1px;
+  top: 18%;
+  background: linear-gradient(90deg, transparent, rgba(139, 74, 117, 0.5), transparent);
 }
-.printed:hover .print-orb {
-  transform: scale(1.12) translate(-4%, 5%);
+.printed-ambient:before {
+  left: 3%;
 }
-.dashboard {
+.printed-ambient:after {
+  right: 3%;
+}
+.printed-brand {
   position: absolute;
-  left: 8%;
-  top: 12%;
-  width: 70%;
-  height: 68%;
-  background: rgba(3, 9, 26, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 14px;
-  padding: 5%;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
-  transform: rotate(-4deg);
+  z-index: 2;
+  top: 10%;
+  left: 50%;
+  width: 52%;
+  text-align: center;
+  transform: translateX(-50%);
   transition: transform 0.7s var(--ease);
 }
-.printed:hover .dashboard {
-  transform: rotate(0) translateY(-2%);
-}
-.dashboard > span {
-  font-size: 0.56rem;
-  letter-spacing: 0.14em;
-  color: var(--cyan);
-}
-.dashboard h4 {
-  font-size: clamp(1.3rem, 2.6vw, 2.8rem);
-  margin: 0.8rem 0 1.8rem;
-  letter-spacing: -0.05em;
-}
-.dash-row {
-  display: flex;
-  gap: 5%;
-}
-.dash-row i {
+.printed-brand span {
   display: block;
-  width: 28%;
-  height: 34px;
-  background: #13254d;
-  border-radius: 5px;
+  margin-bottom: 0.35rem;
+  color: #8b4a75;
+  font-size: clamp(0.45rem, 0.8vw, 0.68rem);
+  letter-spacing: 0.05em;
 }
-.dash-chart {
-  height: 35%;
-  margin-top: 6%;
-  background:
-    linear-gradient(
-      150deg,
-      transparent 48%,
-      var(--cyan) 49%,
-      var(--cyan) 50%,
-      transparent 51%
-    ),
-    linear-gradient(
-      30deg,
-      transparent 55%,
-      var(--violet) 56%,
-      var(--violet) 57%,
-      transparent 58%
-    );
-  border-bottom: 1px solid #334155;
+.printed-brand strong {
+  position: relative;
+  display: block;
+  color: #946f82;
+  font-size: clamp(2.2rem, 5vw, 5.1rem);
+  font-weight: 700;
+  line-height: 0.86;
+  letter-spacing: -0.065em;
+  text-shadow: 0 0 18px rgba(140, 74, 117, 0.5);
+}
+.printed-brand strong:after {
+  position: absolute;
+  content: attr(data-word);
+  inset: 0;
+  color: rgba(139, 74, 117, 0.28);
+  filter: blur(5px);
+  transform: translateY(7%);
+}
+.printed-object {
+  position: absolute;
+  z-index: 2;
+  inset: 31% 8% 16%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.printed-object img {
+  position: relative;
+  z-index: 2;
+  width: 54%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 22px 28px rgba(0, 0, 0, 0.45)) saturate(0.9);
+  transition: transform 0.75s var(--ease), filter 0.75s var(--ease);
+}
+.printed-contour {
+  position: absolute;
+  width: 18%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(181, 200, 245, 0.7);
+  background: repeating-radial-gradient(
+    circle,
+    rgba(181, 200, 245, 0.22) 0 1px,
+    transparent 1px 5px
+  );
+  box-shadow: 0 0 18px rgba(149, 163, 214, 0.16);
+  transition: transform 0.8s var(--ease);
+}
+.printed-contour-left {
+  left: 1%;
+  top: 23%;
+  border-radius: 50%;
+}
+.printed-contour-right {
+  right: 1%;
+  bottom: 11%;
+  border-radius: 26%;
+}
+.printed-quality {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 8%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.printed-quality span {
+  color: #8b4a75;
+  font-size: clamp(0.42rem, 0.7vw, 0.58rem);
+}
+.printed-quality b {
+  color: #c2d9f1;
+  font-size: clamp(0.7rem, 1.35vw, 1.2rem);
+  line-height: 1.25;
+  text-shadow: 0 0 12px rgba(194, 217, 241, 0.25);
+}
+.printed:hover .printed-brand {
+  transform: translateX(-50%) translateY(-5%);
+}
+.printed:hover .printed-object img {
+  filter: drop-shadow(0 27px 34px rgba(0, 0, 0, 0.52)) saturate(1.04);
+  transform: translateY(-3%) rotate(-1.5deg) scale(1.035);
+}
+.printed:hover .printed-contour-left {
+  transform: rotate(14deg) scale(1.06);
+}
+.printed:hover .printed-contour-right {
+  transform: rotate(-12deg) scale(1.06);
 }
 .terminal {
   background:
@@ -1568,8 +1620,9 @@ a:active {
 .project-media:focus-visible .phone {
   transform: rotate(0) translateY(-2%);
 }
-.project-media:focus-visible .dashboard {
-  transform: rotate(0) translateY(-2%);
+.project-media:focus-visible .printed-object img {
+  filter: drop-shadow(0 27px 34px rgba(0, 0, 0, 0.52)) saturate(1.04);
+  transform: translateY(-3%) rotate(-1.5deg) scale(1.035);
 }
 .project-media:focus-visible .system-lines {
   transform: rotate(-5deg) scale(0.9);
