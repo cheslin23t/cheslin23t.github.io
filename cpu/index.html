@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Inside CPU V2 — ches.dev</title>
+    <meta
+      name="description"
+      content="A guided tour of a custom Minecraft redstone CPU: its clock, ROM, instruction encoding, registers, and a real addition program."
+    />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="stylesheet" href="./cpu.css" />
+    <script src="./cpu.js" defer></script>
+    <script src="./build-viewer.js" defer></script>
+    <noscript
+      ><style>
+        .hero-fallback[hidden],
+        .model-fallback[hidden] {
+          display: block;
+        }
+        .hero-art canvas,
+        .build-frame canvas,
+        .viewer-loading {
+          display: none;
+        }
+      </style></noscript
+    >
+  </head>
+  <body>
+    <a class="skip" href="#overview">Skip to CPU tour</a>
+    <header>
+      <a class="brand" href="/">ches.dev <span>/ CPU V2</span></a>
+      <nav aria-label="CPU page">
+        <a href="#tour">Architecture</a><a href="#demo">Run the demo</a>
+      </nav>
+      <div id="progress"></div>
+    </header>
+    <main id="overview">
+      <section class="hero wrap">
+        <div>
+          <h1>A computer.<br />Built from<br /><em>redstone.</em></h1>
+          <p>
+            A custom 8-bit CPU, built in Minecraft. Follow an instruction from
+            its ROM address to the number it leaves in a register.
+          </p>
+          <a class="text-link" href="#tour"
+            >Scroll to explore <span aria-hidden="true">↓</span></a
+          >
+        </div>
+        <div class="hero-art">
+          <img
+            class="hero-fallback"
+            src="./data/build-overview.png"
+            width="600"
+            height="540"
+            alt="Isometric rendering of the physical Minecraft CPU"
+            hidden
+          /><canvas
+            id="hero-build"
+            aria-label="Overview rendering of the actual Minecraft CPU schematic"
+          ></canvas>
+          <div class="hero-spec">
+            <span>32,543 blocks</span><span>91 × 45 × 65</span
+            ><span>Actual schematic</span>
+          </div>
+        </div>
+      </section>
+      <div class="tour wrap" id="tour">
+        <aside class="stage" aria-label="Physical Minecraft CPU viewer">
+          <div class="stage-head">
+            <span>ACTUAL MINECRAFT BUILD</span
+            ><span id="chapter">The whole machine</span>
+          </div>
+          <div class="build-frame">
+            <img
+              class="model-fallback"
+              src="./data/build-overview.png"
+              width="600"
+              height="540"
+              alt="Static isometric rendering of the actual CPU schematic"
+              hidden
+            /><canvas
+              id="build-canvas"
+              tabindex="0"
+              role="img"
+              aria-label="Interactive 3D view of the actual Minecraft CPU"
+              aria-describedby="orbit-help"
+            ></canvas>
+            <p class="viewer-loading" role="status">Loading 32,543 blocks…</p>
+          </div>
+          <p id="build-status" class="build-status" role="status">
+            Complete physical build · original saved ROM
+          </p>
+          <div class="view-controls">
+            <span id="orbit-help"
+              >Drag to orbit · click, then scroll to zoom<br />Keyboard: arrows
+              to orbit, + / − to zoom, Esc to exit</span
+            ><button disabled id="restore-view">Restore view</button>
+          </div>
+          <p class="diagram-note">
+            Exact block positions, simplified materials and component shapes.
+            Highlights mark confirmed repeaters and ROM cells, visible through
+            the build. Camera regions are approximate; component shapes and
+            materials are simplified.
+          </p>
+          <p id="build-fallback" hidden>
+            Use a WebGL-capable browser to explore the build, or
+            <a href="./data/8bCPU-repaired-v1.schem" download
+              >download the Minecraft schematic</a
+            >.
+          </p>
+          <div class="chapter-dots" aria-label="Tour chapters">
+            <a href="#whole" aria-label="Overview"></a
+            ><a href="#clock" aria-label="Clock and controls"></a
+            ><a href="#rom" aria-label="ROM"></a
+            ><a href="#encoding" aria-label="Instruction encoding"></a
+            ><a href="#registers" aria-label="Register banks"></a
+            ><a href="#operation" aria-label="Operations"></a>
+          </div>
+        </aside>
+        <div class="chapters">
+          <section
+            class="chapter"
+            id="whole"
+            data-active="all"
+            data-name="The whole machine"
+          >
+            <span class="step">01 / THE BIG PICTURE</span>
+            <h2>Small words.<br />Real computation.</h2>
+            <p>
+              Instructions live in ROM. A program counter selects an address.
+              The instruction describes what to load or calculate, and which
+              register receives the result.
+            </p>
+            <p>
+              You’re looking at the actual exported Minecraft build. Scroll to
+              move through it: selected blocks turn cyan while the rest of the
+              machine fades back. The model preserves the schematic’s block
+              positions; it does not simulate redstone.
+            </p>
+          </section>
+          <section
+            class="chapter"
+            id="clock"
+            data-active="clock pc"
+            data-name="Clock → program counter"
+          >
+            <span class="step">02 / KEEPING TIME</span>
+            <h2>One address.<br />Every 7.3 seconds.</h2>
+            <p>
+              The repaired native clock advances once every
+              <strong>146 game ticks</strong>. At 20 TPS, that is 7.3 seconds
+              per instruction address.
+            </p>
+            <div class="number-strip">000000 <span>→</span> 000001</div>
+            <p>
+              The six-bit PC visits 64 addresses, then wraps to zero. The six
+              highlighted repeaters are confirmed PC state landmarks. The camera
+              frames the approximate PC region; connected control circuitry
+              extends beyond it. Starting at PC 0 is an illustrative assumption;
+              reset behavior is unknown.
+            </p>
+          </section>
+          <section
+            class="chapter"
+            id="rom"
+            data-active="pc rom"
+            data-name="Address → ROM word"
+          >
+            <span class="step">03 / PROGRAM STORAGE</span>
+            <h2>A program.<br />With room to breathe.</h2>
+            <p>
+              The ROM holds <strong>64 × 16-bit words</strong>. The safe layout
+              starts with NOP at address 0, puts instructions at 1, 3, 5…53, and
+              leaves a NOP after each.
+            </p>
+            <div class="rom-sample">
+              <span>00 <b>0000</b> NOP</span
+              ><span>01 <b>A58B</b> LDI R1, 165</span
+              ><span>02 <b>0000</b> NOP</span
+              ><span>03 <b>3C4B</b> LDI R2, 60</span>
+            </div>
+            <p>
+              The highlight follows the exact programming-cell coordinates; air
+              cells stay invisible. That leaves capacity for
+              <strong>27 logical instructions</strong>. Addresses 56–63 stay
+              NOP: address 60 fetches 56, and 61 fetches 57.
+            </p>
+          </section>
+          <section
+            class="chapter"
+            id="encoding"
+            data-active="rom instruction"
+            data-name="A word → an instruction"
+          >
+            <span class="step">04 / THE INSTRUCTION</span>
+            <h2>Sixteen bits.<br />Every field matters.</h2>
+            <p>
+              The camera moves to the operation-label signs in the physical
+              build. For register operations, each register’s four-bit number is
+              reversed independently. The whole instruction is never reversed.
+            </p>
+            <div class="fields">
+              <div><b>4</b><span>A / lhs</span></div>
+              <div><b>8</b><span>B / rhs</span></div>
+              <div><b>C</b><span>dest</span></div>
+              <div><b>1</b><span>ADD</span></div>
+            </div>
+            <p>
+              <code>48C1</code> means <code>ADD R3, R2, R1</code>: R2’s
+              <code>0010</code> becomes <code>0100</code>, R1’s
+              <code>0001</code> becomes <code>1000</code>, and R3’s
+              <code>0011</code> becomes <code>1100</code>.
+            </p>
+            <p>
+              LDI uses the top eight bits for its immediate value,
+              <strong>without reversal</strong>. INC reads its source on
+              physical B with physical A set to R0.
+            </p>
+          </section>
+          <section
+            class="chapter"
+            id="registers"
+            data-active="instruction registers"
+            data-name="Registers hold the data"
+          >
+            <span class="step">05 / WORKING VALUES</span>
+            <h2>Eight bits.<br />Fourteen usable registers.</h2>
+            <p>
+              R1–R14 hold unsigned values from 0 to 255. R0 reads as zero in
+              tested operand operations; writes do not persist.
+            </p>
+            <div class="number-strip">
+              R1 <span>←</span> 10100101 <small>165</small>
+            </div>
+            <p>
+              R15 can retain loaded data, but its operand reads fail. The
+              compiler excludes it. The model highlights 240 confirmed storage
+              repeaters across the two mirrored banks, including the physically
+              present R15. The camera bounds are approximate; highlighting R15
+              does not imply it works correctly.
+            </p>
+            <p>
+              A displayed register value here is explanatory state. There is no
+              verified CPU output port; <code>output(x)</code> is a compiler
+              declaration.
+            </p>
+          </section>
+          <section
+            class="chapter"
+            id="operation"
+            data-active="registers operation"
+            data-name="Operands → a result"
+          >
+            <span class="step">06 / DOING THE WORK</span>
+            <h2>From two values<br />to one result.</h2>
+            <p>
+              The eight highlighted repeaters are confirmed ALU output
+              landmarks. The camera frames the approximate ALU region without
+              assigning every connected wire to it. ADD, SUB and the bitwise
+              operations work on eight-bit operands. Arithmetic wraps modulo
+              256: <strong>255 + 1 = 0</strong>.
+            </p>
+            <div class="number-strip">60 + 165 <span>=</span> 225</div>
+            <p>
+              Physical A is <code>lhs</code>; physical B is <code>rhs</code>. So
+              <code>SUB R3, R2, R1</code> computes R2 − R1.
+            </p>
+            <p class="supported">
+              Supported: NOP · ADD · SUB · AND · NAND · OR · XOR · NOR · XNOR ·
+              INC · LDI
+            </p>
+            <a class="text-link" href="#demo"
+              >Follow the real demo <span aria-hidden="true">↓</span></a
+            >
+          </section>
+        </div>
+      </div>
+      <section class="demo wrap" id="demo">
+        <div class="demo-intro">
+          <span class="step">THE TESTED PROGRAM</span>
+          <h2>165 + 60.<br /><em>In redstone.</em></h2>
+          <p>
+            The physical model retains its original saved ROM; the separate demo
+            below uses the tested addition program. Step through the exact demo
+            ROM words. The demonstration begins at PC 0; register values remain
+            unknown until written.
+          </p>
+        </div>
+        <div class="demo-console">
+          <div class="console-top">
+            <span>EXPLANATORY REGISTER STATE</span
+            ><span id="pc-label">PC 00</span>
+          </div>
+          <div class="register-values">
+            <div>R1<strong id="r1">?</strong></div>
+            <div>R2<strong id="r2">?</strong></div>
+            <div>R3<strong id="r3">?</strong></div>
+          </div>
+          <div class="current-instruction">
+            <span id="word">0000</span><strong id="assembly">NOP</strong>
+            <p id="effect" aria-live="polite">
+              Illustrative starting address. Register values are unknown.
+            </p>
+          </div>
+          <div class="demo-controls">
+            <button id="previous" disabled aria-label="Previous address">
+              ← Back</button
+            ><button disabled id="play">Play at 7.3 s / address</button
+            ><button disabled id="next">Next →</button
+            ><button disabled id="reset">Restart</button>
+          </div>
+          <div
+            class="rom-grid"
+            id="rom-grid"
+            aria-label="All 64 ROM addresses"
+          ></div>
+          <p class="fine">
+            Addresses 56–63 are reserved NOP. At PC 60 the CPU fetches 56; at PC
+            61 it fetches 57. Playback continues through padding and wraps.
+            Pause is a viewer control, not a hardware HALT.
+          </p>
+          <noscript
+            ><p>
+              Enable JavaScript for the interactive demo. The program loads
+              R1=165 at address 1, R2=60 at address 3, then adds them into
+              R3=225 at address 5. All other words are NOP.
+            </p></noscript
+          >
+        </div>
+      </section>
+      <section class="limits wrap">
+        <h2>Built in blocks.<br />Bound by the hardware.</h2>
+        <div class="limits-list">
+          <div>
+            <h3>The clock keeps going.</h3>
+            <p>
+              There is no verified HALT. After address 63, the PC wraps and
+              repeats. The operator must stop the clock externally.
+            </p>
+          </div>
+          <div>
+            <h3>Some behavior stays unknown.</h3>
+            <p>
+              Branches, reset, flags, internal microsteps, RAM, stack, CALL/RET
+              and I/O are not verified. DEC is faulty. R15 operand reads fail.
+            </p>
+          </div>
+          <div>
+            <h3>Conservative by design.</h3>
+            <p>
+              The compiler inserts NOP gaps and rejects destination/source
+              overlap. Those sequences are not fully certified; this is a
+              compiler policy, not proof they all fail physically.
+            </p>
+          </div>
+        </div>
+      </section>
+      <footer class="wrap">
+        <p>CPU V2 <span> / A behavioral tour by Colin Heslin</span></p>
+        <a href="./data/8bCPU-repaired-v1.schem" download
+          >Download the Minecraft schematic ↓</a
+        ><br /><a
+          href="https://github.com/cheslin23t/CPUV2-Compiler/tree/1851180869f97ff15ae081e659b1f57ea1209675"
+          >Explore the compiler &amp; hardware brief ↗</a
+        >
+        <p class="fine">
+          Physical schematic: commit 1851180. Behavioral demo: commit ecc6892.
+          Software checks do not certify every program on hardware.
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,120 @@
+{
+  "schema": "redcpu-animation-data/v1",
+  "provenance": "Hardware facts supplied from physical tests. The animation must not invent unverified behavior.",
+  "hardware": {
+    "data_width_bits": 8,
+    "instruction_width_bits": 16,
+    "rom_words": 64,
+    "program_counter_bits": 6,
+    "arithmetic": "unsigned modulo 256",
+    "clock": {
+      "game_ticks_per_instruction_address": 146,
+      "ticks_per_second": 20,
+      "seconds_per_instruction_address": 7.3,
+      "note": "No finer-grained execution timing is established."
+    },
+    "registers": {
+      "r0": "Reads zero in tested operand operations; writes do not change a physical register; use as a zero source only.",
+      "usable_general_registers": ["r1-r14"],
+      "r15": "Can retain loaded data, but both operand ports currently read it incorrectly as zero; reject it."
+    },
+    "unverified_or_absent": [
+      "HALT instruction",
+      "branch semantics",
+      "general RAM load/store",
+      "stack",
+      "CALL/RET",
+      "input/output instruction",
+      "usable flags interface",
+      "reset/startup behavior",
+      "cycle-by-cycle internal microarchitecture"
+    ],
+    "known_defects": [
+      "DEC opcode 0xA produces incorrect results.",
+      "R15 operand reads fail.",
+      "ROM address 60 fetches address 56.",
+      "ROM address 61 fetches address 57.",
+      "Conditional branch behavior and overflow semantics are unverified.",
+      "Back-to-back instructions and destination/source overlap are not fully certified."
+    ]
+  },
+  "instruction_set": [
+    {"opcode": "0", "name": "NOP", "semantics": "No operation."},
+    {"opcode": "1", "name": "ADD", "semantics": "dest = (lhs + rhs) & 255."},
+    {"opcode": "2", "name": "SUB", "semantics": "dest = (lhs - rhs) & 255."},
+    {"opcode": "3", "name": "AND", "semantics": "dest = lhs & rhs."},
+    {"opcode": "4", "name": "NAND", "semantics": "dest = ~(lhs & rhs) & 255."},
+    {"opcode": "5", "name": "OR", "semantics": "dest = lhs | rhs."},
+    {"opcode": "6", "name": "XOR", "semantics": "dest = lhs ^ rhs."},
+    {"opcode": "7", "name": "NOR", "semantics": "dest = ~(lhs | rhs) & 255."},
+    {"opcode": "8", "name": "XNOR", "semantics": "dest = ~(lhs ^ rhs) & 255."},
+    {"opcode": "9", "name": "INC", "semantics": "dest = (src + 1) & 255; source is physical B and physical A is R0."},
+    {"opcode": "A", "name": "DEC", "semantics": "Known faulty; reject and do not animate as correct."},
+    {"opcode": "B", "name": "LDI", "semantics": "Load 8-bit immediate; immediate byte is not bit-reversed."},
+    {"opcode": "C", "name": "BRANCH", "semantics": "Unverified; reject."},
+    {"opcode": "D-F", "name": "UNSPECIFIED", "semantics": "Reject."}
+  ],
+  "encoding": {
+    "printed_binary_order": "Most-significant bit first; format each word as 16 binary digits.",
+    "reverse_each_register_nibble": "reverse4(n) = ((n & 1) << 3) | ((n & 2) << 1) | ((n & 4) >> 1) | ((n & 8) >> 3)",
+    "ordinary_register_instruction": {
+      "bits_0_3": "opcode",
+      "bits_4_7": "reverse4(dest)",
+      "bits_8_11": "reverse4(rhs), physical B",
+      "bits_12_15": "reverse4(lhs), physical A",
+      "word_formula": "opcode | (reverse4(dest) << 4) | (reverse4(rhs) << 8) | (reverse4(lhs) << 12)"
+    },
+    "inc": "0x9 | (reverse4(dest) << 4) | (reverse4(src) << 8); high nibble is zero.",
+    "ldi": "0xB | (reverse4(dest) << 4) | (value << 8).",
+    "nop": "Exactly 0x0000; reject nonzero unused bits."
+  },
+  "safe_rom_layout": {
+    "address_0": "NOP",
+    "logical_instruction_addresses": "1, 3, 5, ..., 53",
+    "nop_after_each_logical_instruction": true,
+    "logical_instruction_capacity": 27,
+    "reserved_nop_tail": [56, 57, 58, 59, 60, 61, 62, 63],
+    "reason_for_tail": "Defective fetch aliases make 60 fetch 56 and 61 fetch 57; keep the entire tail zero.",
+    "execution": "PC continues; after address 63 it wraps to 0 and repeats. Operator must stop clock externally."
+  },
+  "demo": {
+    "title": "Add 165 and 60",
+    "starting_pc_assumption": 0,
+    "starting_pc_note": "Illustrative demo assumption only; hardware reset/startup behavior was not specified.",
+    "logical_ir": [
+      {"instruction": "ldi", "dest": "r1", "value": 165},
+      {"instruction": "ldi", "dest": "r2", "value": 60},
+      {"instruction": "add", "dest": "r3", "lhs": "r2", "rhs": "r1"}
+    ],
+    "slots": [
+      {"address": 0, "word_hex": "0000", "binary": "0000000000000000", "assembly": "NOP", "result": "Padding; initial illustrative slot."},
+      {"address": 1, "word_hex": "A58B", "binary": "1010010110001011", "assembly": "LDI R1, 165", "register_updates": {"r1": 165}},
+      {"address": 2, "word_hex": "0000", "binary": "0000000000000000", "assembly": "NOP", "result": "Padding."},
+      {"address": 3, "word_hex": "3C4B", "binary": "0011110001001011", "assembly": "LDI R2, 60", "register_updates": {"r2": 60}},
+      {"address": 4, "word_hex": "0000", "binary": "0000000000000000", "assembly": "NOP", "result": "Padding."},
+      {"address": 5, "word_hex": "48C1", "binary": "0100100011000001", "assembly": "ADD R3, R2, R1", "calculation": "60 + 165 = 225", "register_updates": {"r3": 225}},
+      {"address": 6, "word_hex": "0000", "binary": "0000000000000000", "assembly": "NOP", "result": "Trailing padding."}
+    ],
+    "remaining_addresses": "7-63 are NOP; addresses 56-63 are explicitly reserved zeroes.",
+    "final_values": {"r1": 165, "r2": 60, "r3": 225},
+    "timing": "Each PC address is held for 146 game ticks (7.3 seconds at 20 TPS).",
+    "stop_note": "This sequence does not halt; the PC continues through padding and repeats after wraparound.",
+    "output_note": "There is no CPU output instruction or output port established by these facts; values are shown as explanatory register state."
+  },
+  "optional_physical_rom_mapping": {
+    "coordinate_formula": {"x": "286 - 2 * (address % 16)", "y": "86 - 4 * (address // 16)", "z": "30 + 2 * bit"},
+    "bit_range": "0-15 numeric bit indices",
+    "one_block": "minecraft:redstone_wall_torch[facing=west]",
+    "zero_block": "minecraft:air",
+    "screen_word_orientation": "Physical bit 0 is the rightmost character of a printed binary word.",
+    "scope": "Pure placement data only; no server, RCON, or live block placement."
+  },
+  "animation_accuracy_rules": [
+    "Visualize only facts in this file; make unsupported details visibly unknown or omit them.",
+    "Use a conceptual behavioral flow, not invented internal wiring or clock microsteps.",
+    "Show lhs as physical A and rhs as physical B, especially for noncommutative SUB.",
+    "Show register-nibble bit reversal; do not reverse the whole word or the LDI immediate byte.",
+    "Show one NOP gap after every instruction, address 0 as NOP, and the reserved 56-63 tail.",
+    "Do not show a HALT, usable branches, memory, stack, CALL/RET, I/O, or valid DEC."
+  ]
+}
