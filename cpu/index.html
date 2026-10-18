@@ -9,6 +9,7 @@
       content="A guided tour of a custom Minecraft redstone CPU: its clock, ROM, instruction encoding, registers, and a real addition program."
     />
     <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/png" href="/static/assets/favicon.png" />
     <link rel="stylesheet" href="./cpu.css" />
     <script src="./cpu.js" defer></script>
     <script src="./build-viewer.js" defer></script>
@@ -86,22 +87,52 @@
               aria-label="Interactive 3D view of the actual Minecraft CPU"
               aria-describedby="orbit-help"
             ></canvas>
+            <div id="landmark-labels" aria-hidden="true"></div>
+            <span class="view-badge" id="view-badge">Complete build</span>
             <p class="viewer-loading" role="status">Loading 32,543 blocks…</p>
           </div>
           <p id="build-status" class="build-status" role="status">
             Complete physical build · original saved ROM
           </p>
-          <div class="view-controls">
-            <span id="orbit-help"
-              >Drag to orbit · click, then scroll to zoom<br />Keyboard: arrows
-              to orbit, + / − to zoom, Esc to exit</span
-            ><button disabled id="restore-view">Restore view</button>
+          <div class="view-modes" role="group" aria-label="Model visibility">
+            <button id="region-view" aria-pressed="true" disabled>
+              Module close-up
+            </button>
+            <button id="context-view" aria-pressed="false" disabled>
+              Whole build
+            </button>
+            <button disabled id="restore-view">Reset view</button>
           </div>
+          <div class="view-controls">
+            <label
+              >Orbit
+              <input
+                id="orbit-angle"
+                type="range"
+                min="-180"
+                max="180"
+                value="0"
+                disabled
+            /></label>
+            <label
+              >Zoom
+              <input
+                id="view-zoom"
+                type="range"
+                min="65"
+                max="220"
+                value="100"
+                disabled
+            /></label>
+          </div>
+          <p id="orbit-help">
+            Drag to orbit. Sliders also work by touch or keyboard. Focus the
+            model: arrows rotate, + / − zoom, Esc releases scrolling.
+          </p>
           <p class="diagram-note">
-            Exact block positions, simplified materials and component shapes.
-            Highlights mark confirmed repeaters and ROM cells, visible through
-            the build. Camera regions are approximate; component shapes and
-            materials are simplified.
+            Cyan marks measured component positions, not power. The close-up
+            crops an approximate region; it does not define every wire belonging
+            to a module. Original block colors are preserved.
           </p>
           <p id="build-fallback" hidden>
             Use a WebGL-capable browser to explore the build, or
@@ -109,14 +140,11 @@
               >download the Minecraft schematic</a
             >.
           </p>
-          <div class="chapter-dots" aria-label="Tour chapters">
-            <a href="#whole" aria-label="Overview"></a
-            ><a href="#clock" aria-label="Clock and controls"></a
-            ><a href="#rom" aria-label="ROM"></a
-            ><a href="#encoding" aria-label="Instruction encoding"></a
-            ><a href="#registers" aria-label="Register banks"></a
-            ><a href="#operation" aria-label="Operations"></a>
-          </div>
+          <nav class="chapter-dots" aria-label="Tour chapters">
+            <a href="#whole">Overview</a><a href="#clock">PC</a
+            ><a href="#rom">ROM</a><a href="#encoding">Decode</a
+            ><a href="#registers">Registers</a><a href="#operation">ALU</a>
+          </nav>
         </aside>
         <div class="chapters">
           <section
@@ -134,10 +162,42 @@
             </p>
             <p>
               You’re looking at the actual exported Minecraft build. Scroll to
-              move through it: selected blocks turn cyan while the rest of the
-              machine fades back. The model preserves the schematic’s block
-              positions; it does not simulate redstone.
+              inspect one region at a time, or use the labeled chapter links.
+              Switch to whole-build context to locate each region in the
+              machine. The model preserves the schematic’s block positions; it
+              does not simulate redstone.
             </p>
+            <div class="explanation">
+              <h3>The instruction’s path</h3>
+              <ol class="data-flow">
+                <li>
+                  <b>Address</b
+                  ><span>The six-bit PC selects one of 64 ROM words.</span>
+                </li>
+                <li>
+                  <b>Decode</b
+                  ><span
+                    >The 16-bit word supplies an operation and register
+                    selections.</span
+                  >
+                </li>
+                <li>
+                  <b>Read &amp; calculate</b
+                  ><span>Two operand paths feed the eight-bit ALU.</span>
+                </li>
+                <li>
+                  <b>Store</b
+                  ><span
+                    >The selected destination retains the result for a later
+                    instruction.</span
+                  >
+                </li>
+              </ol>
+              <p class="fine">
+                This is the functional data flow. It is not a claim about four
+                clock phases or a traced route through every wire.
+              </p>
+            </div>
           </section>
           <section
             class="chapter"
@@ -157,9 +217,28 @@
               The six-bit PC visits 64 addresses, then wraps to zero. The six
               highlighted repeaters are confirmed PC state landmarks. The camera
               frames the approximate PC region; connected control circuitry
-              extends beyond it. Starting at PC 0 is an illustrative assumption;
-              reset behavior is unknown.
+              extends beyond it. The PC reset is synchronous: assert reset,
+              allow it to settle, then clock the counter. This was tested; it
+              does not clear the register banks.
             </p>
+            <div class="explanation">
+              <h3>Why slow the clock?</h3>
+              <p>
+                Redstone signals take time to propagate. A correct Boolean
+                result is not enough: it must arrive before the storage circuit
+                locks it in. The repaired feedback loop gives the machine more
+                settling time.
+              </p>
+              <div class="comparison">
+                <span>Original period<strong>44 ticks</strong></span
+                ><span>Repaired period<strong>146 ticks</strong></span>
+              </div>
+              <p>
+                Ten consecutive native PC advances measured 146 ticks each. The
+                close-up marks the six PC state bits; the clock loop and reset
+                controls extend beyond this crop.
+              </p>
+            </div>
           </section>
           <section
             class="chapter"
@@ -186,6 +265,25 @@
               <strong>27 logical instructions</strong>. Addresses 56–63 stay
               NOP: address 60 fetches 56, and 61 fetches 57.
             </p>
+            <div class="explanation">
+              <h3>How blocks encode a word</h3>
+              <p>
+                Each address has 16 programming positions. A west-facing
+                redstone wall torch encodes <strong>1</strong>; air encodes
+                <strong>0</strong>. The address decoder selects the word, and
+                the bit lanes carry its pattern onward.
+              </p>
+              <p>
+                The physical scene shows the original saved ROM. The listing
+                above and the addition replay below use a separate example
+                program.
+              </p>
+              <p class="evidence">
+                Measured limit: unique-word fetch testing passed 62 of 64
+                addresses. Keeping the aliased tail empty avoids executing
+                unintended instructions.
+              </p>
+            </div>
           </section>
           <section
             class="chapter"
@@ -217,6 +315,25 @@
               <strong>without reversal</strong>. INC reads its source on
               physical B with physical A set to R0.
             </p>
+            <div class="explanation">
+              <h3>Decode means controlling the hardware</h3>
+              <p>
+                The opcode selects control signals, including ALU
+                inversion/carry controls and read/write enables. The register
+                fields select the sources and destination. LDI instead carries a
+                literal byte to store.
+              </p>
+              <p>
+                For example, <code>A58B</code> splits into immediate
+                <code>A5</code> (165), reversed destination <code>8</code> (R1),
+                and opcode <code>B</code> (LDI).
+              </p>
+              <p class="evidence">
+                A real decode repair: AND was missing its invert-A torch, and
+                its enable buses did not receive the intended signal. Restoring
+                both made the tested AND cases pass.
+              </p>
+            </div>
           </section>
           <section
             class="chapter"
@@ -225,7 +342,7 @@
             data-name="Registers hold the data"
           >
             <span class="step">05 / WORKING VALUES</span>
-            <h2>Eight bits.<br />Fourteen usable registers.</h2>
+            <h2>Eight bits.<br />A value that stays.</h2>
             <p>
               R1–R14 hold unsigned values from 0 to 255. R0 reads as zero in
               tested operand operations; writes do not persist.
@@ -234,17 +351,90 @@
               R1 <span>←</span> 10100101 <small>165</small>
             </div>
             <p>
-              R15 can retain loaded data, but its operand reads fail. The
-              compiler excludes it. The model highlights 240 confirmed storage
-              repeaters across the two mirrored banks, including the physically
-              present R15. The camera bounds are approximate; highlighting R15
-              does not imply it works correctly.
+              The two banks contain 15 × 8 × 2 = 240 storage repeaters. They
+              hold mirrored copies of the register values, rather than 30
+              independent registers. The highlighted positions include the
+              physically present R15. The camera bounds are approximate;
+              highlighting R15 does not imply it works correctly. R15 retains
+              loaded data, but both operand reads return zero; the compiler
+              excludes it.
             </p>
-            <p>
-              A displayed register value here is explanatory state. There is no
-              verified CPU output port; <code>output(x)</code> is a compiler
-              declaration.
-            </p>
+
+            <div class="explanation">
+              <h3>A locked repeater is a one-bit memory</h3>
+              <p>
+                A repeater normally follows its rear input after a delay. A
+                powered repeater or comparator pointing into its side can lock
+                it. While locked, its output stays at the previous state even if
+                the input changes.
+              </p>
+              <ol class="data-flow">
+                <li>
+                  <b>Accept</b
+                  ><span
+                    >The write controls allow the selected storage cells to take
+                    new data.</span
+                  >
+                </li>
+                <li>
+                  <b>Hold</b
+                  ><span
+                    >The lock preserves each bit for use by later
+                    instructions.</span
+                  >
+                </li>
+              </ol>
+              <p>
+                In these storage probes, the electrical state is inverted:
+                <strong>powered = logical 0; unpowered = logical 1</strong>.
+                Eight stored bits make a byte. The browser’s cyan overlay
+                identifies cells; it does not show their value.
+              </p>
+              <div class="bit-lab" aria-labelledby="bit-lab-title">
+                <h4 id="bit-lab-title">Try one memory cell</h4>
+                <div
+                  class="bit-lab-controls"
+                  role="group"
+                  aria-label="Electrical input"
+                >
+                  <button disabled id="bit-low" aria-pressed="true">
+                    Input off</button
+                  ><button disabled id="bit-high" aria-pressed="false">
+                    Input on
+                  </button>
+                </div>
+                <label
+                  ><input type="checkbox" disabled id="bit-lock" checked /> Lock
+                  the stored output</label
+                >
+                <div class="bit-state">
+                  <span
+                    >Stored electrical state<strong id="bit-electrical"
+                      >Off</strong
+                    ></span
+                  ><span
+                    >Decoded register bit<strong id="bit-logical"
+                      >1</strong
+                    ></span
+                  >
+                </div>
+                <p id="bit-explanation" aria-live="polite">
+                  Locked: change the input and the stored output holds.
+                </p>
+                <p class="fine">
+                  Concept model of settled states. Propagation delays and the
+                  CPU’s write-control wiring are omitted.
+                </p>
+              </div>
+              <p class="evidence">
+                The repair changed the 240 adjacent
+                <strong>data-input repeaters</strong> from delay 1 to 2. The
+                storage repeaters remain at delay 1. Delaying the input change
+                kept data stable until the lock closed. All 15 destinations then
+                passed distinct-value retention tests; R15’s read path still
+                fails.
+              </p>
+            </div>
           </section>
           <section
             class="chapter"
@@ -255,11 +445,10 @@
             <span class="step">06 / DOING THE WORK</span>
             <h2>From two values<br />to one result.</h2>
             <p>
-              The eight highlighted repeaters are confirmed ALU output
-              landmarks. The camera frames the approximate ALU region without
-              assigning every connected wire to it. ADD, SUB and the bitwise
-              operations work on eight-bit operands. Arithmetic wraps modulo
-              256: <strong>255 + 1 = 0</strong>.
+              The ALU takes two eight-bit operands and produces an eight-bit
+              result. The opcode controls which arithmetic or logic operation it
+              performs. The eight cyan repeaters mark its measured outputs.
+              Arithmetic wraps modulo 256: <strong>255 + 1 = 0</strong>.
             </p>
             <div class="number-strip">60 + 165 <span>=</span> 225</div>
             <p>
@@ -271,14 +460,37 @@
               INC · LDI
             </p>
             <a class="text-link" href="#demo"
-              >Follow the real demo <span aria-hidden="true">↓</span></a
+              >Follow the tested program <span aria-hidden="true">↓</span></a
             >
+            <div class="explanation">
+              <h3>Eight parallel result bits</h3>
+              <p>
+                The highlighted repeaters are isolated ALU outputs, one per bit.
+                Bit 0 contributes 1, bit 1 contributes 2, and bit 7 contributes
+                128. Reading them together gives the unsigned result.
+              </p>
+              <div class="binary-proof">
+                <span>00111100 <small>60 · physical A</small></span
+                ><span>10100101 <small>165 · physical B</small></span
+                ><span>11100001 <small>225 · result</small></span>
+              </div>
+              <p>
+                The nearby dust staircase combines the output for zero
+                detection. It is not eight independent result wires, so it
+                cannot be read like the isolated output repeaters.
+              </p>
+              <p class="evidence">
+                A native-clock mixed program passed ADD, SUB, AND, NAND, OR,
+                XOR, NOR, XNOR and INC with operands 165 and 60. This is
+                measured evidence, not an exhaustive truth-table proof.
+              </p>
+            </div>
           </section>
         </div>
       </div>
       <section class="demo wrap" id="demo">
         <div class="demo-intro">
-          <span class="step">THE TESTED PROGRAM</span>
+          <span class="step">A REPLAY OF THE TESTED PROGRAM</span>
           <h2>165 + 60.<br /><em>In redstone.</em></h2>
           <p>
             The physical model retains its original saved ROM; the separate demo
@@ -342,8 +554,10 @@
           <div>
             <h3>Some behavior stays unknown.</h3>
             <p>
-              Branches, reset, flags, internal microsteps, RAM, stack, CALL/RET
-              and I/O are not verified. DEC is faulty. R15 operand reads fail.
+              Conditional branches, overflow semantics, a full-machine reset,
+              internal microsteps, RAM, stack, CALL/RET and I/O are not
+              verified. The PC-only synchronous reset and zero detector have
+              been tested. DEC is faulty. R15 operand reads fail.
             </p>
           </div>
           <div>
@@ -357,7 +571,7 @@
         </div>
       </section>
       <footer class="wrap">
-        <p>CPU V2 <span> / A behavioral tour by Colin Heslin</span></p>
+        <p>CPU V2 <span> / A physical CPU study by Colin Heslin</span></p>
         <a href="./data/8bCPU-repaired-v1.schem" download
           >Download the Minecraft schematic ↓</a
         ><br /><a
@@ -367,6 +581,9 @@
         <p class="fine">
           Physical schematic: commit 1851180. Behavioral demo: commit ecc6892.
           Software checks do not certify every program on hardware.
+          <a href="./data/CPU_REPAIRS.md"
+            >Read the hardware repair and test record ↗</a
+          >
         </p>
       </footer>
     </main>

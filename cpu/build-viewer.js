@@ -3,17 +3,30 @@
 // The simplified shapes show block placement, not a redstone simulation.
 (() => {
   const canvas = document.querySelector("#build-canvas");
+  document.querySelector(".hero-fallback").hidden = false;
+  document.querySelector("#hero-build").hidden = true;
   const status = document.querySelector("#build-status");
   const gl = canvas.getContext("webgl", { antialias: true, alpha: true });
   const fallback = document.querySelector("#build-fallback");
-  if (!gl) {
-    status.textContent = "3D is unavailable in this browser.";
+  function showFallback(message) {
+    status.textContent = message;
     fallback.hidden = false;
     canvas.hidden = true;
     document.querySelector(".model-fallback").hidden = false;
     document.querySelector("#hero-build").hidden = true;
     document.querySelector(".hero-fallback").hidden = false;
     document.querySelector(".viewer-loading").hidden = true;
+    document.querySelector("#landmark-labels").replaceChildren();
+    document.querySelector("#view-badge").textContent =
+      "Static overview · all modules";
+    document
+      .querySelectorAll(".view-modes button, .view-controls input")
+      .forEach((el) => (el.disabled = true));
+  }
+  if (!gl) {
+    showFallback(
+      "3D is unavailable. The overview and module explanations remain available.",
+    );
     return;
   }
   const shader = (type, source) => {
@@ -29,14 +42,14 @@
     program,
     shader(
       gl.VERTEX_SHADER,
-      `attribute vec3 position; attribute vec3 color; attribute float region; uniform mat4 matrix; uniform float selected; uniform float highlightPass; varying vec3 vColor; varying float vChosen; void main(){ float chosen=1.0-step(0.1,abs(region-selected)); float all=1.0-step(0.1,selected); vChosen=chosen; vColor=mix(color*.32,mix(color,vec3(.40,.90,.97),.62),chosen); vColor=mix(vColor,color,all); gl_Position=matrix*vec4(position,1.0); }`,
+      `attribute vec3 position; attribute vec3 color; attribute float region; uniform mat4 matrix; uniform float selected; varying vec3 vColor; varying vec3 vPosition; varying float vChosen; void main(){ float chosen=1.0-step(0.1,abs(region-selected)); float all=1.0-step(0.1,selected); vChosen=chosen; vPosition=position; vColor=mix(color*.72,mix(color,vec3(.40,.90,.97),.78),chosen); vColor=mix(vColor,color,all); gl_Position=matrix*vec4(position,1.0); }`,
     ),
   );
   gl.attachShader(
     program,
     shader(
       gl.FRAGMENT_SHADER,
-      `precision mediump float; varying vec3 vColor; varying float vChosen; uniform float highlightPass; void main(){ if(highlightPass>0.5 && vChosen<0.5) discard; gl_FragColor=vec4(vColor,1.0); }`,
+      `precision mediump float; varying vec3 vColor; varying vec3 vPosition; varying float vChosen; uniform float highlightPass; uniform float cropped; uniform vec3 cropMin; uniform vec3 cropMax; void main(){ if(cropped>0.5 && (any(lessThan(vPosition,cropMin)) || any(greaterThan(vPosition,cropMax)))) discard; if(highlightPass>0.5 && vChosen<0.5) discard; gl_FragColor=vec4(vColor,1.0); }`,
     ),
   );
   gl.linkProgram(program);
@@ -47,6 +60,9 @@
   const uniform = gl.getUniformLocation(program, "matrix"),
     selected = gl.getUniformLocation(program, "selected"),
     highlightPass = gl.getUniformLocation(program, "highlightPass");
+  const cropMin = gl.getUniformLocation(program, "cropMin"),
+    cropMax = gl.getUniformLocation(program, "cropMax"),
+    cropped = gl.getUniformLocation(program, "cropped");
   const faceCorners = [
     [
       [0, 1, 0],
@@ -175,58 +191,182 @@
     a[0] * b[1] - a[1] * b[0],
   ];
   const dot = (a, b) => a.reduce((s, x, i) => s + x * b[i], 0);
+  // Region bounds are inclusive block coordinates, not netlist membership.
+  // Every preset keeps the same azimuth; cuts reveal buried landmarks without spinning the CPU.
   const views = {
     whole: {
-      center: [45, 21, 32],
-      yaw: 2.25,
-      pitch: 0.56,
-      size: 48,
+      bounds: [
+        [0, 0, 0],
+        [90, 44, 64],
+      ],
       region: 0,
-      label: "Complete physical build · original saved ROM",
+      label: "Complete build · 32,543 blocks · saved ROM",
+      pins: [],
     },
     clock: {
-      center: [46, 9, 13],
-      yaw: -0.65,
-      pitch: 0.35,
-      size: 22,
+      bounds: [
+        [39, 0, 9],
+        [53, 19, 17],
+      ],
       region: 1,
-      label: "PC · 6 confirmed state repeaters",
+      label: "PC · six state bits · approximate region",
+      pins: [
+        { p: [41.5, 7.5, 15.5], text: "PC bit 0 · weight 1" },
+        { p: [41.5, 17.5, 15.5], text: "PC bit 5 · weight 32" },
+      ],
     },
     rom: {
-      center: [15, 8, 49],
-      yaw: -0.85,
-      pitch: 0.55,
-      size: 33,
+      bounds: [
+        [0, 0, 32],
+        [33, 16, 64],
+      ],
       region: 2,
-      label: "ROM programming cells · documented coordinates",
+      label: "ROM · four layers × 16 words × 16 bits",
+      pins: [
+        { p: [30.5, 14.5, 34.5], text: "Address 0 · bit 0 cell" },
+        { p: [0.5, 2.5, 64.5], text: "Address 63 · bit 15 cell" },
+      ],
     },
     encoding: {
-      center: [64, 26, 57],
-      yaw: 2.0,
-      pitch: 0.55,
-      size: 31,
+      bounds: [
+        [48, 22, 52],
+        [84, 36, 62],
+      ],
       region: 3,
-      label: "Operation-label neighborhood · signs from the build",
+      label: "Decode · operation-sign neighborhood",
+      pins: [
+        { p: [55.5, 26.5, 60.5], text: "ADD · physical sign" },
+        { p: [75.5, 26.5, 60.5], text: "LDI · physical sign" },
+      ],
     },
     registers: {
-      center: [75, 32, 43],
-      yaw: 1.25,
-      pitch: 0.46,
-      size: 29,
+      bounds: [
+        [60, 20, 36],
+        [90, 44, 50],
+      ],
       region: 4,
-      label: "Register banks · 240 confirmed storage repeaters",
+      label: "Registers · 15 bytes stored twice · 240 one-bit cells",
+      pins: [
+        { p: [62.5, 22.5, 39.5], text: "R1 · bit 0 · bank 1" },
+        { p: [62.5, 22.5, 47.5], text: "R1 · bit 0 · bank 2" },
+      ],
     },
     operation: {
-      center: [51, 32, 27],
-      yaw: 2.8,
-      pitch: 0.4,
-      size: 27,
+      bounds: [
+        [44, 20, 18],
+        [58, 44, 36],
+      ],
       region: 5,
-      label: "ALU · 8 confirmed output repeaters",
+      label: "ALU · eight isolated output repeaters",
+      pins: [
+        { p: [52.5, 22.5, 18.5], text: "Output bit 0 · weight 1" },
+        { p: [52.5, 36.5, 18.5], text: "Output bit 7 · weight 128" },
+      ],
     },
   };
-  let view = { ...views.whole, center: [...views.whole.center] },
-    goal = { ...views.whole },
+  const baseYaw = 2.25,
+    basePitch = 0.5;
+  let context = false;
+  let zoom = 1;
+  function preset(id) {
+    const bounds = (context ? views.whole : views[id]).bounds;
+    return {
+      ...views[id],
+      center: bounds[0].map((v, i) => (v + bounds[1][i] + 1) / 2),
+      yaw: baseYaw,
+      pitch: basePitch,
+      size: fitHalf(
+        bounds,
+        baseYaw,
+        basePitch,
+        canvas.clientWidth / Math.max(1, canvas.clientHeight),
+      ),
+    };
+  }
+  function fitHalf(bounds, yaw, pitch, aspect) {
+    const z = [
+      Math.sin(yaw) * Math.cos(pitch),
+      Math.sin(pitch),
+      Math.cos(yaw) * Math.cos(pitch),
+    ];
+    const x = normalize(cross([0, 1, 0], z)),
+      y = cross(z, x);
+    const half = bounds[0].map((v, i) => (bounds[1][i] + 1 - v) / 2);
+    const extent = (axis) =>
+      half.reduce((sum, v, i) => sum + Math.abs(axis[i]) * v, 0);
+    return Math.max(extent(y), extent(x) / aspect) * 1.32;
+  }
+  const pinLayer = document.querySelector("#landmark-labels");
+  function setPins() {
+    pinLayer.innerHTML = '<svg class="pin-leaders" aria-hidden="true"></svg>';
+    const svg = pinLayer.firstChild;
+    for (const pin of views[currentChapter].pins) {
+      const line = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "line",
+      );
+      const dot = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "circle",
+      );
+      dot.setAttribute("r", "4");
+      svg.append(line, dot);
+      const label = document.createElement("span");
+      label.className = "landmark-pin";
+      label.textContent = pin.text;
+      pinLayer.append(label);
+    }
+  }
+  function projectPins(matrix) {
+    const width = canvas.clientWidth,
+      height = canvas.clientHeight,
+      occupied = [];
+    views[currentChapter].pins.forEach((pin, i) => {
+      const [x, y, z] = pin.p;
+      const px =
+        ((matrix[0] * x + matrix[4] * y + matrix[8] * z + matrix[12] + 1) *
+          width) /
+        2;
+      const py =
+        ((1 - matrix[1] * x - matrix[5] * y - matrix[9] * z - matrix[13]) *
+          height) /
+        2;
+      const el = pinLayer.children[i + 1];
+      if (!el) return;
+      const line = pinLayer.firstChild.children[i * 2],
+        dot = pinLayer.firstChild.children[i * 2 + 1];
+      const visible = px > 5 && px < width - 5 && py > 5 && py < height - 5;
+      el.hidden = !visible;
+      line.style.display = dot.style.display = visible ? "" : "none";
+      if (!visible) return;
+      const ew = el.offsetWidth,
+        eh = el.offsetHeight;
+      const left = Math.max(
+        10,
+        Math.min(width - ew - 10, px < width / 2 ? px + 24 : px - ew - 24),
+      );
+      let top = Math.max(42, Math.min(height - eh - 10, py - eh - 28));
+      for (const prev of occupied)
+        if (
+          left < prev.right + 8 &&
+          left + ew > prev.left - 8 &&
+          top < prev.bottom + 8 &&
+          top + eh > prev.top - 8
+        )
+          top = Math.min(height - eh - 10, prev.bottom + 12);
+      occupied.push({ left, right: left + ew, top, bottom: top + eh });
+      el.style.left = `${left}px`;
+      el.style.top = `${top}px`;
+      line.setAttribute("x1", px);
+      line.setAttribute("y1", py);
+      line.setAttribute("x2", Math.max(left, Math.min(left + ew, px)));
+      line.setAttribute("y2", top + eh / 2);
+      dot.setAttribute("cx", px);
+      dot.setAttribute("cy", py);
+    });
+  }
+  let view = preset("whole"),
+    goal = preset("whole"),
     vertices = 0,
     lineVertices = 0,
     ready = false,
@@ -308,7 +448,18 @@
       -1,
       1,
     ]);
-    gl.uniformMatrix4fv(uniform, false, multiply(ortho, look));
+    const matrix = multiply(ortho, look);
+    gl.uniformMatrix4fv(uniform, false, matrix);
+    gl.uniform1f(cropped, !context && currentChapter !== "whole" ? 1 : 0);
+    gl.uniform3fv(
+      cropMin,
+      views[currentChapter].bounds[0].map((v) => v - 0.2),
+    );
+    gl.uniform3fv(
+      cropMax,
+      views[currentChapter].bounds[1].map((v) => v + 1.2),
+    );
+    projectPins(matrix);
     gl.uniform1f(selected, goal.region);
     gl.uniform1f(highlightPass, 0);
     gl.drawArrays(gl.TRIANGLES, 0, vertices);
@@ -318,16 +469,24 @@
       gl.drawArrays(gl.TRIANGLES, 0, vertices);
       gl.uniform1f(highlightPass, 0);
     }
-    if (lineVertices) {
+    if (lineVertices && goal.region !== 0) {
       gl.uniform1f(highlightPass, 1);
       gl.drawArrays(gl.LINES, vertices, lineVertices);
       gl.uniform1f(highlightPass, 0);
     }
     const hero = document.querySelector("#hero-build");
-    if (currentChapter === "whole" && hero) {
+    if (
+      currentChapter === "whole" &&
+      hero &&
+      !hero.dataset.captured &&
+      distance < 0.03
+    ) {
       hero.width = w;
       hero.height = h;
       hero.getContext("2d").drawImage(canvas, 0, 0);
+      hero.dataset.captured = "true";
+      hero.hidden = false;
+      document.querySelector(".hero-fallback").hidden = true;
     }
     if (distance > 0.03) frame = requestAnimationFrame(draw);
   }
@@ -337,7 +496,28 @@
   function focus(id) {
     if (!views[id]) id = "whole";
     currentChapter = id;
-    goal = { ...views[id], center: [...views[id].center] };
+    if (!ready) return;
+    zoom = 1;
+    goal = preset(id);
+    // Take the shortest angular path after a manual orbit.
+    view.yaw =
+      goal.yaw +
+      Math.atan2(Math.sin(view.yaw - goal.yaw), Math.cos(view.yaw - goal.yaw));
+    document.querySelector("#orbit-angle").value = "0";
+    document.querySelector("#view-zoom").value = "100";
+    canvas.dataset.chapter = id;
+    canvas.dataset.mode = context ? "context" : "region";
+    document.querySelector("#view-badge").textContent =
+      id === "whole" || context
+        ? "Complete build"
+        : "Module cutaway · approximate bounds";
+    document
+      .querySelector("#region-view")
+      .setAttribute("aria-pressed", String(!context));
+    document
+      .querySelector("#context-view")
+      .setAttribute("aria-pressed", String(context));
+    setPins();
     status.textContent = goal.label;
     lastFrame = performance.now();
     requestDraw();
@@ -346,6 +526,44 @@
   document
     .querySelector("#restore-view")
     .addEventListener("click", () => focus(currentChapter));
+  for (const [id, value] of [
+    ["region-view", false],
+    ["context-view", true],
+  ]) {
+    document.getElementById(id).addEventListener("click", () => {
+      context = value;
+      focus(currentChapter);
+    });
+  }
+  function refit() {
+    const bounds = (context ? views.whole : views[currentChapter]).bounds;
+    goal.size =
+      fitHalf(
+        bounds,
+        goal.yaw,
+        goal.pitch,
+        canvas.clientWidth / Math.max(1, canvas.clientHeight),
+      ) / zoom;
+    requestDraw();
+  }
+  document.querySelector("#orbit-angle").addEventListener("input", (e) => {
+    goal.yaw = baseYaw + (Number(e.target.value) * Math.PI) / 180;
+    refit();
+  });
+  document.querySelector("#view-zoom").addEventListener("input", (e) => {
+    zoom = Number(e.target.value) / 100;
+    refit();
+  });
+  function syncControls() {
+    const angle = Math.atan2(
+      Math.sin(goal.yaw - baseYaw),
+      Math.cos(goal.yaw - baseYaw),
+    );
+    document.querySelector("#orbit-angle").value = String(
+      (angle * 180) / Math.PI,
+    );
+    document.querySelector("#view-zoom").value = String(zoom * 100);
+  }
   let pointer = null;
   canvas.addEventListener("pointerdown", (e) => {
     canvas.focus({ preventScroll: true });
@@ -360,7 +578,8 @@
       Math.min(1.45, goal.pitch + (e.clientY - pointer[1]) * 0.005),
     );
     pointer = [e.clientX, e.clientY];
-    requestDraw();
+    syncControls();
+    refit();
   });
   const release = () => {
     pointer = null;
@@ -372,11 +591,9 @@
     (e) => {
       if (document.activeElement !== canvas) return;
       e.preventDefault();
-      goal.size = Math.max(
-        12,
-        Math.min(100, goal.size * Math.exp(e.deltaY * 0.0015)),
-      );
-      requestDraw();
+      zoom = Math.max(0.65, Math.min(2.2, zoom * Math.exp(-e.deltaY * 0.0015)));
+      syncControls();
+      refit();
     },
     { passive: false },
   );
@@ -407,16 +624,16 @@
     if (e.key === "ArrowRight") goal.yaw += 0.2;
     if (e.key === "ArrowUp") goal.pitch = Math.min(1.45, goal.pitch + 0.1);
     if (e.key === "ArrowDown") goal.pitch = Math.max(0.12, goal.pitch - 0.1);
-    if (["+", "="].includes(e.key)) goal.size = Math.max(12, goal.size * 0.85);
-    if (["-", "_"].includes(e.key)) goal.size = Math.min(100, goal.size / 0.85);
-    requestDraw();
+    if (["+", "="].includes(e.key)) zoom = Math.min(2.2, zoom / 0.85);
+    if (["-", "_"].includes(e.key)) zoom = Math.max(0.65, zoom * 0.85);
+    syncControls();
+    refit();
   });
-  addEventListener("resize", requestDraw);
+  addEventListener("resize", refit);
   canvas.addEventListener("webglcontextlost", (e) => {
     e.preventDefault();
     ready = false;
-    status.textContent = "3D graphics paused. Reload to restore the view.";
-    fallback.hidden = false;
+    showFallback("3D graphics paused. Reload to restore the interactive view.");
   });
   fetch("./data/build.json")
     .then((r) => {
@@ -447,14 +664,37 @@
           z % 2 === 0
         )
           return 2;
-        if (x === 41 && z === 15 && y >= 7 && y <= 17 && y % 2 === 1) return 1;
-        if (x >= 62 && x <= 90 && x % 2 === 0 && [39, 47].includes(z)) {
+        if (
+          name.startsWith("minecraft:repeater[") &&
+          x === 41 &&
+          z === 15 &&
+          y >= 7 &&
+          y <= 17 &&
+          y % 2 === 1
+        )
+          return 1;
+        if (
+          name.startsWith("minecraft:repeater[") &&
+          x >= 62 &&
+          x <= 90 &&
+          x % 2 === 0 &&
+          [39, 47].includes(z)
+        ) {
           const r = (x - 60) / 2;
           const bit = (y - 22 - (r % 2 === 0 ? 1 : 0)) / 2;
           if (Number.isInteger(bit) && bit >= 0 && bit < 8) return 4;
         }
-        if (x >= 51 && x <= 79 && y >= 23 && y <= 29 && z >= 55) return 3;
-        if (x === 52 && z === 18 && y >= 22 && y <= 36 && y % 2 === 0) return 5;
+        if (name.includes("sign") && x >= 53 && x <= 77 && y === 26 && z === 60)
+          return 3;
+        if (
+          name.startsWith("minecraft:repeater[") &&
+          x === 52 &&
+          z === 18 &&
+          y >= 22 &&
+          y <= 36 &&
+          y % 2 === 0
+        )
+          return 5;
         return 6;
       }
       function box(x, y, z, sx, sy, sz, color, region, full) {
@@ -483,10 +723,12 @@
           }
         }
       }
+      const counts = {};
       for (const [x, y, z, p] of data.blocks) {
         const name = names[p],
           color = typeColor(name),
           region = regionFor(x, y, z, name);
+        counts[region] = (counts[region] || 0) + 1;
         let sx = 0.97,
           sy = 0.97,
           sz = 0.97,
@@ -538,9 +780,9 @@
         if (/repeater|comparator/.test(name))
           for (const offset of [0.25, 0.68])
             box(
-              x + 0.4,
+              x + (/facing=(east|west)/.test(name) ? offset : 0.4),
               y + 0.14,
-              z + offset,
+              z + (/facing=(east|west)/.test(name) ? 0.4 : offset),
               0.14,
               0.2,
               0.14,
@@ -552,7 +794,8 @@
       vertices = regions.length;
       const bounds = [
         { region: 1, min: [39, 0, 9], max: [53, 19, 17] },
-        { region: 2, min: [0, 2, 34], max: [30, 14, 64] },
+        { region: 2, min: [0, 0, 32], max: [33, 16, 64] },
+        { region: 3, min: [48, 22, 52], max: [84, 36, 62] },
         { region: 4, min: [60, 20, 36], max: [90, 44, 50] },
         { region: 5, min: [44, 20, 18], max: [58, 44, 36] },
       ];
@@ -607,17 +850,19 @@
         gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0);
       }
       ready = true;
-      document.querySelector("#restore-view").disabled = false;
+      document
+        .querySelectorAll(".view-modes button, .view-controls input")
+        .forEach((el) => (el.disabled = false));
+      canvas.dataset.landmarks = JSON.stringify(counts);
       canvas.dataset.blocks = String(data.blocks.length);
       canvas.dataset.ready = "true";
       focus(currentChapter);
       document.querySelector(".viewer-loading").hidden = true;
     })
     .catch((error) => {
-      status.textContent = "The physical model could not load.";
-      fallback.hidden = false;
-      document.querySelector(".model-fallback").hidden = false;
-      document.querySelector(".viewer-loading").hidden = true;
+      showFallback(
+        "The model could not load. A static overview is shown; reload to retry.",
+      );
       console.error(error);
     });
 })();

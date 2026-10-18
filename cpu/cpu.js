@@ -6,7 +6,12 @@ const modules = [...document.querySelectorAll("[data-module]")];
 let pending = false;
 function updateTour() {
   const target =
-    innerWidth <= 800 ? Math.min(innerHeight * 0.65, 560) : innerHeight * 0.5;
+    innerWidth <= 960 && innerHeight > 700
+      ? Math.min(
+          innerHeight - 60,
+          document.querySelector(".stage").getBoundingClientRect().bottom + 100,
+        )
+      : innerHeight * 0.4;
   let active = chapters[0];
   for (const chapter of chapters)
     if (chapter.getBoundingClientRect().top <= target) active = chapter;
@@ -120,7 +125,11 @@ document.querySelector("#previous").addEventListener("click", () => {
   pause();
   visitedAddresses = Math.max(0, visitedAddresses - 1);
   pc = visitedAddresses % 64;
-  registers = [visitedAddresses >= 1 ? 165 : null, visitedAddresses >= 3 ? 60 : null, visitedAddresses >= 5 ? 225 : null];
+  registers = [
+    visitedAddresses >= 1 ? 165 : null,
+    visitedAddresses >= 3 ? 60 : null,
+    visitedAddresses >= 5 ? 225 : null,
+  ];
   render();
 });
 document.querySelector("#reset").addEventListener("click", () => {
@@ -147,3 +156,37 @@ render();
 // Keep actions disabled until their event handlers are installed.
 for (const id of ["play", "next", "reset"])
   document.getElementById(id).disabled = false;
+
+// One settled-state latch illustration. This does not simulate the CPU or delays.
+let bitInput = false,
+  bitStored = false;
+function renderBitCell() {
+  const locked = document.querySelector("#bit-lock").checked;
+  if (!locked) bitStored = bitInput;
+  document
+    .querySelector("#bit-low")
+    .setAttribute("aria-pressed", String(!bitInput));
+  document
+    .querySelector("#bit-high")
+    .setAttribute("aria-pressed", String(bitInput));
+  document.querySelector("#bit-electrical").textContent = bitStored
+    ? "On"
+    : "Off";
+  document.querySelector("#bit-logical").textContent = bitStored ? "0" : "1";
+  document.querySelector("#bit-explanation").textContent = locked
+    ? `Locked: input is ${bitInput ? "on" : "off"}; stored output stays ${bitStored ? "on" : "off"}.`
+    : `Unlocked: stored output follows the ${bitInput ? "on" : "off"} input after settling.`;
+}
+document.querySelector("#bit-low").addEventListener("click", () => {
+  bitInput = false;
+  renderBitCell();
+});
+document.querySelector("#bit-high").addEventListener("click", () => {
+  bitInput = true;
+  renderBitCell();
+});
+document.querySelector("#bit-lock").addEventListener("change", renderBitCell);
+
+document
+  .querySelectorAll("#bit-low, #bit-high, #bit-lock")
+  .forEach((el) => (el.disabled = false));
