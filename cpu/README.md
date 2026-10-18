@@ -37,7 +37,7 @@ The conceptual SVG is not used as physical geometry.
 
 ## Interaction and accuracy
 
-Document scrolling chooses camera focus. Drag horizontally to orbit; click/focus
+Document scrolling chooses camera focus. Chapter views share one orientation and fit the selected region to the viewport. Module close-up crops an approximate region; Whole build restores context. Projected labels mark exact coordinates, not module ownership. Named navigation links select chapters. Orbit and zoom sliders work without dragging. Drag horizontally to orbit; click/focus
 then use the wheel to zoom. Keyboard arrows orbit, +/- zoom, Home restores the
 chapter view, and Escape releases focus. Restore view also resets orbit/zoom.
 Touch keeps vertical document scrolling available. Reduced motion removes easing.
@@ -45,5 +45,5 @@ Touch keeps vertical document scrolling available. Reduced motion removes easing
 The separate demo advances through the exact 64-word padded ROM, including NOPs,
 fetch aliases, and wrap. Its Play control uses 7.3 seconds per address. Register
 values are unknown until written. Restart only resets explanatory demo state.
-There is no hardware HALT, general I/O, or verified startup/reset sequence implied.
-The canonical brief is `data/HANDOFF.md`, paired with `data/cpu.json`.
+There is no verified hardware HALT, general I/O, or full-machine reset. The PC-only synchronous reset was tested in the mapping work: assert reset, let it settle, then clock. It does not clear the register banks.
+The behavioral brief is `data/HANDOFF.md`, paired with `data/cpu.json`. Its older statement that reset is entirely unknown is superseded by the PC-only mapping evidence above. `data/CPU_REPAIRS.md` supplies the repair and validation record. The page distinguishes the 240 storage repeaters (delay 1) from their 240 adjacent input repeaters (repaired to delay 2). Storage probe encoding is inverted; two banks hold mirrored copies, not twice the logical register count. The one-bit interactive example is a conceptual settled-state model, not redstone simulation.

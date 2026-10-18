@@ -28,7 +28,7 @@ components:
 
 ## Overview
 
-The existing portfolio uses midnight navy, cyan highlights, system sans typography, and glass panels. Its source remains unchanged. `/cpu/` is a separate, unlinked brand story for the physical Minecraft redstone CPU. Reference: the pacing of a product launch, grounded in the actual exported build rather than an invented processor render. The memorable element is the real schematic moving through a guided tour.
+The existing portfolio uses midnight navy, cyan highlights, system sans typography, and glass panels. Its source remains unchanged. `/cpu/` is a separate, unlinked brand story for the physical Minecraft redstone CPU. Reference: the pacing of a product launch, grounded in the actual exported build rather than an invented processor render. The memorable element is the real schematic moving through a guided tour. The audience includes technically literate project reviewers: emphasize mechanisms, measured failures, repairs, and the limits of the evidence. Do not manufacture autobiographical claims or claim exhaustive validation.
 
 ## Colors
 
@@ -40,7 +40,7 @@ System sans avoids network font dependencies and layout shifts. Large, closely t
 
 ## Layout
 
-Desktop pairs long narrative chapters with a sticky physical model. Phone layouts place a compact model above the naturally scrolling chapter. The page is English. It is not linked from the homepage and has noindex metadata; this is discoverability control, not access control.
+Desktop pairs long narrative chapters with a sticky physical model. Phone layouts place a compact sticky model above the naturally scrolling chapter; short screens release the sticky viewer to preserve reading space. The page is English. It is not linked from the homepage and has noindex metadata; this is discoverability control, not access control.
 
 ## Elevation & Depth
 
@@ -52,7 +52,7 @@ Restrained 5px control corners and a 9px demo console. No default card grids. Di
 
 ## Components
 
-The physical viewer uses exact schematic positions and simplified block geometry. Mouse dragging rotates; focused wheel zoom and keyboard arrows/+/- provide direct control. Escape releases focus so page scrolling remains available. Restore returns to the current chapter view. Motion follows document scrolling without scroll-jacking; reduced motion removes camera easing. The addition console is separate host-side explanatory state and preserves the exact words, NOPs, alias addresses, and PC wrap. Unknown registers display `?` until written. Restart resets only the viewer demo, not the hardware.
+The physical viewer uses exact schematic positions and simplified block geometry. Chapter views preserve one azimuth and fit their inclusive bounds to the viewport. Module close-up crops surrounding geometry; Whole build restores spatial context. Exact landmarks have projected leader lines; the bounding frame is approximate. Mouse dragging rotates; focused wheel zoom and keyboard arrows/+/- provide direct control. Escape releases focus so page scrolling remains available. Orbit/zoom sliders provide touch and keyboard alternatives. Reset view returns to the current chapter framing. Named chapter links replace unlabeled dots. Motion follows document scrolling without scroll-jacking; reduced motion removes camera easing. The addition console is separate host-side explanatory state and preserves the exact words, NOPs, alias addresses, and PC wrap. Unknown registers display `?` until written. A separate settled-state one-bit example illustrates locking and inverted logical encoding; it omits delays and is not a live CPU simulation. Restart resets only the viewer demo, not the hardware.
 
 ## Do's and Don'ts
 
