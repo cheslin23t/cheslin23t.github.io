@@ -1,0 +1,8 @@
+{
+  "profile": "content-site",
+  "ownership": { "Select/Listbox": "native" },
+  "commands": {
+    "test": "node cpu/tools/verify.mjs",
+    "syntax": "node --check cpu/cpu.js && node --check cpu/build-viewer.js"
+  }
+}
