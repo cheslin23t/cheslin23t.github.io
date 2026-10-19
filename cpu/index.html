@@ -2,75 +2,59 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Inside CPU V2 — ches.dev</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>8-bit redstone CPU — Colin Heslin</title>
     <meta
       name="description"
-      content="A guided tour of a custom Minecraft redstone CPU: its clock, ROM, instruction encoding, registers, and a real addition program."
+      content="Colin Heslin’s Minecraft CPU: physical ROM, register cells, instruction decoding and recorded execution."
     />
-    <meta name="robots" content="noindex, nofollow" />
-    <link rel="icon" type="image/png" href="/static/assets/favicon.png" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="/static/assets/favicon.png" />
     <link rel="stylesheet" href="./cpu.css" />
     <script src="./cpu.js" defer></script>
-    <script src="./build-viewer.js" defer></script>
+    <script type="module" src="./build-viewer.js"></script>
     <noscript
       ><style>
-        .hero-fallback[hidden],
         .model-fallback[hidden] {
-          display: block;
+          display: block !important;
         }
-        .hero-art canvas,
-        .build-frame canvas,
-        .viewer-loading {
-          display: none;
+        #build-canvas,
+        .viewer-loading,
+        .camera-controls,
+        .state-strip {
+          display: none !important;
+        }
+        .physical-stage {
+          position: relative !important;
         }
       </style></noscript
     >
   </head>
   <body>
-    <a class="skip" href="#overview">Skip to CPU tour</a>
+    <a class="skip" href="#whole">Skip to walkthrough</a>
     <header>
-      <a class="brand" href="/">ches.dev <span>/ CPU V2</span></a>
-      <nav aria-label="CPU page">
-        <a href="#tour">Architecture</a><a href="#demo">Run the demo</a>
+      <a class="brand" href="/">Colin Heslin <span>/ CPU V2</span></a>
+      <nav aria-label="CPU sections">
+        <a href="#rom">ROM</a><a href="#registers">Registers</a
+        ><a href="#alu">ALU</a><a href="#instructions">Instructions</a>
       </nav>
-      <div id="progress"></div>
     </header>
-    <main id="overview">
-      <section class="hero wrap">
-        <div>
-          <h1>A computer.<br />Built from<br /><em>redstone.</em></h1>
-          <p>
-            A custom 8-bit CPU, built in Minecraft. Follow an instruction from
-            its ROM address to the number it leaves in a register.
-          </p>
-          <a class="text-link" href="#tour"
-            >Scroll to explore <span aria-hidden="true">↓</span></a
+    <main>
+      <div class="intro">
+        <h1>8-bit redstone CPU</h1>
+        <p>
+          Minecraft Java · programmable hardware ·
+          <a href="https://github.com/cheslin23t/CPUV2-Compiler"
+            >Python compiler ↗</a
           >
-        </div>
-        <div class="hero-art">
-          <img
-            class="hero-fallback"
-            src="./data/build-overview.png"
-            width="600"
-            height="540"
-            alt="Isometric rendering of the physical Minecraft CPU"
-            hidden
-          /><canvas
-            id="hero-build"
-            aria-label="Overview rendering of the actual Minecraft CPU schematic"
-          ></canvas>
-          <div class="hero-spec">
-            <span>32,543 blocks</span><span>91 × 45 × 65</span
-            ><span>Actual schematic</span>
-          </div>
-        </div>
-      </section>
-      <div class="tour wrap" id="tour">
-        <aside class="stage" aria-label="Physical Minecraft CPU viewer">
-          <div class="stage-head">
-            <span>ACTUAL MINECRAFT BUILD</span
-            ><span id="chapter">The whole machine</span>
+        </p>
+      </div>
+      <div class="walkthrough">
+        <aside class="physical-stage" aria-label="CPU model">
+          <div class="stage-title">
+            <strong id="scene-location">The CPU</strong
+            ><span id="scene-count">1 / 17</span>
           </div>
           <div class="build-frame">
             <img
@@ -78,514 +62,613 @@
               src="./data/build-overview.png"
               width="600"
               height="540"
-              alt="Static isometric rendering of the actual CPU schematic"
+              alt="Overview of the Minecraft CPU schematic"
               hidden
             /><canvas
               id="build-canvas"
               tabindex="0"
-              role="img"
-              aria-label="Interactive 3D view of the actual Minecraft CPU"
-              aria-describedby="orbit-help"
+              aria-label="CPU model. Arrow keys rotate; plus and minus zoom; Escape releases scrolling."
             ></canvas>
             <div id="landmark-labels" aria-hidden="true"></div>
-            <span class="view-badge" id="view-badge">Complete build</span>
-            <p class="viewer-loading" role="status">Loading 32,543 blocks…</p>
+            <span id="view-badge">Complete build</span>
+            <p class="viewer-loading">Loading schematic…</p>
           </div>
-          <p id="build-status" class="build-status" role="status">
-            Complete physical build · original saved ROM
-          </p>
-          <div class="view-modes" role="group" aria-label="Model visibility">
-            <button id="region-view" aria-pressed="true" disabled>
-              Module close-up
-            </button>
-            <button id="context-view" aria-pressed="false" disabled>
-              Whole build
-            </button>
-            <button disabled id="restore-view">Reset view</button>
-          </div>
-          <div class="view-controls">
-            <label
-              >Orbit
-              <input
-                id="orbit-angle"
-                type="range"
-                min="-180"
-                max="180"
-                value="0"
+          <div class="camera-controls">
+            <div class="view-modes">
+              <button
+                type="button"
                 disabled
-            /></label>
-            <label
-              >Zoom
-              <input
-                id="view-zoom"
-                type="range"
-                min="65"
-                max="220"
-                value="100"
+                id="region-view"
+                aria-pressed="true"
+              >
+                Detail</button
+              ><button
+                type="button"
                 disabled
-            /></label>
+                id="context-view"
+                aria-pressed="false"
+              >
+                Whole CPU</button
+              ><button type="button" disabled id="restore-view">
+                Reset camera
+              </button>
+            </div>
+            <div class="view-controls">
+              <label
+                >Orbit<input
+                  id="orbit-angle"
+                  type="range"
+                  min="-180"
+                  max="180"
+                  value="0" /></label
+              ><label
+                >Zoom<input
+                  id="view-zoom"
+                  type="range"
+                  min="65"
+                  max="600"
+                  value="100"
+              /></label>
+            </div>
           </div>
-          <p id="orbit-help">
-            Drag to orbit. Sliders also work by touch or keyboard. Focus the
-            model: arrows rotate, + / − zoom, Esc releases scrolling.
-          </p>
-          <p class="diagram-note">
-            Cyan marks measured component positions, not power. The close-up
-            crops an approximate region; it does not define every wire belonging
-            to a module. Original block colors are preserved.
+          <div class="state-strip" aria-label="Recorded CPU state">
+            <span>PC <b id="state-pc">00</b></span
+            ><span>Word <b id="state-word">0000</b></span
+            ><span>R1 <b id="state-r1">0</b></span
+            ><span>R2 <b id="state-r2">0</b></span
+            ><span>ALU <b id="state-alu">0</b></span
+            ><span>R3 <b id="state-r3">0</b></span>
+          </div>
+          <p id="build-status">Loading physical model</p>
+          <p id="signal-caption">
+            Scroll to follow the program. Drag or use the camera sliders to
+            inspect.
           </p>
           <p id="build-fallback" hidden>
-            Use a WebGL-capable browser to explore the build, or
-            <a href="./data/8bCPU-repaired-v1.schem" download
-              >download the Minecraft schematic</a
-            >.
+            Interactive graphics unavailable. The schematic overview and
+            walkthrough remain available.
           </p>
-          <nav class="chapter-dots" aria-label="Tour chapters">
-            <a href="#whole">Overview</a><a href="#clock">PC</a
-            ><a href="#rom">ROM</a><a href="#encoding">Decode</a
-            ><a href="#registers">Registers</a><a href="#operation">ALU</a>
-          </nav>
         </aside>
-        <div class="chapters">
-          <section
-            class="chapter"
-            id="whole"
-            data-active="all"
-            data-name="The whole machine"
-          >
-            <span class="step">01 / THE BIG PICTURE</span>
-            <h2>Small words.<br />Real computation.</h2>
+        <div class="story">
+          <section class="step" id="whole" aria-labelledby="title-whole">
+            <p class="location">The CPU</p>
+            <h2 id="title-whole">8-bit data. 16-bit instructions.</h2>
             <p>
-              Instructions live in ROM. A program counter selects an address.
-              The instruction describes what to load or calculate, and which
-              register receives the result.
+              This is my programmable redstone CPU in Minecraft. It has a
+              six-bit program counter, 64 instruction words, and two mirrored
+              register banks feeding an eight-bit ALU.
             </p>
             <p>
-              You’re looking at the actual exported Minecraft build. Scroll to
-              inspect one region at a time, or use the labeled chapter links.
-              Switch to whole-build context to locate each region in the
-              machine. The model preserves the schematic’s block positions; it
-              does not simulate redstone.
+              The program below loads two values, adds them, and stores the
+              result in R3. Scroll to follow it through the physical build.
             </p>
-            <div class="explanation">
-              <h3>The instruction’s path</h3>
-              <ol class="data-flow">
-                <li>
-                  <b>Address</b
-                  ><span>The six-bit PC selects one of 64 ROM words.</span>
-                </li>
-                <li>
-                  <b>Decode</b
-                  ><span
-                    >The 16-bit word supplies an operation and register
-                    selections.</span
-                  >
-                </li>
-                <li>
-                  <b>Read &amp; calculate</b
-                  ><span>Two operand paths feed the eight-bit ALU.</span>
-                </li>
-                <li>
-                  <b>Store</b
-                  ><span
-                    >The selected destination retains the result for a later
-                    instruction.</span
-                  >
-                </li>
-              </ol>
-              <p class="fine">
-                This is the functional data flow. It is not a claim about four
-                clock phases or a traced route through every wire.
-              </p>
+            <pre><code>LDI R1, 165
+LDI R2, 60
+ADD R3, R2, R1</code></pre>
+            <p class="result">R3 = 225 <span>165 + 60</span></p>
+          </section>
+          <section class="step" id="rom" aria-labelledby="title-rom">
+            <p class="location">Program memory</p>
+            <h2 id="title-rom">The program is stored in torches.</h2>
+            <p>
+              The ROM contains four layers of 16 words. Each word has 16
+              programming positions: a torch stores a 1; an empty position
+              stores a 0.
+            </p>
+            <p>
+              The program counter selects a word. Its 16 bits feed the
+              instruction bus, where some bits select the operation and others
+              select registers or carry an immediate value.
+            </p>
+            <div class="formula">
+              4 layers × 16 words × 16 bits<br /><strong
+                >1,024 physical bit positions</strong
+              >
             </div>
           </section>
-          <section
-            class="chapter"
-            id="clock"
-            data-active="clock pc"
-            data-name="Clock → program counter"
-          >
-            <span class="step">02 / KEEPING TIME</span>
-            <h2>One address.<br />Every 7.3 seconds.</h2>
+          <section class="step" id="rom-word" aria-labelledby="title-rom-word">
+            <p class="location">ROM · address 1</p>
+            <h2 id="title-rom-word">A58B is a physical pattern.</h2>
             <p>
-              The repaired native clock advances once every
-              <strong>146 game ticks</strong>. At 20 TPS, that is 7.3 seconds
-              per instruction address.
+              The first load is <code>LDI R1, 165</code>. Its word is
+              <code>A58B</code>, or <code>1010010110001011</code>. The close-up
+              shows that word’s actual torch positions.
             </p>
-            <div class="number-strip">000000 <span>→</span> 000001</div>
-            <p>
-              The six-bit PC visits 64 addresses, then wraps to zero. The six
-              highlighted repeaters are confirmed PC state landmarks. The camera
-              frames the approximate PC region; connected control circuitry
-              extends beyond it. The PC reset is synchronous: assert reset,
-              allow it to settle, then clock the counter. This was tested; it
-              does not clear the register banks.
-            </p>
-            <div class="explanation">
-              <h3>Why slow the clock?</h3>
-              <p>
-                Redstone signals take time to propagate. A correct Boolean
-                result is not enough: it must arrive before the storage circuit
-                locks it in. The repaired feedback loop gives the machine more
-                settling time.
-              </p>
-              <div class="comparison">
-                <span>Original period<strong>44 ticks</strong></span
-                ><span>Repaired period<strong>146 ticks</strong></span>
-              </div>
-              <p>
-                Ten consecutive native PC advances measured 146 ticks each. The
-                close-up marks the six PC state bits; the clock loop and reset
-                controls extend beyond this crop.
-              </p>
+            <div class="word-bits" aria-label="1010010110001011">
+              <span class="bit-1">1</span><span class="bit-0">0</span
+              ><span class="bit-1">1</span><span class="bit-0">0</span
+              ><span class="bit-0">0</span><span class="bit-1">1</span
+              ><span class="bit-0">0</span><span class="bit-1">1</span
+              ><span class="bit-1">1</span><span class="bit-0">0</span
+              ><span class="bit-0">0</span><span class="bit-0">0</span
+              ><span class="bit-1">1</span><span class="bit-0">0</span
+              ><span class="bit-1">1</span><span class="bit-1">1</span>
             </div>
+            <p>
+              Physical bit 0 is the least significant bit—the rightmost digit
+              above. Consecutive bits sit two blocks apart along the word.
+            </p>
+            <small
+              >Address 1 · local X 28, Y 14 · bits at Z 34 through 64</small
+            >
           </section>
-          <section
-            class="chapter"
-            id="rom"
-            data-active="pc rom"
-            data-name="Address → ROM word"
-          >
-            <span class="step">03 / PROGRAM STORAGE</span>
-            <h2>A program.<br />With room to breathe.</h2>
+          <section class="step" id="load" aria-labelledby="title-load">
+            <p class="location">Instruction decode</p>
+            <h2 id="title-load">LDI sends a byte to R1.</h2>
             <p>
-              The ROM holds <strong>64 × 16-bit words</strong>. The safe layout
-              starts with NOP at address 0, puts instructions at 1, 3, 5…53, and
-              leaves a NOP after each.
-            </p>
-            <div class="rom-sample">
-              <span>00 <b>0000</b> NOP</span
-              ><span>01 <b>A58B</b> LDI R1, 165</span
-              ><span>02 <b>0000</b> NOP</span
-              ><span>03 <b>3C4B</b> LDI R2, 60</span>
-            </div>
-            <p>
-              The highlight follows the exact programming-cell coordinates; air
-              cells stay invisible. That leaves capacity for
-              <strong>27 logical instructions</strong>. Addresses 56–63 stay
-              NOP: address 60 fetches 56, and 61 fetches 57.
-            </p>
-            <div class="explanation">
-              <h3>How blocks encode a word</h3>
-              <p>
-                Each address has 16 programming positions. A west-facing
-                redstone wall torch encodes <strong>1</strong>; air encodes
-                <strong>0</strong>. The address decoder selects the word, and
-                the bit lanes carry its pattern onward.
-              </p>
-              <p>
-                The physical scene shows the original saved ROM. The listing
-                above and the addition replay below use a separate example
-                program.
-              </p>
-              <p class="evidence">
-                Measured limit: unique-word fetch testing passed 62 of 64
-                addresses. Keeping the aliased tail empty avoids executing
-                unintended instructions.
-              </p>
-            </div>
-          </section>
-          <section
-            class="chapter"
-            id="encoding"
-            data-active="rom instruction"
-            data-name="A word → an instruction"
-          >
-            <span class="step">04 / THE INSTRUCTION</span>
-            <h2>Sixteen bits.<br />Every field matters.</h2>
-            <p>
-              The camera moves to the operation-label signs in the physical
-              build. For register operations, each register’s four-bit number is
-              reversed independently. The whole instruction is never reversed.
+              <code>A58B</code> splits into an immediate byte, a destination
+              field, and an opcode.
             </p>
             <div class="fields">
-              <div><b>4</b><span>A / lhs</span></div>
-              <div><b>8</b><span>B / rhs</span></div>
-              <div><b>C</b><span>dest</span></div>
-              <div><b>1</b><span>ADD</span></div>
+              <div><strong>A5</strong><span>165</span></div>
+              <div><strong>8</strong><span>R1</span></div>
+              <div><strong>B</strong><span>LDI</span></div>
             </div>
             <p>
-              <code>48C1</code> means <code>ADD R3, R2, R1</code>: R2’s
-              <code>0010</code> becomes <code>0100</code>, R1’s
-              <code>0001</code> becomes <code>1000</code>, and R3’s
-              <code>0011</code> becomes <code>1100</code>.
+              The immediate byte is unchanged. Register numbers are bit-reversed
+              within their four-bit fields: R1’s <code>0001</code> becomes
+              <code>1000</code>.
             </p>
             <p>
-              LDI uses the top eight bits for its immediate value,
-              <strong>without reversal</strong>. INC reads its source on
-              physical B with physical A set to R0.
+              The LDI control selects the immediate data for writing. In this
+              run, R1 reaches <code>10100101</code> at game tick 191.
             </p>
-            <div class="explanation">
-              <h3>Decode means controlling the hardware</h3>
-              <p>
-                The opcode selects control signals, including ALU
-                inversion/carry controls and read/write enables. The register
-                fields select the sources and destination. LDI instead carries a
-                literal byte to store.
-              </p>
-              <p>
-                For example, <code>A58B</code> splits into immediate
-                <code>A5</code> (165), reversed destination <code>8</code> (R1),
-                and opcode <code>B</code> (LDI).
-              </p>
-              <p class="evidence">
-                A real decode repair: AND was missing its invert-A torch, and
-                its enable buses did not receive the intended signal. Restoring
-                both made the tested AND cases pass.
-              </p>
-            </div>
           </section>
           <section
-            class="chapter"
+            class="step"
             id="registers"
-            data-active="instruction registers"
-            data-name="Registers hold the data"
+            aria-labelledby="title-registers"
           >
-            <span class="step">05 / WORKING VALUES</span>
-            <h2>Eight bits.<br />A value that stays.</h2>
+            <p class="location">Register banks</p>
+            <h2 id="title-registers">One byte, eight storage cells.</h2>
             <p>
-              R1–R14 hold unsigned values from 0 to 255. R0 reads as zero in
-              tested operand operations; writes do not persist.
+              Each vertical slice holds eight bits. R1–R15 have a copy in each
+              bank, so there are 240 storage repeaters. The copies provide
+              matching register values to the operand paths.
             </p>
-            <div class="number-strip">
-              R1 <span>←</span> 10100101 <small>165</small>
+            <p>
+              R1 holds 165; R2 holds 60. The CPU reads these values later when
+              the ADD instruction selects its operands.
+            </p>
+            <p class="binary-line">
+              <span>R1</span> 10100101 <b>165</b><br /><span>R2</span> 00111100
+              <b>60</b>
+            </p>
+          </section>
+          <section class="step" id="inverter" aria-labelledby="title-inverter">
+            <p class="location">R1 · bit 0</p>
+            <h2 id="title-inverter">The write path inverts this bit.</h2>
+            <p>
+              This wire, target block, and attached torch are in R1’s write
+              path. With a 0 at the input, the supporting block is unpowered and
+              the torch is on.
+            </p>
+            <div class="signal-reading">
+              <span>Wire <b>0</b></span
+              ><span>→</span><span>Torch <b>1</b></span>
             </div>
             <p>
-              The two banks contain 15 × 8 × 2 = 240 storage repeaters. They
-              hold mirrored copies of the register values, rather than 30
-              independent registers. The highlighted positions include the
-              physically present R15. The camera bounds are approximate;
-              highlighting R15 does not imply it works correctly. R15 retains
-              loaded data, but both operand reads return zero; the compiler
-              excludes it.
+              The storage probes use inverted electrical levels: an on repeater
+              represents a logical 0. This torch supplies that inversion before
+              the bit reaches storage.
             </p>
-
-            <div class="explanation">
-              <h3>A locked repeater is a one-bit memory</h3>
-              <p>
-                A repeater normally follows its rear input after a delay. A
-                powered repeater or comparator pointing into its side can lock
-                it. While locked, its output stays at the previous state even if
-                the input changes.
-              </p>
-              <ol class="data-flow">
-                <li>
-                  <b>Accept</b
-                  ><span
-                    >The write controls allow the selected storage cells to take
-                    new data.</span
-                  >
-                </li>
-                <li>
-                  <b>Hold</b
-                  ><span
-                    >The lock preserves each bit for use by later
-                    instructions.</span
-                  >
-                </li>
-              </ol>
-              <p>
-                In these storage probes, the electrical state is inverted:
-                <strong>powered = logical 0; unpowered = logical 1</strong>.
-                Eight stored bits make a byte. The browser’s cyan overlay
-                identifies cells; it does not show their value.
-              </p>
-              <div class="bit-lab" aria-labelledby="bit-lab-title">
-                <h4 id="bit-lab-title">Try one memory cell</h4>
-                <div
-                  class="bit-lab-controls"
-                  role="group"
-                  aria-label="Electrical input"
-                >
-                  <button disabled id="bit-low" aria-pressed="true">
-                    Input off</button
-                  ><button disabled id="bit-high" aria-pressed="false">
-                    Input on
-                  </button>
-                </div>
-                <label
-                  ><input type="checkbox" disabled id="bit-lock" checked /> Lock
-                  the stored output</label
-                >
-                <div class="bit-state">
-                  <span
-                    >Stored electrical state<strong id="bit-electrical"
-                      >Off</strong
-                    ></span
-                  ><span
-                    >Decoded register bit<strong id="bit-logical"
-                      >1</strong
-                    ></span
-                  >
-                </div>
-                <p id="bit-explanation" aria-live="polite">
-                  Locked: change the input and the stored output holds.
-                </p>
-                <p class="fine">
-                  Concept model of settled states. Propagation delays and the
-                  CPU’s write-control wiring are omitted.
-                </p>
-              </div>
-              <p class="evidence">
-                The repair changed the 240 adjacent
-                <strong>data-input repeaters</strong> from delay 1 to 2. The
-                storage repeaters remain at delay 1. Delaying the input change
-                kept data stable until the lock closed. All 15 destinations then
-                passed distinct-value retention tests; R15’s read path still
-                fails.
-              </p>
-            </div>
+            <small>Input wire (60, 22, 43) · torch (62, 22, 43)</small>
           </section>
           <section
-            class="chapter"
-            id="operation"
-            data-active="registers operation"
-            data-name="Operands → a result"
+            class="step"
+            id="inverter-high"
+            aria-labelledby="title-inverter-high"
           >
-            <span class="step">06 / DOING THE WORK</span>
-            <h2>From two values<br />to one result.</h2>
+            <p class="location">R1 · bit 0</p>
+            <h2 id="title-inverter-high">The same circuit with a 1.</h2>
             <p>
-              The ALU takes two eight-bit operands and produces an eight-bit
-              result. The opcode controls which arithmetic or logic operation it
-              performs. The eight cyan repeaters mark its measured outputs.
-              Arithmetic wraps modulo 256: <strong>255 + 1 = 0</strong>.
+              Loading 1 powers the same input wire. It powers the target block,
+              which switches off the attached torch.
             </p>
-            <div class="number-strip">60 + 165 <span>=</span> 225</div>
-            <p>
-              Physical A is <code>lhs</code>; physical B is <code>rhs</code>. So
-              <code>SUB R3, R2, R1</code> computes R2 − R1.
-            </p>
-            <p class="supported">
-              Supported: NOP · ADD · SUB · AND · NAND · OR · XOR · NOR · XNOR ·
-              INC · LDI
-            </p>
-            <a class="text-link" href="#demo"
-              >Follow the tested program <span aria-hidden="true">↓</span></a
-            >
-            <div class="explanation">
-              <h3>Eight parallel result bits</h3>
-              <p>
-                The highlighted repeaters are isolated ALU outputs, one per bit.
-                Bit 0 contributes 1, bit 1 contributes 2, and bit 7 contributes
-                128. Reading them together gives the unsigned result.
-              </p>
-              <div class="binary-proof">
-                <span>00111100 <small>60 · physical A</small></span
-                ><span>10100101 <small>165 · physical B</small></span
-                ><span>11100001 <small>225 · result</small></span>
-              </div>
-              <p>
-                The nearby dust staircase combines the output for zero
-                detection. It is not eight independent result wires, so it
-                cannot be read like the isolated output repeaters.
-              </p>
-              <p class="evidence">
-                A native-clock mixed program passed ADD, SUB, AND, NAND, OR,
-                XOR, NOR, XNOR and INC with operands 165 and 60. This is
-                measured evidence, not an exhaustive truth-table proof.
-              </p>
+            <div class="signal-reading">
+              <span>Wire <b>1</b></span
+              ><span>→</span><span>Torch <b>0</b></span>
             </div>
+            <p>
+              The two views are captures from this exact circuit, with
+              <code>LDI R1, 0</code> and <code>LDI R1, 1</code> selected. The
+              wire reads power 0 and 15 respectively.
+            </p>
+          </section>
+          <section class="step" id="memory" aria-labelledby="title-memory">
+            <p class="location">Register cell</p>
+            <h2 id="title-memory">R1 holds its value while R2 changes.</h2>
+            <p>
+              At tick 350, R2 holds the second load, 60. R1 still holds 165. Its
+              low-bit storage repeater is locked, so a changing rear input
+              cannot change the stored output.
+            </p>
+            <dl class="readings">
+              <div>
+                <dt>Input repeater</dt>
+                <dd>On</dd>
+              </div>
+              <div>
+                <dt>Storage repeater</dt>
+                <dd>Off · locked</dd>
+              </div>
+              <div>
+                <dt>Logical stored bit</dt>
+                <dd>1</dd>
+              </div>
+            </dl>
+            <p>
+              The storage repeater has delay 1; the adjacent input repeater has
+              delay 2. The write signal controls when the cell accepts data and
+              when it holds it.
+            </p>
+          </section>
+          <section class="step" id="cells" aria-labelledby="title-cells">
+            <p class="location">Inspect the registers</p>
+            <h2 id="title-cells">Inspect any register bit.</h2>
+            <p>
+              Choose any register, bit, and bank to inspect its storage repeater
+              in the build. These readings are from the end of the same program.
+            </p>
+            <div class="cell-controls">
+              <label
+                >Register<select id="cell-register">
+                  <option value="1">R1</option>
+                  <option value="2">R2</option>
+                  <option value="3">R3</option>
+                  <option value="4">R4</option>
+                  <option value="5">R5</option>
+                  <option value="6">R6</option>
+                  <option value="7">R7</option>
+                  <option value="8">R8</option>
+                  <option value="9">R9</option>
+                  <option value="10">R10</option>
+                  <option value="11">R11</option>
+                  <option value="12">R12</option>
+                  <option value="13">R13</option>
+                  <option value="14">R14</option>
+                  <option value="15">R15</option>
+                </select></label
+              ><label
+                >Bit<select id="cell-bit">
+                  <option value="0">0 · weight 1</option>
+                  <option value="1">1 · weight 2</option>
+                  <option value="2">2 · weight 4</option>
+                  <option value="3">3 · weight 8</option>
+                  <option value="4">4 · weight 16</option>
+                  <option value="5">5 · weight 32</option>
+                  <option value="6">6 · weight 64</option>
+                  <option value="7">7 · weight 128</option>
+                </select></label
+              ><label
+                >Bank<select id="cell-bank">
+                  <option value="0">1</option>
+                  <option value="1">2</option>
+                </select></label
+              >
+            </div>
+            <p id="cell-reading" class="result">R1 · bit 0 = 1</p>
+            <p id="cell-coordinate" class="mono">(62, 22, 39)</p>
+            <small id="cell-electrical">Storage state from game tick 650</small>
+          </section>
+          <section class="step" id="decode" aria-labelledby="title-decode">
+            <p class="location">ADD · control module</p>
+            <h2 id="title-decode">
+              48C1 selects two sources and a destination.
+            </h2>
+            <p>
+              The ADD sign marks the operation in the control module. Its
+              instruction word routes R2 to operand A, R1 to operand B, and the
+              result to R3.
+            </p>
+            <div class="fields">
+              <div><strong>4</strong><span>A: R2</span></div>
+              <div><strong>8</strong><span>B: R1</span></div>
+              <div><strong>C</strong><span>Write R3</span></div>
+              <div><strong>1</strong><span>ADD</span></div>
+            </div>
+            <p>
+              The instruction contains register addresses, not the values 60 and
+              165. Those values come from the register banks. A different
+              register selection uses the same ALU.
+            </p>
+          </section>
+          <section
+            class="step"
+            id="alu-controls"
+            aria-labelledby="title-alu-controls"
+          >
+            <p class="location">ALU · control inputs</p>
+            <h2>Carry and inversion change the operation.</h2>
+            <p>
+              The mapped controls include carry-in, operand inversion, and OR.
+              These change the signals entering the ALU rather than requiring a
+              separate arithmetic unit for each instruction.
+            </p>
+            <p>
+              Carry-in adds one at the low end of the result. Inverting an
+              eight-bit operand complements every bit:
+              <code>00000001</code> becomes <code>11111110</code>.
+            </p>
+            <div class="formula">
+              CIN with zero operands → 1<br />Invert A when A = 1 → 254
+            </div>
+            <p>
+              The <code>CIN</code> and <code>!A</code> locations are marked in
+              this close-up. The operation decoder selects control signals from
+              the instruction’s opcode.
+            </p>
+          </section>
+          <section
+            class="step"
+            id="alu-inputs"
+            aria-labelledby="title-alu-inputs"
+          >
+            <p class="location">ALU · propagation</p>
+            <h2 id="title-alu-inputs">
+              The instruction changes before the result settles.
+            </h2>
+            <p>
+              The ADD word reaches the instruction bus at tick 443. Signals then
+              propagate through the operand paths and ALU.
+            </p>
+            <p>
+              At tick 463, the ALU output has not reached 225 yet. The readout
+              shows the actual intermediate values from this run.
+            </p>
+            <div class="formula">
+              <strong>A = R2 = 60</strong><br /><strong>B = R1 = 165</strong>
+            </div>
+            <p>
+              The native clock allows the data and write controls to propagate
+              before moving to the next address.
+            </p>
+          </section>
+          <section class="step" id="alu" aria-labelledby="title-alu">
+            <p class="location">ALU · result bus</p>
+            <h2 id="title-alu">Eight output wires carry 225.</h2>
+            <p>
+              At tick 497, the eight isolated output repeaters read
+              <code>11100001</code>. Bits 7, 6, 5, and 0 are on: 128 + 64 + 32 +
+              1.
+            </p>
+            <pre class="sum"><code>   00111100    60
+ + 10100101   165
+ ──────────
+   11100001   225</code></pre>
+            <p>
+              The result is eight bits wide. Arithmetic wraps modulo 256; the
+              destination receives the low eight result bits.
+            </p>
+            <small>Output bit i · local (52, 22 + 2i, 18)</small>
+          </section>
+          <section class="step" id="flags" aria-labelledby="title-flags">
+            <p class="location">ALU · zero detection</p>
+            <h2 id="title-flags">The result also feeds a zero detector.</h2>
+            <p>
+              The dust staircase beside the output combines the result bits. Its
+              torch produces the zero indication: it is on when all eight result
+              bits are off.
+            </p>
+            <div class="formula">Z = ¬(b₇ ∨ b₆ ∨ … ∨ b₀)</div>
+            <p>
+              That combined line is a condition signal, not another eight-bit
+              data bus. The independent output repeaters remain the source for
+              the register value.
+            </p>
+            <p class="aside">
+              The build also has overflow and branch-control circuitry. Their
+              complete behavior is not characterized, so they are not used in
+              this program.
+            </p>
+          </section>
+          <section class="step" id="store" aria-labelledby="title-store">
+            <p class="location">R3 · writeback</p>
+            <h2 id="title-store">R3 retains the result.</h2>
+            <p>
+              R3 reaches 225 at tick 509. Its eight storage cells preserve that
+              byte after the instruction changes.
+            </p>
+            <p>
+              By tick 650, the ALU is back at 0 and R3 is still 225. This
+              close-up is R3’s low bit: electrically off, locked, and storing a
+              logical 1.
+            </p>
+            <div class="formula">
+              <strong>ALU → 0</strong><br /><strong>R3 → 225</strong>
+            </div>
+            <p>
+              A following instruction can select R3 as an operand and use the
+              retained result.
+            </p>
+          </section>
+          <section class="step" id="pc" aria-labelledby="title-pc">
+            <p class="location">Program counter</p>
+            <h2 id="title-pc">Six bits choose the next word.</h2>
+            <p>
+              The six state repeaters hold the ROM address. The native clock
+              advances the counter once every 146 game ticks—7.3 seconds at
+              normal Minecraft speed.
+            </p>
+            <p>
+              After the ADD, the PC advances from 3 to 4 at tick 569. The
+              instruction bus takes additional time to reflect the new address.
+            </p>
+            <p>
+              The counter continues through the 64-word ROM and wraps. Stopping
+              the clock pauses execution; there is no HALT instruction in this
+              program.
+            </p>
+          </section>
+          <section class="step" id="run" aria-labelledby="title-run">
+            <p class="location">Recorded execution</p>
+            <h2 id="title-run">Replay the program.</h2>
+            <p>
+              This is the complete run on the CPU. Scrub to any game tick, or
+              play it while watching the result bus and registers.
+            </p>
+            <div class="run-controls">
+              <button id="run-play" type="button" disabled>
+                Play recording</button
+              ><label
+                >Speed<select id="run-speed">
+                  <option value="1">1×</option>
+                  <option value="4" selected>4×</option>
+                  <option value="0.25">¼×</option>
+                </select></label
+              >
+            </div>
+            <label class="trace-label" for="trace-seek"
+              >Game tick <output id="trace-tick">0 / 869</output></label
+            ><input
+              id="trace-seek"
+              type="range"
+              min="0"
+              max="869"
+              value="0"
+              disabled
+            />
+            <p id="trace-status" class="aside">Loading recording…</p>
+            <small
+              >Game time · 870 samples ·
+              <a href="./data/recording.json">Download recording</a></small
+            >
           </section>
         </div>
       </div>
-      <section class="demo wrap" id="demo">
-        <div class="demo-intro">
-          <span class="step">A REPLAY OF THE TESTED PROGRAM</span>
-          <h2>165 + 60.<br /><em>In redstone.</em></h2>
+      <section id="instructions" class="instruction-set">
+        <div>
+          <p class="location">Instruction set</p>
+          <h2>What each operation changes.</h2>
           <p>
-            The physical model retains its original saved ROM; the separate demo
-            below uses the tested addition program. Step through the exact demo
-            ROM words. The demonstration begins at PC 0; register values remain
-            unknown until written.
+            Register operations select two operands and a destination. LDI
+            supplies a byte directly; INC uses the B operand and adds one.
+          </p>
+          <p>
+            The examples use R1 = 165 and R2 = 60. Results are eight bits; NOT
+            is limited to those eight bits.
           </p>
         </div>
-        <div class="demo-console">
-          <div class="console-top">
-            <span>EXPLANATORY REGISTER STATE</span
-            ><span id="pc-label">PC 00</span>
-          </div>
-          <div class="register-values">
-            <div>R1<strong id="r1">?</strong></div>
-            <div>R2<strong id="r2">?</strong></div>
-            <div>R3<strong id="r3">?</strong></div>
-          </div>
-          <div class="current-instruction">
-            <span id="word">0000</span><strong id="assembly">NOP</strong>
-            <p id="effect" aria-live="polite">
-              Illustrative starting address. Register values are unknown.
-            </p>
-          </div>
-          <div class="demo-controls">
-            <button id="previous" disabled aria-label="Previous address">
-              ← Back</button
-            ><button disabled id="play">Play at 7.3 s / address</button
-            ><button disabled id="next">Next →</button
-            ><button disabled id="reset">Restart</button>
-          </div>
-          <div
-            class="rom-grid"
-            id="rom-grid"
-            aria-label="All 64 ROM addresses"
-          ></div>
-          <p class="fine">
-            Addresses 56–63 are reserved NOP. At PC 60 the CPU fetches 56; at PC
-            61 it fetches 57. Playback continues through padding and wraps.
-            Pause is a viewer control, not a hardware HALT.
-          </p>
-          <noscript
-            ><p>
-              Enable JavaScript for the interactive demo. The program loads
-              R1=165 at address 1, R2=60 at address 3, then adds them into
-              R3=225 at address 5. All other words are NOP.
-            </p></noscript
-          >
+        <div class="table-scroll">
+          <table>
+            <caption>
+              Supported operations
+            </caption>
+            <thead>
+              <tr>
+                <th>Opcode</th>
+                <th>Instruction</th>
+                <th>Effect</th>
+                <th>Result</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>0</td>
+                <th scope="row">NOP</th>
+                <td>No write; the PC continues.</td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td>1</td>
+                <th scope="row">ADD</th>
+                <td>R3 ← (R2 + R1) mod 256</td>
+                <td>225</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <th scope="row">SUB</th>
+                <td>R3 ← (R2 − R1) mod 256</td>
+                <td>151</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <th scope="row">AND</th>
+                <td>R3 ← R2 AND R1</td>
+                <td>36</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <th scope="row">NAND</th>
+                <td>R3 ← NOT (R2 AND R1)</td>
+                <td>219</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <th scope="row">OR</th>
+                <td>R3 ← R2 OR R1</td>
+                <td>189</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <th scope="row">XOR</th>
+                <td>R3 ← R2 XOR R1</td>
+                <td>153</td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <th scope="row">NOR</th>
+                <td>R3 ← NOT (R2 OR R1)</td>
+                <td>66</td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <th scope="row">XNOR</th>
+                <td>R3 ← NOT (R2 XOR R1)</td>
+                <td>102</td>
+              </tr>
+              <tr>
+                <td>9</td>
+                <th scope="row">INC</th>
+                <td>R3 ← (R1 + 1) mod 256</td>
+                <td>166</td>
+              </tr>
+              <tr>
+                <td>B</td>
+                <th scope="row">LDI</th>
+                <td>R3 ← immediate byte 165</td>
+                <td>165</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
-      <section class="limits wrap">
-        <h2>Built in blocks.<br />Bound by the hardware.</h2>
-        <div class="limits-list">
-          <div>
-            <h3>The clock keeps going.</h3>
-            <p>
-              There is no verified HALT. After address 63, the PC wraps and
-              repeats. The operator must stop the clock externally.
-            </p>
-          </div>
-          <div>
-            <h3>Some behavior stays unknown.</h3>
-            <p>
-              Conditional branches, overflow semantics, a full-machine reset,
-              internal microsteps, RAM, stack, CALL/RET and I/O are not
-              verified. The PC-only synchronous reset and zero detector have
-              been tested. DEC is faulty. R15 operand reads fail.
-            </p>
-          </div>
-          <div>
-            <h3>Conservative by design.</h3>
-            <p>
-              The compiler inserts NOP gaps and rejects destination/source
-              overlap. Those sequences are not fully certified; this is a
-              compiler policy, not proof they all fail physically.
-            </p>
-          </div>
-        </div>
-      </section>
-      <footer class="wrap">
-        <p>CPU V2 <span> / A physical CPU study by Colin Heslin</span></p>
-        <a href="./data/8bCPU-repaired-v1.schem" download
-          >Download the Minecraft schematic ↓</a
-        ><br /><a
-          href="https://github.com/cheslin23t/CPUV2-Compiler/tree/1851180869f97ff15ae081e659b1f57ea1209675"
-          >Explore the compiler &amp; hardware brief ↗</a
-        >
-        <p class="fine">
-          Physical schematic: commit 1851180. Behavioral demo: commit ecc6892.
-          Software checks do not certify every program on hardware.
-          <a href="./data/CPU_REPAIRS.md"
-            >Read the hardware repair and test record ↗</a
-          >
+      <details class="source-notes">
+        <summary>Build files and implementation notes</summary>
+        <p>
+          The 3D model uses the physical schematic with simplified block shapes.
+          The ROM is programmed with the example shown here. Bright orange/gray
+          overlays are measured electrical states; blue identifies components.
+          Module crops are viewing regions, not complete netlists.
         </p>
-      </footer>
+        <p>
+          R1–R14 are available to the compiler; R0 reads as zero. R15 stores
+          data but has faulty operand reads. DEC is faulty, ROM addresses 60/61
+          alias 56/57, and branch/overflow behavior remains unverified. Internal
+          ALU gates beyond the mapped probes have not been individually traced.
+        </p>
+        <p>
+          The recording began with registers cleared as test setup. PC reset
+          does not clear registers. The test world was restored after capture.
+        </p>
+        <p>
+          <a href="./data/8bCPU-repaired-v1.schem">Download schematic</a> ·
+          <a href="./data/recording.json">Measurement data</a> ·
+          <a href="./README.md">Technical reference</a>
+        </p>
+      </details>
+      <noscript
+        ><p>
+          JavaScript is disabled. The complete written walkthrough and schematic
+          download are available above.
+        </p></noscript
+      >
     </main>
+    <footer>
+      <span>Colin Heslin · CPU V2</span
+      ><a href="https://github.com/cheslin23t/CPUV2-Compiler"
+        >Compiler source ↗</a
+      >
+    </footer>
   </body>
 </html>
