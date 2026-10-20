@@ -1,8 +1,11 @@
 # CPU V2 physical walkthrough
 
 Serve the repository root with `python3 -m http.server 8087`, then open `/cpu/`.
-No package installation or remote runtime assets are required. The homepage is unchanged.
-The route has `noindex, nofollow`; it is unlisted, not access-controlled.
+No package installation or remote runtime assets are required for the CPU tour.
+The homepage now links here through a featured CPU section. Its small register
+simulation uses the historical padded addition example from `data/cpu.json`,
+separately from this tour’s current compact hardware recording.
+The route retains `noindex, nofollow`; it is linked, not access-controlled.
 
 ## What the page shows
 

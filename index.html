@@ -18,6 +18,8 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/static/index.css" />
+    <link rel="stylesheet" href="/static/cpu-preview.css" />
+    <script src="/static/cpu-preview.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -29,7 +31,7 @@
         ><img src="/static/assets/ch-logo-black-gold.png" alt=""
       /></a>
       <nav aria-label="Primary navigation">
-        <a href="#work">Work</a><a href="#about">About</a
+        <a href="#work">Work</a><a href="#cpu-feature">CPU</a><a href="#about">About</a
         ><a href="#contact">Contact</a>
       </nav>
       <a class="header-cta magnetic" href="mailto:colin@ches.dev"
@@ -236,6 +238,56 @@
           </a>
         </article>
       </section>
+
+  <section id="cpu-feature" class="cpu-feature" aria-labelledby="cpu-feature-title">
+    <div class="cpu-feature-story">
+      <p class="overline">Featured build · CPU V2</p>
+      <h2 id="cpu-feature-title">A computer.<br />Built from <span>redstone.</span></h2>
+      <p class="cpu-feature-description">I built an 8-bit CPU in Minecraft. Take a look inside the machine, or try a small program right here.</p>
+      <div class="cpu-build-preview">
+        <img src="/cpu/data/build-overview.png" width="558" height="499" loading="lazy" alt="The actual Minecraft CPU, with stacked redstone circuits and colored wool modules" />
+        <dl>
+          <div><dt>Data width</dt><dd>8 bits</dd></div>
+          <div><dt>Program ROM</dt><dd>64 × 16 bits</dd></div>
+          <div><dt>Physical build</dt><dd>32,543 blocks</dd></div>
+        </dl>
+      </div>
+      <a class="cpu-tour-link" href="/cpu/">Explore the CPU <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 18 18 6M6 6h12v12" /></svg></a>
+    </div>
+
+    <section class="cpu-preview" aria-labelledby="cpu-preview-title" aria-describedby="cpu-preview-timing">
+      <div class="cpu-preview-heading">
+        <div><p class="cpu-console-label">Try a program</p><h3 id="cpu-preview-title">165 + 60 <span>= ?</span></h3></div>
+        <span class="cpu-pc" id="cpu-preview-pc">PC 00</span>
+      </div>
+      <table class="cpu-program">
+        <caption class="cpu-sr-only">Addition program. The highlighted row is the current ROM address.</caption>
+        <thead><tr><th scope="col">Addr</th><th scope="col">Instruction</th><th scope="col">Hex</th></tr></thead>
+        <tbody>
+          <tr data-preview-address="0" aria-current="step"><td>00</td><td>NOP</td><td>0000</td></tr>
+          <tr data-preview-address="1"><td>01</td><td>LDI R1, 165</td><td>A58B</td></tr>
+          <tr data-preview-address="2"><td>02</td><td>NOP</td><td>0000</td></tr>
+          <tr data-preview-address="3"><td>03</td><td>LDI R2, 60</td><td>3C4B</td></tr>
+          <tr data-preview-address="4"><td>04</td><td>NOP</td><td>0000</td></tr>
+          <tr data-preview-address="5"><td>05</td><td>ADD R3, R2, R1</td><td>48C1</td></tr>
+          <tr data-preview-address="6"><td>06</td><td>NOP</td><td>0000</td></tr>
+        </tbody>
+      </table>
+      <div class="cpu-preview-registers" aria-label="Explanatory register values">
+        <div><span>R1</span><strong id="cpu-preview-r1">?</strong><code id="cpu-preview-bits1">????????</code></div>
+        <div><span>R2</span><strong id="cpu-preview-r2">?</strong><code id="cpu-preview-bits2">????????</code></div>
+        <div class="cpu-result-register"><span>R3 · result</span><strong id="cpu-preview-r3">?</strong><code id="cpu-preview-bits3">????????</code></div>
+      </div>
+      <div class="cpu-preview-controls">
+        <button type="button" id="cpu-preview-play" class="cpu-preview-primary" aria-pressed="false" disabled>Run demo</button>
+        <button type="button" id="cpu-preview-step" disabled>Step</button>
+        <button type="button" id="cpu-preview-restart" disabled>Restart</button>
+      </div>
+      <p id="cpu-preview-status" class="cpu-preview-status" role="status">Start at PC 00. Registers are unknown until written.</p>
+      <p id="cpu-preview-timing" class="cpu-preview-note">Accelerated preview · 0.9 s/address; hardware: 7.3 s.<br />Padded example · register simulation, separate from the recording.</p>
+      <noscript><p class="cpu-preview-note">Enable JavaScript to play, or <a href="/cpu/">explore the CPU tour</a>.</p></noscript>
+    </section>
+  </section>
 
       <section class="journey" id="journey" aria-labelledby="journey-title">
         <header class="journey-head reveal">

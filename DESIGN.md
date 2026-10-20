@@ -37,7 +37,7 @@ Manrope is the established display and body family; system-ui is its fallback. L
 
 ## Layout
 
-A two-column hero leads into interests, three featured projects (BadAvo, Printed, and JB-X), a chronological build log, About, and Contact. The featured cards remain the high-attention editorial anchors. The build log adds breadth without flattening every repository into equal importance: maturity labels distinguish products and working systems from starters, prototypes, and experiments. Its desktop composition uses a sticky story heading beside a vertical chronology; below 1000px it becomes a single reading column, and on phones the dates move above each entry. The JB-X card shows a representative terminal scene and links to the public source repository. Alternating projects give the wider column to the visual. Mobile retains every navigation destination and places the hero mark below the copy rather than over it. Use natural content height rather than clipping copy into a viewport.
+A two-column hero leads into interests, three featured projects (BadAvo, Printed, and JB-X), a compact CPU feature, a chronological build log, About, and Contact. The featured cards remain the high-attention editorial anchors. The build log adds breadth without flattening every repository into equal importance: maturity labels distinguish products and working systems from starters, prototypes, and experiments. Its desktop composition uses a sticky story heading beside a vertical chronology; below 1000px it becomes a single reading column, and on phones the dates move above each entry. The JB-X card shows a representative terminal scene and links to the public source repository. Alternating projects give the wider column to the visual. Mobile retains every navigation destination and places the hero mark below the copy rather than over it. Use natural content height rather than clipping copy into a viewport.
 
 ## Elevation & Depth
 
@@ -58,3 +58,9 @@ Buttons use 10px corners; project panels use 22px desktop / 16px mobile corners.
 - Do not hide meaningful text behind JavaScript initialization or expose fake preview controls as working controls.
 - Do not add ornamental section numbering that implies a nonexistent sequence.
 - Keep project descriptions grounded in Colin's supplied history.
+
+## Homepage CPU feature
+
+The homepage links to `/cpu/` from a compact section between selected work and the build log; the CPU navigation item scrolls to that section. `static/cpu-preview.css` owns the scoped feature styling, mapping its `--cpu-*` aliases to the existing `--ink-2`, `--white`, `--muted`, `--line`, `--gold`, and `--cyan` runtime tokens. Preserve the gold identity, 22px panel corners, Manrope copy, and monospace program data. The actual schematic thumbnail remains distinct from explanatory register state.
+
+`static/cpu-preview.js` runs the older conservative padded addition example from `cpu/data/cpu.json` at addresses 0–6, independently of the current CPU tour’s compact recorded program. Unknown registers display `?` until written. Playback is opt-in and accelerated to 0.9 seconds per address; native hardware timing is labeled 7.3 seconds. Run/Pause, Step, Restart, and Replay control only this explanation; the end message states that hardware continues through NOPs and wraps. Hidden pages pause playback. Native controls, visible keyboard focus, a live status message, stable geometry, reduced motion, and no-JavaScript content follow the portfolio’s existing accessibility conventions.
