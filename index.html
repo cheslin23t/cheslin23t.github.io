@@ -3,520 +3,858 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#020617" />
+    <meta name="color-scheme" content="light dark" />
     <meta
       name="description"
-      content="Colin Heslin — a New York developer building mobile apps, backend systems, APIs, real-time software, and developer tools."
+      content="Colin Heslin — backend systems, developer tools, iOS apps, and computer architecture. Explore the projects and the engineering behind them."
     />
-    <title>Colin Heslin — Developer</title>
-    <link rel="icon" type="image/png" href="/static/assets/favicon.png" />
-    <link rel="apple-touch-icon" href="/static/assets/favicon.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap"
-      rel="stylesheet"
-    />
+    <title>Colin Heslin — Software & systems</title>
+    <link rel="icon" href="/static/assets/favicon.png" />
+    <script src="/static/appearance.js"></script>
     <link rel="stylesheet" href="/static/index.css" />
-    <link rel="stylesheet" href="/static/cpu-preview.css" />
-    <script src="/static/cpu-preview.js" defer></script>
+    <script src="/static/index.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-    <div class="cursor" aria-hidden="true"></div>
-    <div class="progress" aria-hidden="true"><span></span></div>
-
     <header class="site-header">
-      <a class="logo" href="#top" aria-label="Colin Heslin, home"
-        ><img src="/static/assets/ch-logo-black-gold.png" alt=""
-      /></a>
-      <nav aria-label="Primary navigation">
-        <a href="#work">Work</a><a href="#cpu-feature">CPU</a><a href="#about">About</a
-        ><a href="#contact">Contact</a>
-      </nav>
-      <a class="header-cta magnetic" href="mailto:colin@ches.dev"
-        ><i></i> Let’s talk <span>↗</span></a
+      <a class="wordmark" href="/" aria-label="ches.dev, home"
+        >ches<span>.</span>dev</a
       >
+      <nav aria-label="Main navigation">
+        <a href="/#work">Work</a><a href="/#other-projects">Other projects</a
+        ><a href="/#about">About</a
+        ><a href="mailto:colin@ches.dev"
+          >Contact
+          <span aria-hidden="true"
+            ><svg
+              class="icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              aria-hidden="true"
+            >
+              <path d="M5 19 19 5M5 5h14v14" /></svg></span
+        ></a>
+      </nav>
     </header>
-
-    <main id="main" tabindex="-1">
-      <section class="hero" id="top" aria-labelledby="hero-title">
-        <div class="hero-copy">
-          <p class="overline reveal">Colin Heslin — New York</p>
-          <h1 id="hero-title">
-            <span class="line"><i>I build things.</i></span>
-            <span class="line"><i>And make</i></span>
-            <span class="line"
-              ><i><em>them better.</em></i></span
-            >
-          </h1>
-          <p class="hero-intro reveal">
-            I’m Colin, a high school developer in New York. I’ve moved from
-            bots and real-time experiments to business software, developer
-            tools, and on-device machine learning.
-          </p>
-          <div class="hero-actions reveal">
-            <a class="button button-primary magnetic" href="#work"
-              >Explore projects <span>↘</span></a
-            >
-            <a
-              class="button button-secondary magnetic"
-              href="mailto:colin@ches.dev"
-              >Let’s talk <span>↗</span></a
-            >
-          </div>
+    <main id="main">
+      <section class="intro">
+        <div class="intro-meta">
+          <span>Software & systems</span
+          ><span>High school developer · New York</span>
         </div>
-
-        <div class="hero-mark" data-tilt aria-hidden="true">
-          <img src="/static/assets/ch-logo-black-gold.png" alt="" />
-          <div class="mark-caption">
-            <span>Independent developer</span><span>New York</span>
-          </div>
-        </div>
-        <a class="scroll-hint" href="#work"
-          ><span>Scroll to explore</span><i>↓</i></a
-        >
-      </section>
-
-      <section class="intro" aria-label="Current interests">
-        <p class="reveal">Right now I’m focused on</p>
-        <div class="interest-list reveal">
-          <span>fintech,</span><span>real-time systems,</span
-          ><span>and tools people use.</span>
-        </div>
-      </section>
-
-      <section class="work" id="work" aria-labelledby="work-title">
-        <header class="section-head reveal">
-          <p>Selected work</p>
-          <h2 id="work-title">A few things<br /><span>I’ve built.</span></h2>
-          <span>(03)</span>
-        </header>
-
-        <article class="project" id="project-badavo" data-project>
-          <div class="project-copy reveal">
-            <span class="project-number">01 / Mobile · ML · Product</span>
-            <h3>BadAvo</h3>
-            <p>
-              An iOS app with a custom image-recognition model that runs
-              on-device to assess avocado ripeness.
-            </p>
-            <div class="project-tech">
-              Swift <i>•</i> Core ML <i>•</i> Vision
-            </div>
-            <a
-              class="round-link magnetic"
-              href="https://badavo.ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Visit BadAvo"
-              >↗</a
-            >
-          </div>
-          <a
-            class="project-media badavo"
-            id="badavo-preview"
-            href="https://badavo.ai"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Visit BadAvo"
-          >
-            <div class="project-glow"></div>
-            <div class="avocado"></div>
-            <div class="phone">
-              <i class="phone-island"></i>
-              <div class="app-mark"><i></i><strong>BadAvo</strong></div>
-              <div class="app-copy">
-                <b>Pick the perfect avocado</b
-                ><span
-                  >Take a clear photo and get an instant on-device ripeness
-                  estimate.</span
+        <div class="intro-grid">
+          <h1>Colin Heslin<span class="accent">.</span></h1>
+          <div class="intro-copy">
+            <p>I build backend systems,<br />developer tools, and iOS apps.</p>
+            <a class="text-link" href="mailto:colin@ches.dev"
+              >Get in touch
+              <span aria-hidden="true"
+                ><svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  aria-hidden="true"
                 >
-              </div>
-              <div class="latest-scan">
-                <i></i><span>Latest scan</span><b>Ripe in 2–3 days</b>
-              </div>
-              <div class="scan-button"><span>▣</span> Scan another</div>
-              <div class="app-tabs">
-                <i>●<small>About</small></i
-                ><i class="active">◆<small>Home</small></i
-                ><i>⚙<small>Settings</small></i>
-              </div>
-            </div>
-            <span class="media-note">On-device intelligence</span>
-          </a>
-        </article>
-
-        <article class="project project-flip" id="project-printed" data-project>
-          <div class="project-copy reveal">
-            <span class="project-number">02 / Business software · Full stack</span>
-            <h3>Printed</h3>
-            <p>
-              In 2024, my friends and I started a 3D-printing business. I built
-              its customer order intake and admin workflow, turning approved
-              submissions into tracked print jobs.
-            </p>
-            <div class="project-tech">Python <i>•</i> Flask <i>•</i> MySQL</div>
-            <a
-              class="round-link magnetic"
-              href="https://ches.dev/3D-Printing-Order-Management/index.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="View Printed"
-              >↗</a
-            >
+                  <path d="M5 19 19 5M5 5h14v14" /></svg></span
+            ></a>
           </div>
-          <a
-            class="project-media printed"
-            href="https://ches.dev/3D-Printing-Order-Management/index.html"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="View Printed"
-          >
-            <div class="printed-ambient" aria-hidden="true"></div>
-            <div class="printed-brand" aria-hidden="true">
-              <span>Introducing</span>
-              <strong data-word="Printed">Printed</strong>
+        </div>
+        <div class="work-index" aria-label="Featured project index">
+          <a href="#project-badavo"
+            ><span class="index-no">01</span>BadAvo<span aria-hidden="true"
+              ><svg
+                class="icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <path d="M5 5 19 19M5 19h14V5" /></svg></span></a
+          ><a href="#project-printed"
+            ><span class="index-no">02</span>Printed<span aria-hidden="true"
+              ><svg
+                class="icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <path d="M5 5 19 19M5 19h14V5" /></svg></span></a
+          ><a href="#project-jbx"
+            ><span class="index-no">03</span>JB-X<span aria-hidden="true"
+              ><svg
+                class="icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <path d="M5 5 19 19M5 19h14V5" /></svg></span></a
+          ><a href="#project-cpu"
+            ><span class="index-no">04</span>CPU V2<span aria-hidden="true"
+              ><svg
+                class="icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <path d="M5 5 19 19M5 19h14V5" /></svg></span
+          ></a>
+        </div>
+      </section>
+      <div class="section-line" id="work">
+        <h2>Selected work</h2>
+        <span>Four projects / four different problems</span>
+      </div>
+      <article class="project project-badavo" id="project-badavo">
+        <div class="project-heading">
+          <span class="project-no">01 / 04</span>
+          <h3>BadAvo</h3>
+          <span class="micro">iOS / Machine learning</span>
+        </div>
+        <div class="project-layout">
+          <div class="project-copy">
+            <h4>Avocado ripeness, assessed on-device.</h4>
+            <p>
+              An iOS app that uses a custom image-recognition model to assess
+              avocado ripeness.
+            </p>
+            <p class="tech">Swift · Core ML · Vision</p>
+            <div class="engineering-note">
+              <span class="micro">The engineering</span>
+              <p>
+                The recognition model runs on the device. The product brings
+                that capability into a small, task-focused iOS interface.
+              </p>
             </div>
-            <div class="printed-object" aria-hidden="true">
-              <i class="printed-contour printed-contour-left"></i>
+            <a class="text-link" href="/work/badavo/"
+              >Read the engineering notes
+              <span aria-hidden="true"
+                ><svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  aria-hidden="true"
+                >
+                  <path d="M5 19 19 5M5 5h14v14" /></svg></span
+            ></a>
+          </div>
+          <div class="artifact badavo-art">
+            <div class="artifact-heading">
+              <span>Published app / actual screens</span><span>iOS</span>
+            </div>
+            <div class="app-screens">
               <img
-                src="https://ches.dev/3D-Printing-Order-Management/static/model.png"
-                alt=""
+                id="app-screen"
+                src="/static/assets/badavo-screen-1.jpg"
+                alt="First published BadAvo App Store screenshot"
+                width="444"
+                height="960"
+                fetchpriority="high"
+              />
+              <div class="screen-note">
+                <span class="micro">On the device</span>
+                <h4>Inside BadAvo</h4>
+                <p>
+                  Inspect the published app screens. This is the actual
+                  interface, rather than a recreated product mockup.
+                </p>
+                <div
+                  class="screen-controls"
+                  role="group"
+                  aria-label="Published app screenshots"
+                >
+                  <button data-screen="1" aria-pressed="true" disabled>
+                    Home</button
+                  ><button data-screen="2" aria-pressed="false" disabled>
+                    About</button
+                  ><button data-screen="3" aria-pressed="false" disabled>
+                    Settings
+                  </button>
+                </div>
+                <p id="screen-status" class="micro" role="status">
+                  Screen 1 of 3
+                </p>
+                <a
+                  class="text-link"
+                  href="https://apps.apple.com/us/app/badavo/id6746645776"
+                  >View on the App Store
+                  <svg
+                    class="icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 19 19 5M5 5h14v14" /></svg
+                ></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+      <article class="project project-printed" id="project-printed">
+        <div class="project-heading">
+          <span class="project-no">02 / 04</span>
+          <h3>Printed</h3>
+          <span class="micro">Business software / Full stack</span>
+        </div>
+        <div class="project-layout">
+          <div class="project-copy">
+            <h4>A storefront, backed by an order workflow.</h4>
+            <p>
+              The public website and order-management application I built for a
+              3D-printing business with friends.
+            </p>
+            <p class="tech">Python · Flask · MySQL</p>
+            <div class="engineering-note">
+              <span class="micro">The workflow</span>
+              <p>
+                Customer intake and admin review are separate steps. An accepted
+                submission becomes a tracked print record.
+              </p>
+            </div>
+            <a class="text-link" href="/work/printed/"
+              >Read the engineering notes
+              <span aria-hidden="true"
+                ><svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  aria-hidden="true"
+                >
+                  <path d="M5 19 19 5M5 5h14v14" /></svg></span
+            ></a>
+          </div>
+          <div class="artifact print-art">
+            <div class="artifact-heading">
+              <span>Printed / project preview</span
+              ><span id="printed-context">Original storefront</span>
+            </div>
+            <div
+              class="printed-view-controls"
+              role="group"
+              aria-label="Printed preview"
+            >
+              <button
+                type="button"
+                data-printed-view="website"
+                aria-pressed="true"
+                aria-controls="printed-website"
+                disabled
+              >
+                Storefront
+              </button>
+              <button
+                type="button"
+                data-printed-view="workflow"
+                aria-pressed="false"
+                aria-controls="printed-workflow"
+                disabled
+              >
+                Order workflow
+              </button>
+            </div>
+            <div class="printed-views">
+              <section
+                class="printed-panel printed-website"
+                id="printed-website"
+                aria-label="Printed storefront"
+              >
+                <a
+                  class="printed-capture"
+                  href="https://ches.dev/3D-Printing-Order-Management/index.html"
+                  aria-label="Open the original Printed website"
+                >
+                  <img
+                    src="/static/assets/printed-storefront.png"
+                    width="919"
+                    height="535"
+                    loading="lazy"
+                    alt="Original Printed storefront artwork: a coral and orange Printed wordmark over a dark grid and outlined mountain peaks, with the Irvington tagline."
+                  />
+                </a>
+                <div class="artifact-bottom">
+                  <p>The storefront for our 3D-printing business.</p>
+                  <a
+                    href="https://ches.dev/3D-Printing-Order-Management/index.html"
+                    >Visit Printed
+                    <svg
+                      class="icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 19 19 5M5 5h14v14" /></svg
+                  ></a>
+                </div>
+              </section>
+              <section
+                class="printed-panel"
+                id="printed-workflow"
+                aria-label="Local order workflow"
+                hidden
+              >
+                <div class="flow-track" aria-label="Order workflow">
+                  <span id="pending-phase" class="current">Submission</span
+                  ><span aria-hidden="true"
+                    ><svg
+                      class="icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      aria-hidden="true"
+                    >
+                      <path d="M4 12h16m-7-7 7 7-7 7" /></svg></span
+                  ><span id="active-phase">Print record</span>
+                </div>
+                <div class="order-layout">
+                  <div class="order-details">
+                    <span class="micro">Customer request</span>
+                    <h4>Desk organizer</h4>
+                    <dl>
+                      <div>
+                        <dt>Customer</dt>
+                        <dd>Sample customer</dd>
+                      </div>
+                      <div>
+                        <dt>Size</dt>
+                        <dd>120 × 80 × 50 mm</dd>
+                      </div>
+                      <div>
+                        <dt>Budget</dt>
+                        <dd>$25</dd>
+                      </div>
+                      <div>
+                        <dt>Payment</dt>
+                        <dd>Cash</dd>
+                      </div>
+                    </dl>
+                  </div>
+                  <div class="order-review">
+                    <span class="micro">Admin review</span
+                    ><strong id="order-state">Pending submission</strong>
+                    <p id="order-description">
+                      Approve to create an active print record, or deny the
+                      sample request.
+                    </p>
+                    <div class="button-row">
+                      <button id="approve" class="primary" disabled>
+                        Approve</button
+                      ><button id="deny" disabled>Deny</button
+                      ><button id="hide-order" disabled hidden>
+                        Hide record
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="artifact-bottom">
+                  <p id="order-status" role="status">
+                    No order has been submitted to a server.
+                  </p>
+                  <button id="reset-order" disabled>Restart example</button>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </article>
+      <article class="project project-jbx" id="project-jbx">
+        <div class="project-heading">
+          <span class="project-no">03 / 04</span>
+          <h3>JB-X</h3>
+          <span class="micro">Developer tools / APIs</span>
+        </div>
+        <div class="project-layout">
+          <div class="project-copy">
+            <h4>Item queries from the command line.</h4>
+            <p>
+              A Python command-line tool for Roblox Jailbreak item data, with a
+              modular command registry, aliases, and contextual help.
+            </p>
+            <p class="tech">Python · CLI · APIs</p>
+            <div class="engineering-note">
+              <span class="micro">The abstraction</span>
+              <p>
+                Commands register their implementation, help text, and aliases
+                together. New commands extend the registry rather than a growing
+                dispatch chain.
+              </p>
+            </div>
+            <a class="text-link" href="/work/jb-x/"
+              >Read the engineering notes
+              <span aria-hidden="true"
+                ><svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  aria-hidden="true"
+                >
+                  <path d="M5 19 19 5M5 5h14v14" /></svg></span
+            ></a>
+          </div>
+          <div class="artifact terminal-art">
+            <div class="artifact-heading">
+              <span>JB-X / command registry</span
+              ><span>Local browser demonstration</span>
+            </div>
+            <div class="terminal-content">
+              <span class="micro">Try the command system</span>
+              <form id="command-form" novalidate>
+                <label for="command">Command</label>
+                <div class="command-input">
+                  <span aria-hidden="true">&gt;</span
+                  ><input
+                    id="command"
+                    name="command"
+                    value="help value"
+                    spellcheck="false"
+                    autocomplete="off"
+                    aria-describedby="command-help"
+                  /><button type="submit" disabled>
+                    Run
+                    <svg
+                      class="icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      aria-hidden="true"
+                    >
+                      <path d="M20 5v9H4m6-6-6 6 6 6" />
+                    </svg>
+                  </button>
+                </div>
+              </form>
+              <p id="command-help" class="micro">
+                Try help, help value, or an alias such as help val.
+              </p>
+              <pre id="command-output" role="status">
+Help for command 'value':
+Description: Shows the value of item(s)
+Usage: value &lt;name...&gt;
+Aliases: v, val, item, it, itm</pre>
+              <div class="command-presets" aria-label="Example commands">
+                <button data-command="help" disabled>help</button
+                ><button data-command="help val" disabled>help val</button
+                ><button data-command="value carbonara" disabled>
+                  value carbonara
+                </button>
+              </div>
+            </div>
+            <div class="artifact-bottom">
+              <p>Aliases resolve to the same registered command.</p>
+              <a
+                href="https://github.com/cheslin23t/JBCL-Commandline-CLI/blob/main/util/registry.py"
+                >Inspect the registry
+                <svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  aria-hidden="true"
+                >
+                  <path d="M5 19 19 5M5 5h14v14" /></svg
+              ></a>
+            </div>
+          </div>
+        </div>
+      </article>
+      <article class="project project-cpu" id="project-cpu">
+        <div class="project-heading">
+          <span class="project-no">04 / 04</span>
+          <h3>CPU V2</h3>
+          <span class="micro">Computer architecture / Minecraft</span>
+        </div>
+        <div class="project-layout">
+          <div class="project-copy">
+            <h4>An 8-bit computer, built in redstone.</h4>
+            <p>
+              A programmable Minecraft CPU. Explore its instruction encoding,
+              registers, and recorded execution.
+            </p>
+            <p class="tech">8-bit · 64-word ROM · Python compiler</p>
+            <div class="engineering-note">
+              <span class="micro">The evidence</span>
+              <p>
+                The physical walkthrough includes the exported schematic and
+                game-tick recordings. The browser explanation stays separate
+                from measured hardware state.
+              </p>
+            </div>
+            <a class="text-link" href="/cpu/"
+              >Read the engineering notes
+              <span aria-hidden="true"
+                ><svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  aria-hidden="true"
+                >
+                  <path d="M5 19 19 5M5 5h14v14" /></svg></span
+            ></a>
+          </div>
+          <div class="artifact cpu-art">
+            <div class="artifact-heading">
+              <span>CPU V2 / instruction-level demo</span
+              ><span>Compact verified program</span>
+            </div>
+            <div class="cpu-layout">
+              <img
+                src="/cpu/data/build-overview.png"
+                width="600"
+                height="540"
+                alt="Schematic-derived rendering of the actual Minecraft CPU"
                 loading="lazy"
               />
-              <i class="printed-contour printed-contour-right"></i>
-            </div>
-            <div class="printed-quality" aria-hidden="true">
-              <span>Only the best</span>
-              <b>Smooth. Sleek. Strong.</b>
-            </div>
-            <span class="media-note">Open project ↗</span>
-          </a>
-        </article>
-
-        <article class="project" id="project-jbx" data-project>
-          <div class="project-copy reveal">
-            <span class="project-number">03 / Developer tools · Python</span>
-            <h3>JB-X</h3>
-            <p>
-              A command-line interface for Roblox Jailbreak item values and
-              trends. I built a modular command registry, aliases, help and
-              interactive selection for ambiguous item searches.
-            </p>
-            <div class="project-tech">Python <i>•</i> CLI <i>•</i> API integration</div>
-            <a
-              class="round-link magnetic"
-              href="https://github.com/cheslin23t/JBCL-Commandline-CLI"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="View JB-X source on GitHub"
-              >↗</a
-            >
-          </div>
-          <a
-            class="project-media terminal"
-            href="https://github.com/cheslin23t/JBCL-Commandline-CLI"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="View JB-X source on GitHub"
-          >
-            <div class="terminal-window" aria-hidden="true">
-              <div class="terminal-top"><span>JB-X / item lookup</span><i>● ● ●</i></div>
-              <div class="terminal-body">
-                <p><span class="terminal-prompt">›</span> value carbonara</p>
-                <p class="terminal-result">CARBONARA <span>Vehicle</span></p>
-                <div class="terminal-fields">
-                  <span>Cash value</span><b>Available via API</b>
-                  <span>Demand</span><b>Item data</b>
-                  <span>Trend</span><b>Item data</b>
+              <div>
+                <p class="micro">165 + 60 <span id="cpu-answer">= ?</span></p>
+                <table class="program">
+                  <caption class="sr-only">
+                    Three-instruction addition program
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th>Addr</th>
+                      <th>Instruction</th>
+                      <th>Hex</th>
+                    </tr>
+                  </thead>
+                  <tbody id="cpu-program">
+                    <tr>
+                      <td>01</td>
+                      <td>LDI R1, 165</td>
+                      <td>A58B</td>
+                    </tr>
+                    <tr>
+                      <td>02</td>
+                      <td>LDI R2, 60</td>
+                      <td>3C4B</td>
+                    </tr>
+                    <tr>
+                      <td>03</td>
+                      <td>ADD R3, R2, R1</td>
+                      <td>48C1</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="registers">
+                  <div>
+                    <span>R1</span><strong id="r1">?</strong
+                    ><code id="bits1">????????</code>
+                  </div>
+                  <div>
+                    <span>R2</span><strong id="r2">?</strong
+                    ><code id="bits2">????????</code>
+                  </div>
+                  <div>
+                    <span>R3</span><strong id="r3">?</strong
+                    ><code id="bits3">????????</code>
+                  </div>
                 </div>
-                <p class="terminal-hint">Use <strong>--help</strong> to explore commands<span class="terminal-caret">_</span></p>
               </div>
             </div>
-            <span class="media-note">View source on GitHub ↗</span>
-          </a>
-        </article>
-      </section>
-
-  <section id="cpu-feature" class="cpu-feature" aria-labelledby="cpu-feature-title">
-    <div class="cpu-feature-story">
-      <p class="overline">Featured build · CPU V2</p>
-      <h2 id="cpu-feature-title">A computer.<br />Built from <span>redstone.</span></h2>
-      <p class="cpu-feature-description">I built an 8-bit CPU in Minecraft. Take a look inside the machine, or try a small program right here.</p>
-      <div class="cpu-build-preview">
-        <img src="/cpu/data/build-overview.png" width="558" height="499" loading="lazy" alt="The actual Minecraft CPU, with stacked redstone circuits and colored wool modules" />
-        <dl>
-          <div><dt>Data width</dt><dd>8 bits</dd></div>
-          <div><dt>Program ROM</dt><dd>64 × 16 bits</dd></div>
-          <div><dt>Physical build</dt><dd>32,543 blocks</dd></div>
-        </dl>
-      </div>
-      <a class="cpu-tour-link" href="/cpu/">Explore the CPU <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 18 18 6M6 6h12v12" /></svg></a>
-    </div>
-
-    <section class="cpu-preview" aria-labelledby="cpu-preview-title" aria-describedby="cpu-preview-timing">
-      <div class="cpu-preview-heading">
-        <div><p class="cpu-console-label">Try a program</p><h3 id="cpu-preview-title">165 + 60 <span>= ?</span></h3></div>
-        <span class="cpu-pc" id="cpu-preview-pc">PC 00</span>
-      </div>
-      <table class="cpu-program">
-        <caption class="cpu-sr-only">Addition program. The highlighted row is the current ROM address.</caption>
-        <thead><tr><th scope="col">Addr</th><th scope="col">Instruction</th><th scope="col">Hex</th></tr></thead>
-        <tbody>
-          <tr data-preview-address="0" aria-current="step"><td>00</td><td>NOP</td><td>0000</td></tr>
-          <tr data-preview-address="1"><td>01</td><td>LDI R1, 165</td><td>A58B</td></tr>
-          <tr data-preview-address="2"><td>02</td><td>NOP</td><td>0000</td></tr>
-          <tr data-preview-address="3"><td>03</td><td>LDI R2, 60</td><td>3C4B</td></tr>
-          <tr data-preview-address="4"><td>04</td><td>NOP</td><td>0000</td></tr>
-          <tr data-preview-address="5"><td>05</td><td>ADD R3, R2, R1</td><td>48C1</td></tr>
-          <tr data-preview-address="6"><td>06</td><td>NOP</td><td>0000</td></tr>
-        </tbody>
-      </table>
-      <div class="cpu-preview-registers" aria-label="Explanatory register values">
-        <div><span>R1</span><strong id="cpu-preview-r1">?</strong><code id="cpu-preview-bits1">????????</code></div>
-        <div><span>R2</span><strong id="cpu-preview-r2">?</strong><code id="cpu-preview-bits2">????????</code></div>
-        <div class="cpu-result-register"><span>R3 · result</span><strong id="cpu-preview-r3">?</strong><code id="cpu-preview-bits3">????????</code></div>
-      </div>
-      <div class="cpu-preview-controls">
-        <button type="button" id="cpu-preview-play" class="cpu-preview-primary" aria-pressed="false" disabled>Run demo</button>
-        <button type="button" id="cpu-preview-step" disabled>Step</button>
-        <button type="button" id="cpu-preview-restart" disabled>Restart</button>
-      </div>
-      <p id="cpu-preview-status" class="cpu-preview-status" role="status">Start at PC 00. Registers are unknown until written.</p>
-      <p id="cpu-preview-timing" class="cpu-preview-note">Accelerated preview · 0.9 s/address; hardware: 7.3 s.<br />Padded example · register simulation, separate from the recording.</p>
-      <noscript><p class="cpu-preview-note">Enable JavaScript to play, or <a href="/cpu/">explore the CPU tour</a>.</p></noscript>
-    </section>
-  </section>
-
-      <section class="journey" id="journey" aria-labelledby="journey-title">
-        <header class="journey-head reveal">
-          <p class="overline">Build log · 2021 to now</p>
-          <h2 id="journey-title">The work<br /><span>between the highlights.</span></h2>
-          <p>
-            The featured projects are the strongest finished stories. This is
-            the wider path: selected tools, prototypes, and experiments that
-            expanded what I could build next.
-          </p>
-        </header>
-
-        <ol class="journey-list">
-          <li class="journey-item reveal">
-            <div class="journey-meta">
-              <time datetime="2021">2021</time>
-              <span>Early project</span>
+            <div class="button-row cpu-buttons">
+              <button
+                id="cpu-run"
+                class="primary"
+                aria-pressed="false"
+                disabled
+              >
+                Run program</button
+              ><button id="cpu-step" disabled>Step</button
+              ><button id="cpu-reset" disabled>Restart</button>
             </div>
-            <div class="journey-copy">
-              <p class="journey-area">Bots · Event-driven JavaScript</p>
-              <h3>Spade</h3>
-              <p>
-                An early Discord bot organized around command files and event
-                handlers, with per-server prefixes and music controls. It was
-                my entry point into asynchronous, event-driven software.
-              </p>
-              <a href="https://github.com/cheslin23t/Spade" target="_blank" rel="noopener noreferrer">View the early code <span aria-hidden="true">↗</span></a>
+            <p class="cpu-status" id="cpu-status" role="status">
+              Three instructions. Registers are unknown until written.
+            </p>
+            <div class="artifact-bottom">
+              <p>Accelerated explanation · no NOP steps · not live redstone</p>
+              <a href="/cpu/"
+                >Inspect recorded hardware
+                <svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  aria-hidden="true"
+                >
+                  <path d="M5 19 19 5M5 5h14v14" /></svg
+              ></a>
             </div>
-          </li>
-
-          <li class="journey-item reveal">
-            <div class="journey-meta">
-              <time datetime="2022">2022</time>
-              <span>Archived project</span>
-            </div>
-            <div class="journey-copy">
-              <p class="journey-area">Discord automation · Node.js / MongoDB</p>
-              <h3>Cyberblade Bot</h3>
-              <p>
-                A learning project that took my earlier bot work into slash
-                commands, modular command loading, interactive polls, and
-                database-backed server settings. The repository is preserved
-                as a 2022 snapshot, not a production-ready bot.
-              </p>
-              <a href="https://github.com/cheslin23t/CyberbladeBot" target="_blank" rel="noopener noreferrer">View the archived source <span aria-hidden="true">↗</span></a>
-            </div>
-          </li>
-
-          <li class="journey-item reveal">
-            <div class="journey-meta">
-              <time datetime="2022">2022</time>
-              <span>Troop software</span>
-            </div>
-            <div class="journey-copy">
-              <p class="journey-area">Operations · Flask / Replit DB</p>
-              <h3>BSA2</h3>
-              <p>
-                Initially built for my Boy Scout troop’s website, this Flask
-                app served as the troop’s primary trip RSVP flow and gave
-                organizers a simple view of who was and was not attending.
-                It is preserved as early operational software.
-              </p>
-              <a href="https://ches.dev/BSA2/" target="_blank" rel="noopener noreferrer">Open the project archive <span aria-hidden="true">↗</span></a>
-            </div>
-          </li>
-
-          <li class="journey-item reveal">
-            <div class="journey-meta">
-              <time datetime="2022">2022</time>
-              <span>Experiment</span>
-            </div>
-            <div class="journey-copy">
-              <p class="journey-area">Real-time software · Node.js</p>
-              <h3>spaceChat</h3>
-              <p>
-                A learning project for accounts, direct messages, and live
-                Socket.IO events backed by MongoDB. It is earlier exploratory
-                work, not a production chat system.
-              </p>
-              <a href="https://github.com/cheslin23t/spaceChat" target="_blank" rel="noopener noreferrer">Explore the experiment <span aria-hidden="true">↗</span></a>
-            </div>
-          </li>
-
-          <li class="journey-item reveal">
-            <div class="journey-meta">
-              <time datetime="2023">2023–24</time>
-              <span>Prototype</span>
-            </div>
-            <div class="journey-copy">
-              <p class="journey-area">Backend · Accounts · Data</p>
-              <h3>ProveIt</h3>
-              <p>
-                A Flask and MySQL prototype with blueprint-based features,
-                account routes, sessions, and a database-backed dashboard—an
-                early step toward more structured backend applications.
-              </p>
-              <a href="https://github.com/cheslin23t/ProveIt" target="_blank" rel="noopener noreferrer">See the prototype <span aria-hidden="true">↗</span></a>
-            </div>
-          </li>
-
-          <li class="journey-item journey-featured reveal">
-            <div class="journey-meta">
-              <time datetime="2024">2024–26</time>
-              <span>Featured system</span>
-            </div>
-            <div class="journey-copy">
-              <p class="journey-area">Business software · Flask / MySQL</p>
-              <h3>Printed</h3>
-              <p>
-                Customer order intake, admin review, and tracked print records
-                for a 3D-printing business. This turned the patterns from
-                earlier prototypes into software for a real workflow.
-              </p>
-              <a href="#project-printed">See the featured project <span aria-hidden="true">↑</span></a>
-            </div>
-          </li>
-
-          <li class="journey-item journey-featured reveal">
-            <div class="journey-meta">
-              <time datetime="2025-12">Late 2025–26</time>
-              <span>Featured tool</span>
-            </div>
-            <div class="journey-copy">
-              <p class="journey-area">Developer tools · APIs</p>
-              <h3>JB-X</h3>
-              <p>
-                A Python CLI that made Jailbreak item APIs faster to explore,
-                with a decorator-based command registry, aliases, contextual
-                help, and interactive selection for ambiguous searches.
-              </p>
-              <a href="#project-jbx">See the featured project <span aria-hidden="true">↑</span></a>
-            </div>
-          </li>
-
-          <li class="journey-item reveal">
-            <div class="journey-meta">
-              <time datetime="2026">2026</time>
-              <span>Reusable starter</span>
-            </div>
-            <div class="journey-copy">
-              <p class="journey-area">Backend architecture · Flask / MySQL</p>
-              <h3>Modular Flask Template</h3>
-              <p>
-                A starter organized into feature modules, with account routes,
-                shared database helpers, environment configuration, and setup
-                guidance for the next Flask project.
-              </p>
-              <a href="https://github.com/cheslin23t/Modular-Flask-Template" target="_blank" rel="noopener noreferrer">Browse the starter <span aria-hidden="true">↗</span></a>
-            </div>
-          </li>
-
-          <li class="journey-item journey-featured reveal">
-            <div class="journey-meta">
-              <span class="journey-now">Now</span>
-              <span>Featured product</span>
-            </div>
-            <div class="journey-copy">
-              <p class="journey-area">iOS · On-device machine learning</p>
-              <h3>BadAvo</h3>
-              <p>
-                An iOS product that brings image recognition into a focused
-                everyday experience: assessing avocado ripeness with a model
-                that runs on the device.
-              </p>
-              <a href="#project-badavo">See the featured project <span aria-hidden="true">↑</span></a>
-            </div>
-          </li>
-        </ol>
-
-        <aside class="journey-aside reveal" aria-label="Work beyond public repositories">
-          <span>Beyond the repositories</span>
-          <p>
-            I’ve also built CPUs in Minecraft as a hands-on way to explore
-            computer architecture. That work is not presented here as a public
-            code project, but it is part of how I learn systems from the bottom up.
-          </p>
-        </aside>
-      </section>
-
-      <section class="about" id="about" aria-labelledby="about-title">
-        <div class="about-sticky">
-          <p class="overline">About</p>
-          <h2 id="about-title">A little<br /><span>about me.</span></h2>
-        </div>
-        <div class="about-story">
-          <p class="reveal">
-            I’m a high school student from New York. I spend most of my time
-            building backend systems, APIs, and data-driven apps.
-          </p>
-          <p class="reveal">
-            I’m especially interested in fintech and large-scale data
-            infrastructure. I like going all the way from the system underneath
-            a product to the experience someone actually uses.
-          </p>
-          <div class="capabilities reveal">
-            <span>What I work with</span>
-            <ul>
-              <li>Swift + Core ML</li>
-              <li>Python + Flask</li>
-              <li>JavaScript + Node.js</li>
-              <li>MySQL + MongoDB</li>
-              <li>WebSockets + APIs</li>
-              <li>CLI + backend architecture</li>
-            </ul>
           </div>
         </div>
+      </article>
+      <section class="other-projects" id="other-projects">
+        <div class="section-line">
+          <h2>Other projects</h2>
+          <span>Earlier work, experiments, and reusable tools</span>
+        </div>
+        <div class="minor-list">
+          <details>
+            <summary>
+              <span class="minor-year">2021</span><strong>Spade</strong
+              ><span class="minor-category">Discord bot · Early work</span
+              ><span class="disclosure" aria-hidden="true">+</span>
+            </summary>
+            <div class="minor-detail">
+              <p>
+                An early command-file and event-handler project with per-server
+                prefixes and music controls.
+              </p>
+              <a href="https://github.com/cheslin23t/Spade"
+                >View project
+                <svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  aria-hidden="true"
+                >
+                  <path d="M5 19 19 5M5 5h14v14" /></svg
+              ></a>
+            </div>
+          </details>
+          <details>
+            <summary>
+              <span class="minor-year">2022</span><strong>Cyberblade Bot</strong
+              ><span class="minor-category">Discord automation · Archived</span
+              ><span class="disclosure" aria-hidden="true">+</span>
+            </summary>
+            <div class="minor-detail">
+              <p>
+                Slash commands, modular command loading, polls, and
+                database-backed server settings. Preserved as a learning
+                project.
+              </p>
+              <a href="https://github.com/cheslin23t/CyberbladeBot"
+                >View project
+                <svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  aria-hidden="true"
+                >
+                  <path d="M5 19 19 5M5 5h14v14" /></svg
+              ></a>
+            </div>
+          </details>
+          <details>
+            <summary>
+              <span class="minor-year">2022</span><strong>BSA2</strong
+              ><span class="minor-category">Troop software · Early work</span
+              ><span class="disclosure" aria-hidden="true">+</span>
+            </summary>
+            <div class="minor-detail">
+              <p>
+                A Flask trip-RSVP flow for my Boy Scout troop, giving organizers
+                a view of attendance.
+              </p>
+              <a href="https://ches.dev/BSA2/"
+                >View project
+                <svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  aria-hidden="true"
+                >
+                  <path d="M5 19 19 5M5 5h14v14" /></svg
+              ></a>
+            </div>
+          </details>
+          <details>
+            <summary>
+              <span class="minor-year">2022</span><strong>spaceChat</strong
+              ><span class="minor-category"
+                >Real-time messaging · Experiment</span
+              ><span class="disclosure" aria-hidden="true">+</span>
+            </summary>
+            <div class="minor-detail">
+              <p>
+                Accounts, direct messages, and live Socket.IO events backed by
+                MongoDB.
+              </p>
+              <a href="https://github.com/cheslin23t/spaceChat"
+                >View project
+                <svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  aria-hidden="true"
+                >
+                  <path d="M5 19 19 5M5 5h14v14" /></svg
+              ></a>
+            </div>
+          </details>
+          <details>
+            <summary>
+              <span class="minor-year">2023–24</span><strong>ProveIt</strong
+              ><span class="minor-category">Backend · Prototype</span
+              ><span class="disclosure" aria-hidden="true">+</span>
+            </summary>
+            <div class="minor-detail">
+              <p>
+                A Flask and MySQL prototype with blueprint-based features,
+                sessions, and a database-backed dashboard.
+              </p>
+              <a href="https://github.com/cheslin23t/ProveIt"
+                >View project
+                <svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  aria-hidden="true"
+                >
+                  <path d="M5 19 19 5M5 5h14v14" /></svg
+              ></a>
+            </div>
+          </details>
+          <details>
+            <summary>
+              <span class="minor-year">2026</span
+              ><strong>Modular Flask Template</strong
+              ><span class="minor-category">Backend architecture · Starter</span
+              ><span class="disclosure" aria-hidden="true">+</span>
+            </summary>
+            <div class="minor-detail">
+              <p>
+                A feature-organized starter with account routes, shared database
+                helpers, and setup guidance.
+              </p>
+              <a href="https://github.com/cheslin23t/Modular-Flask-Template"
+                >View project
+                <svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  aria-hidden="true"
+                >
+                  <path d="M5 19 19 5M5 5h14v14" /></svg
+              ></a>
+            </div>
+          </details>
+        </div>
       </section>
-
-      <section class="contact" id="contact" aria-labelledby="contact-title">
-        <p class="overline reveal">Contact</p>
-        <h2 id="contact-title" class="reveal">
-          Want to talk?<br /><span>Email me.</span>
-        </h2>
-        <a class="contact-email reveal" href="mailto:colin@ches.dev"
-          >colin@ches.dev <span>↗</span></a
-        >
-        <footer>
-          <span class="footer-brand"
-            ><img src="/static/assets/ch-logo-black-gold.png" alt="" /> ©
-            <span id="year">2026</span> Colin Heslin</span
-          ><a
-            href="https://github.com/cheslin23t"
-            target="_blank"
-            rel="noopener noreferrer"
-            >GitHub ↗</a
-          ><a href="#top">Back to top ↑</a>
-        </footer>
+      <section class="about" id="about">
+        <h2>About</h2>
+        <div>
+          <p class="about-lead">
+            I’m a high school student from New York, focused on software
+            engineering.
+          </p>
+          <p>
+            I’m interested in backend systems, APIs, real-time software, and
+            financial technology. These projects span the interfaces people use
+            and the systems underneath them.
+          </p>
+          <ul class="capabilities">
+            <li>Swift + Core ML</li>
+            <li>Python + Flask</li>
+            <li>JavaScript + Node.js</li>
+            <li>MySQL + MongoDB</li>
+            <li>WebSockets + APIs</li>
+            <li>CLI + system architecture</li>
+          </ul>
+        </div>
       </section>
+      <section class="contact" id="contact">
+        <span class="micro">Contact</span
+        ><a class="email" href="mailto:colin@ches.dev"
+          >colin@ches.dev
+          <span aria-hidden="true"
+            ><svg
+              class="icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              aria-hidden="true"
+            >
+              <path d="M5 19 19 5M5 5h14v14" /></svg></span
+        ></a>
+        <div class="button-row">
+          <button id="copy-email" disabled>Copy email</button
+          ><a href="https://github.com/cheslin23t"
+            >GitHub
+            <svg
+              class="icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              aria-hidden="true"
+            >
+              <path d="M5 19 19 5M5 5h14v14" /></svg></a
+          ><span id="copy-status" role="status"></span>
+        </div>
+      </section>
+      <noscript
+        ><p class="no-js">
+          Interactive demonstrations require JavaScript. All project
+          descriptions, engineering notes, screenshots, and source links remain
+          available.
+        </p></noscript
+      >
     </main>
-    <script src="/static/index.js"></script>
+    <footer class="site-footer">
+      <span>Colin Heslin · New York</span
+      ><a href="https://github.com/cheslin23t"
+        >GitHub
+        <svg
+          class="icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          aria-hidden="true"
+        >
+          <path d="M5 19 19 5M5 5h14v14" /></svg></a
+      ><a href="#main"
+        >Back to top
+        <svg
+          class="icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          aria-hidden="true"
+        >
+          <path d="M12 20V4M5 11l7-7 7 7" /></svg
+      ></a>
+    </footer>
   </body>
 </html>

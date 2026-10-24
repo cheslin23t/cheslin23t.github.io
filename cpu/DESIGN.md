@@ -1,19 +1,19 @@
 ---
 version: alpha
 colors:
-  background: "#f5f7f8"
-  surface: "#ffffff"
-  stage: "#e8edf0"
-  text: "#202c37"
-  muted: "#536372"
-  border: "#cad4dc"
-  primary: "#1769a0"
-  active: "#e0edf5"
-  thumb: "#91a0ac"
-  thumbHover: "#637887"
+  background: "#ffffff"
+  surface: "#f2f5f5"
+  stage: "#f2f5f5"
+  text: "#202428"
+  muted: "#58626b"
+  border: "#cbd1d5"
+  primary: "#006d77"
+  active: "#dceced"
+  thumb: "#58626b"
+  thumbHover: "#006d77"
 typography:
   sans:
-    fontFamily: "-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+    fontFamily: "Manrope, system-ui, sans-serif"
   mono:
     fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
 rounded:
@@ -36,16 +36,12 @@ moving from the complete machine into small circuits as the prose reaches them.
 
 ## Colors
 
-Ownership model B: `cpu/cpu.css` is canonical; this file mirrors it. The light
-frontmatter maps background/surface/stage/text/muted/border/primary/active/thumb/
-thumbHover to --bg/--surface/--stage/--ink/--muted/--line/--accent/--active/--thumb/
---thumb-hover. Components consume these semantic variables.
-
-`prefers-color-scheme: dark` automatically maps the same roles to #171c22,
-#20272e, #222c35, #e7edf2, #b3c1cc, #3d4b58, #82c4ec, #2e4555, #637887,
-and #93a8b7 respectively. No saved theme override or startup flash. Both themes
-retain identical hierarchy, geometry, and controls. Forced colors keeps native
-controls and scrollbars usable.
+Shared color and font ownership is `static/theme.css`, loaded after the scoped
+`cpu/cpu.css`. The root DESIGN.md defines the portfolio palette. CPU-specific
+geometry, controls, camera regions, and measured signal semantics remain local.
+The shared --stage/--thumb/--thumb-hover aliases follow the surface, muted, and
+accent tokens. Device appearance selects both light and dark themes without
+changing content or geometry. Forced colors preserves native controls.
 
 Minecraft wool colors come from the schematic palette with face shading.
 Redstone dust is red physical geometry, connected according to its north/east/
@@ -55,11 +51,11 @@ not electrical power. Text labels supplement signal colors.
 
 ## Typography
 
-System sans carries the project name and readable 15–16px body text. Moderate
+Locally hosted Manrope carries the project name and readable 15–16px body text. Moderate
 weight and tight tracking identify headings without a marketing voice. Monospace
 is for words, bit fields, assembly, coordinates, and electrical readings. Labels
 name real hardware, not decorative categories. Scene counts represent the actual
-reading sequence. No remote fonts or font swaps.
+reading sequence. No remote font requests.
 
 ## Layout
 
@@ -72,7 +68,7 @@ Mobile stacks a compact sticky model above the reading area. The model is capped
 at 46svh; chapter anchor offsets account for it once, without doubling CSS
 scroll-padding and scroll-margin. Text keeps enough screen space to be read.
 The instruction reference follows the walkthrough, then a quiet disclosure for
-source files and hardware limitations. The homepage remains unchanged.
+source files and hardware limitations. The homepage links here from an equally weighted CPU project chapter.
 
 ## Elevation & Depth
 
