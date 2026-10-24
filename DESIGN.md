@@ -1,66 +1,68 @@
 ---
 version: alpha
 colors:
-  primary: "#e2c98a"
-  ink: "#020617"
-  surface: "#0b1530"
-  white: "#f8fafc"
-  muted: "#94a3b8"
-  gold: "#e2c98a"
-  gold-deep: "#c6a15b"
-  cyan: "#22d3ee"
-  violet: "#a855f7"
+  background: "#ffffff"
+  surface: "#f2f5f5"
+  text: "#202428"
+  muted: "#58626b"
+  border: "#cbd1d5"
+  accent: "#006d77"
+  primary: "#006d77"
 typography:
   sans:
     fontFamily: "Manrope, system-ui, sans-serif"
+  mono:
+    fontFamily: "Plex Mono, ui-monospace, monospace"
 rounded:
-  button: "10px"
-  panel: "22px"
-omitted:
-  - section: spacing
-    reason: "Responsive spacing is owned by static/index.css using clamp and --pad."
-  - section: components
-    reason: "Shared CSS classes own this single-page portfolio's component styles."
+  control: "5px"
+  artifact: "6px"
+spacing:
+  gutter: "4.3vw"
+components:
+  artifact:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.text}"
+  caption:
+    textColor: "{colors.muted}"
+  primaryButton:
+    backgroundColor: "{colors.primary}"
+  link:
+    textColor: "{colors.accent}"
 ---
 
 ## Overview
 
-Colin Heslin's personal portfolio helps collaborators explore his software and contact him. Preserve the black-and-gold CH monogram as the signature, with expressive project scenes and readable first-person writing. The user wants rich animation, optimized rather than removed.
+Colin Heslin's portfolio presents inspectable software and systems to employers and technical reviewers. Precision comes from typography, proportion, authentic artifacts, and concise evidence. This replaces the navy/gold showcase and the rejected generated-image/project-selector explorations. All four featured projects have the same heading hierarchy and comparable presentation: BadAvo, Printed, JB-X, CPU V2. No project owns the hero. Copy is deliberately short so Colin can replace it with personal build notes.
 
 ## Colors
 
-Runtime ownership: `static/index.css` :root variables are authoritative and map directly to the color names above (--ink, --surface, --white, --muted, --gold, --gold-deep, --cyan, --violet). `primary` is the documented alias for --gold. No generated token adapter. Gold connects the hero headline and primary action to the logo; cyan and violet remain the project and technical accents. Muted text must remain readable against navy.
+Runtime ownership is static/theme.css: --bg, --surface, --ink, --muted, --line, and --accent map to the frontmatter. Light appearance is white, cool silver, charcoal, and deep teal. System dark appearance uses #141619 / #1e2328 / #eff2f4 / #b2bbc2 / #4b5962 / #9dd6d8, respectively. --on-accent is white in light mode and carbon in dark mode. --active marks state selection. CSS prefers-color-scheme owns appearance, with no persistent override or startup script. Native controls receive color-scheme. The CPU route loads the same tokens after its scoped stylesheet; physical probe colors and recorded data retain their meaning.
 
 ## Typography
 
-Manrope is the established display and body family; system-ui is its fallback. Large tightly tracked headings have explicit line breaks and sufficient descender clearance. Small uppercase text is reserved for navigation and metadata. Do not use generic claims or invent project metrics.
+Manrope is locally hosted at weights 400–700; Plex Mono identifies addresses, commands, and technical metadata. Body text is normal tracking. Headings use deliberate tight tracking. Arrows are real SVG icons to avoid missing font glyphs. Font licenses and asset provenance live under static/assets.
 
 ## Layout
 
-A two-column hero leads into interests, three featured projects (BadAvo, Printed, and JB-X), a compact CPU feature, a chronological build log, About, and Contact. The featured cards remain the high-attention editorial anchors. The build log adds breadth without flattening every repository into equal importance: maturity labels distinguish products and working systems from starters, prototypes, and experiments. Its desktop composition uses a sticky story heading beside a vertical chronology; below 1000px it becomes a single reading column, and on phones the dates move above each entry. The JB-X card shows a representative terminal scene and links to the public source repository. Alternating projects give the wider column to the visual. Mobile retains every navigation destination and places the hero mark below the copy rather than over it. Use natural content height rather than clipping copy into a viewport.
+A compact introduction and four-link work index lead to four continuous project chapters. The project index is anchor navigation, not a selector hiding other work. Descriptions and artifacts share a consistent grid; individual artifacts are app screenshots, an order workflow, a command registry, and a CPU explanation. Minor projects form six smaller native disclosures. About and contact finish the page. Three short static engineering-note routes share the same shell; /cpu/ preserves the detailed physical walkthrough. Mobile stacks content in document flow. No scroll-jacking, forced full-height sections, or horizontal-only actions.
 
 ## Elevation & Depth
 
-The gold logo floats and tilts; product scenes respond to hover and keyboard focus. Keep depth local to these visuals. Avoid full-screen blurs and layout-driven animation. Batch pointer writes through requestAnimationFrame and cache entry geometry.
+Keep surfaces flat and restrained. A small shadow belongs only to authentic app captures. Do not generate project visuals or reconstruct fake product screens. No glows, magnetic controls, custom cursors, or decorative parallax.
 
 ## Shapes
 
-Buttons use 10px corners; project panels use 22px desktop / 16px mobile corners. Circular arrows identify project links. Preserve the existing monogram asset.
+5px control and 6px artifact corners. Open text remains unboxed. Dividers encode section and workflow boundaries.
 
 ## Components
 
-`index.html` owns semantic structure. `static/index.css` owns shared buttons, project frames, the build log, navigation and focus styles. Timeline entries use an ordered list, native links, machine-readable dates where a precise year is known, and visible maturity labels; off-repository work must be explicitly identified rather than given a false source link. `static/index.js` progressively enhances reveal, progress and pointer behavior. Links retain native navigation; a skip link enters the main content. Decorative logo art is hidden from assistive technology. Content remains visible without JavaScript. Custom cursor activation requires a fine hover-capable pointer, a viewport over 640px, no forced colors and no reduced-motion preference. Changing any of these restores the native pointer.
+static/index.css owns content layout and shared controls; static/index.js progressively enhances the homepage. All essential content and links work without JavaScript. Demo controls remain disabled until handlers are installed. Printed is explicitly fictional, local workflow state. JB-X demonstrates verified command help and aliases without third-party API requests. CPU uses the compact recorded program at addresses 1,2,3, preserving A58B/3C4B/48C1. Registers begin unknown until written; playback finishes after ADD without implying hardware HALT. Pause when offscreen or hidden. Keep full model/recording on /cpu/; do not rewrite hardware source data. Native details provide keyboard-operable minor-project disclosure. Clipboard failure has inline recovery. The system pointer, visible focus, 44px controls, semantic statuses, natural scrolling, and reduced-motion behavior apply throughout.
 
 ## Do's and Don'ts
 
-- Keep motion, keyboard focus, mobile navigation, and reduced-motion behavior consistent.
-- Verify 320px, 390px, tablet and desktop widths, including resize and no-JavaScript states.
-- Do not hide meaningful text behind JavaScript initialization or expose fake preview controls as working controls.
-- Do not add ornamental section numbering that implies a nonexistent sequence.
-- Keep project descriptions grounded in Colin's supplied history.
-
-## Homepage CPU feature
-
-The homepage links to `/cpu/` from a compact section between selected work and the build log; the CPU navigation item scrolls to that section. `static/cpu-preview.css` owns the scoped feature styling, mapping its `--cpu-*` aliases to the existing `--ink-2`, `--white`, `--muted`, `--line`, `--gold`, and `--cyan` runtime tokens. Preserve the gold identity, 22px panel corners, Manrope copy, and monospace program data. The actual schematic thumbnail remains distinct from explanatory register state.
-
-`static/cpu-preview.js` runs the older conservative padded addition example from `cpu/data/cpu.json` at addresses 0–6, independently of the current CPU tour’s compact recorded program. Unknown registers display `?` until written. Playback is opt-in and accelerated to 0.9 seconds per address; native hardware timing is labeled 7.3 seconds. Run/Pause, Step, Restart, and Replay control only this explanation; the end message states that hardware continues through NOPs and wraps. Hidden pages pause playback. Native controls, visible keyboard focus, a live status message, stable geometry, reduced motion, and no-JavaScript content follow the portfolio’s existing accessibility conventions.
+- Preserve all four featured projects and six smaller projects, original destinations, and maturity distinctions.
+- Use real captures, measured data, source-linked explanations, and honest local demo labels.
+- Do not invent accuracy, speed, adoption, current market values, or personal engineering decisions.
+- Keep light/dark content and geometry identical and image colors authentic.
+- Verify 320px, phone, tablet, desktop, text zoom, no-JavaScript, and reduced motion.
+- Maintain technical notes as short editable HTML, with no generated filler or unfinished public placeholders.

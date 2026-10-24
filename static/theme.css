@@ -1,0 +1,66 @@
+@font-face {
+  font-family: Manrope;
+  src: url("/static/assets/fonts/manrope-400.ttf");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: Manrope;
+  src: url("/static/assets/fonts/manrope-500.ttf");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: Manrope;
+  src: url("/static/assets/fonts/manrope-600.ttf");
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: Manrope;
+  src: url("/static/assets/fonts/manrope-700.ttf");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Plex Mono";
+  src: url("/static/assets/fonts/plex-mono.ttf");
+  font-weight: 400;
+  font-display: swap;
+}
+:root {
+  color-scheme: light dark;
+  --bg: #fff;
+  --surface: #f2f5f5;
+  --ink: #202428;
+  --muted: #58626b;
+  --line: #cbd1d5;
+  --accent: #006d77;
+  --on-accent: #fff;
+  --active: #dceced;
+  --stage: var(--surface);
+  --thumb: var(--muted);
+  --thumb-hover: var(--accent);
+  --sans: Manrope, system-ui, sans-serif;
+  --mono: "Plex Mono", ui-monospace, monospace;
+  --gutter: clamp(20px, 4.3vw, 76px);
+  scrollbar-color: var(--muted) var(--bg);
+  scrollbar-gutter: stable;
+  scroll-behavior: smooth;
+  scroll-padding-top: 90px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141619;
+    --surface: #1e2328;
+    --ink: #eff2f4;
+    --muted: #b2bbc2;
+    --line: #4b5962;
+    --accent: #9dd6d8;
+    --on-accent: #141619;
+    --active: #293e42;
+  }
+}
+body {
+  font-family: var(--sans);
+}

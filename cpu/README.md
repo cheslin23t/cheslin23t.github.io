@@ -2,9 +2,9 @@
 
 Serve the repository root with `python3 -m http.server 8087`, then open `/cpu/`.
 No package installation or remote runtime assets are required for the CPU tour.
-The homepage now links here through a featured CPU section. Its small register
-simulation uses the historical padded addition example from `data/cpu.json`,
-separately from this tour’s current compact hardware recording.
+The homepage now links here through a featured CPU section. Its instruction-level register demo uses this tour’s verified compact program
+at addresses 1–3. The homepage explanation is accelerated and separate from
+the physical recording; it does not execute redstone or imply a hardware HALT.
 The route retains `noindex, nofollow`; it is linked, not access-controlled.
 
 ## What the page shows
@@ -49,16 +49,16 @@ Exact landmarks and approximate module frames are in `data/landmarks.json`.
 The new circuit crops are in `build-viewer.js`. Coordinates below are local to
 the repaired export; add world minimum `(256,72,-4)` to obtain lab coordinates.
 
-| Landmark | Local coordinate |
-| --- | --- |
-| R1 bit 0 input wire | `(60,22,43)` |
-| Supporting block | `(61,22,43)` |
-| East-facing inverter torch | `(62,22,43)` |
+| Landmark                                   | Local coordinate            |
+| ------------------------------------------ | --------------------------- |
+| R1 bit 0 input wire                        | `(60,22,43)`                |
+| Supporting block                           | `(61,22,43)`                |
+| East-facing inverter torch                 | `(62,22,43)`                |
 | R1 bit 0 storage / adjacent input repeater | `(62,22,39)` / `(62,22,40)` |
-| R3 bit 0 storage | `(66,22,39)` |
-| ADD / LDI signs | `(55,26,60)` / `(75,26,60)` |
-| ALU bit i | `(52,22+2i,18)` |
-| PC bit i | `(41,7+2i,15)` |
+| R3 bit 0 storage                           | `(66,22,39)`                |
+| ADD / LDI signs                            | `(55,26,60)` / `(75,26,60)` |
+| ALU bit i                                  | `(52,22+2i,18)`             |
+| PC bit i                                   | `(41,7+2i,15)`              |
 
 ## Hardware capture, 2026-10-18
 
@@ -70,7 +70,7 @@ register, manual-control, tick-rate, and ROM state were checked against the
 pre-test state. No hardware repairs were made for this website redesign.
 
 Two settled manual captures selected `LDI R1,0` and `LDI R1,1`. The input wire
-read power 0 / 15 respectively, and the *same* torch read lit=true / false.
+read power 0 / 15 respectively, and the _same_ torch read lit=true / false.
 The memory example uses native trace tick 350: R1 storage is off and locked,
 while its adjacent input repeater is on. R1 remains 165 while R2 receives 60.
 
@@ -80,13 +80,13 @@ encode `(powered ? 1 : 0) + (locked ? 2 : 0)`; wires retain analog strength.
 The browser never drops recorded transient values when seeking individual ticks.
 Real-time playback can naturally skip display frames depending on screen refresh.
 
-| Measurement | Game tick |
-| --- | --- |
-| ADD instruction bus settles to 48C1 | 443 |
-| ALU reaches 225 | 497 |
-| R3 reaches 225 | 509 |
-| Next PC advance | 569 |
-| ALU is 0 while R3 still holds 225 | 650 |
+| Measurement                         | Game tick |
+| ----------------------------------- | --------- |
+| ADD instruction bus settles to 48C1 | 443       |
+| ALU reaches 225                     | 497       |
+| R3 reaches 225                      | 509       |
+| Next PC advance                     | 569       |
+| ALU is 0 while R3 still holds 225   | 650       |
 
 The compact addition sequence passed at both 20 and 200 TPS in both register
 banks. A six-consecutive-instruction LDI/LDI/ADD/SUB/AND/XOR program also passed
