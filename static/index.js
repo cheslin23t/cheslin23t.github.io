@@ -17,6 +17,23 @@ if (screen) {
     });
   });
 }
+if ($("#printed-website")) {
+  const views = [...document.querySelectorAll("[data-printed-view]")];
+  views.forEach((button) => {
+    button.disabled = false;
+    button.addEventListener("click", () => {
+      const workflow = button.dataset.printedView === "workflow";
+      $("#printed-website").hidden = workflow;
+      $("#printed-workflow").hidden = !workflow;
+      $("#printed-context").textContent = workflow
+        ? "Fictional sample · local only"
+        : "Original storefront";
+      views.forEach((control) =>
+        control.setAttribute("aria-pressed", String(control === button)),
+      );
+    });
+  });
+}
 if ($("#order-state")) {
   function updateOrder(state) {
     const pending = state === "pending",

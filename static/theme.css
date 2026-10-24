@@ -38,6 +38,11 @@
   --accent: #006d77;
   --on-accent: #fff;
   --active: #dceced;
+  --section-bg: #f1f5f5;
+  --glass-bg: #f5f8f8;
+  --glass-edge: #cbd7d9;
+  --glass-sheen: #ffffffb3;
+  --glass-shadow: #172c3310;
   --stage: var(--surface);
   --thumb: var(--muted);
   --thumb-hover: var(--accent);
@@ -59,6 +64,11 @@
     --accent: #9dd6d8;
     --on-accent: #141619;
     --active: #293e42;
+    --section-bg: #1b2025;
+    --glass-bg: #20262b;
+    --glass-edge: #ffffff24;
+    --glass-sheen: #ffffff0d;
+    --glass-shadow: #00000026;
   }
 }
 body {

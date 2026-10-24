@@ -15,7 +15,8 @@ typography:
     fontFamily: "Plex Mono, ui-monospace, monospace"
 rounded:
   control: "5px"
-  artifact: "6px"
+  artifact: "14px"
+  header: "18px"
 spacing:
   gutter: "4.3vw"
 components:
@@ -44,19 +45,19 @@ Manrope is locally hosted at weights 400–700; Plex Mono identifies addresses, 
 
 ## Layout
 
-A compact introduction and four-link work index lead to four continuous project chapters. The project index is anchor navigation, not a selector hiding other work. Descriptions and artifacts share a consistent grid; individual artifacts are app screenshots, an order workflow, a command registry, and a CPU explanation. Minor projects form six smaller native disclosures. About and contact finish the page. Three short static engineering-note routes share the same shell; /cpu/ preserves the detailed physical walkthrough. Mobile stacks content in document flow. No scroll-jacking, forced full-height sections, or horizontal-only actions.
+The wordmark is ches.dev on the homepage, engineering notes, and CPU walkthrough. A compact introduction and four-link work index lead to four continuous project chapters. The project index is anchor navigation, not a selector hiding other work. Descriptions and artifacts share a consistent grid; individual artifacts are app screenshots, an order workflow, a command registry, and a CPU explanation. Full-width chapter bands alternate the base and --section-bg surfaces, separated by visible seams and open gutters. Minor projects form six smaller native disclosures. About and contact finish the page. Three short static engineering-note routes share the same shell; /cpu/ preserves the detailed physical walkthrough. Mobile keeps the desktop design intact while stacking content in document flow: a two-column navigation has 44px targets, and the Printed request/review panels stack below 480px. No scroll-jacking, forced full-height sections, or horizontal-only actions.
 
 ## Elevation & Depth
 
-Keep surfaces flat and restrained. A small shadow belongs only to authentic app captures. Do not generate project visuals or reconstruct fake product screens. No glows, magnetic controls, custom cursors, or decorative parallax.
+Use restrained glass-inspired chrome: a fine highlight, a translucent tint, and a shallow static shadow. Only the bounded navigation header may use backdrop blur (10px); artifact panels never use live blur. The header requires a 900px-or-wider, hover-capable device, no reduced motion/transparency, and browser support. static/appearance.js opts devices reporting at most 4GB RAM or four logical cores into the opaque, unblurred fallback before paint. Unknown capability hints, disabled JavaScript, and unsupported CSS use the solid header; enhanced blur requires both known hints to exceed those limits. No full-screen filters, animated refraction, or permanent GPU-layer promotion. Static surfaces keep the same contrast and geometry. A small shadow also belongs to authentic app captures. Do not generate project visuals or reconstruct fake product screens. No glows, magnetic controls, custom cursors, or decorative parallax.
 
 ## Shapes
 
-5px control and 6px artifact corners. Open text remains unboxed. Dividers encode section and workflow boundaries.
+5px control, 14px artifact, and 18px desktop header corners. The Printed view selector uses a 12px outer and 8px inner radius. Open text remains unboxed. Dividers encode section and workflow boundaries.
 
 ## Components
 
-static/index.css owns content layout and shared controls; static/index.js progressively enhances the homepage. All essential content and links work without JavaScript. Demo controls remain disabled until handlers are installed. Printed is explicitly fictional, local workflow state. JB-X demonstrates verified command help and aliases without third-party API requests. CPU uses the compact recorded program at addresses 1,2,3, preserving A58B/3C4B/48C1. Registers begin unknown until written; playback finishes after ADD without implying hardware HALT. Pause when offscreen or hidden. Keep full model/recording on /cpu/; do not rewrite hardware source data. Native details provide keyboard-operable minor-project disclosure. Clipboard failure has inline recovery. The system pointer, visible focus, 44px controls, semantic statuses, natural scrolling, and reduced-motion behavior apply throughout.
+static/index.css owns content layout and shared controls; static/index.js progressively enhances the homepage. All essential content and links work without JavaScript. Demo controls remain disabled until handlers are installed. Printed initially shows the authentic storefront artwork from the original project, with its own colors preserved. Native Storefront / Order workflow buttons switch the preview without discarding local workflow state. At tablet/desktop widths a shared CSS grid row reserves both panel sizes, so switching cannot move the next chapter; the inactive panel is visibility-hidden and inaccessible. Phones retain natural panel height. The workflow remains explicitly fictional and local; no orders are submitted. The screenshot is static: no particle loop, hue filter, or title animation from the original storefront runs inside the portfolio. JB-X demonstrates verified command help and aliases without third-party API requests. CPU uses the compact recorded program at addresses 1,2,3, preserving A58B/3C4B/48C1. Registers begin unknown until written; playback finishes after ADD without implying hardware HALT. Pause when offscreen or hidden. Keep full model/recording on /cpu/; do not rewrite hardware source data. Native details provide keyboard-operable minor-project disclosure. Clipboard failure has inline recovery. The system pointer, visible focus, 44px controls, semantic statuses, natural scrolling, and reduced-motion behavior apply throughout.
 
 ## Do's and Don'ts
 

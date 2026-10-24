@@ -1,4 +1,7 @@
 @import url("/static/theme.css");
+:root {
+  scroll-padding-top: 120px;
+}
 * {
   box-sizing: border-box;
 }
@@ -142,17 +145,30 @@ img {
   clip-path: inset(50%);
 }
 .site-header {
-  height: 88px;
-  margin: 0 var(--gutter);
+  position: sticky;
+  top: 12px;
+  z-index: 5;
+  height: 76px;
+  width: calc(100% - var(--gutter) * 2);
+  max-width: calc(1600px - var(--gutter) * 2);
+  margin: 16px auto 0;
+  padding: 0 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--line);
+  gap: 20px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 18px;
+  background: var(--glass-bg);
+  box-shadow:
+    inset 0 1px 0 var(--glass-sheen),
+    0 8px 24px var(--glass-shadow);
 }
 .wordmark {
   font-weight: 700;
-  letter-spacing: -0.09em;
-  font-size: 33px;
+  letter-spacing: -0.055em;
+  font-size: 26px;
+  white-space: nowrap;
 }
 .wordmark span {
   color: var(--accent);
@@ -246,9 +262,24 @@ main,
   color: var(--muted);
 }
 .project {
-  padding: 34px 0 65px;
-  border-bottom: 1px solid var(--line);
+  position: relative;
+  isolation: isolate;
+  margin: 28px 0;
+  padding: 52px 0 64px;
   scroll-margin-top: 25px;
+}
+.project::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 calc(-1 * var(--gutter));
+  border-block: 1px solid var(--line);
+  background: var(--bg);
+  pointer-events: none;
+}
+.project-printed::before,
+.project-cpu::before {
+  background: var(--section-bg);
 }
 .project-heading {
   display: grid;
@@ -303,11 +334,16 @@ main,
   color: var(--muted);
 }
 .artifact {
-  background: var(--surface);
+  background:
+    linear-gradient(135deg, var(--glass-sheen), transparent 45%), var(--surface);
   min-width: 0;
-  border-radius: 6px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 14px;
   overflow: hidden;
   align-self: start;
+  box-shadow:
+    inset 0 1px 0 var(--glass-sheen),
+    0 10px 26px var(--glass-shadow);
 }
 .artifact-heading {
   display: flex;
@@ -395,6 +431,63 @@ main,
 .flow-track .current {
   color: var(--accent);
   font-weight: 700;
+}
+.printed-view-controls {
+  display: flex;
+  gap: 5px;
+  margin: 16px 24px;
+  padding: 4px;
+  width: fit-content;
+  max-width: calc(100% - 48px);
+  border: 1px solid var(--glass-edge);
+  border-radius: 12px;
+  background: var(--bg);
+  box-shadow: inset 0 1px 0 var(--glass-sheen);
+}
+.printed-view-controls button {
+  border-color: transparent;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.printed-view-controls button[aria-pressed="true"] {
+  background: var(--surface);
+  border-color: var(--glass-edge);
+  color: var(--ink);
+  box-shadow: 0 2px 5px var(--glass-shadow);
+}
+.printed-views {
+  display: grid;
+  min-height: 390px;
+}
+.printed-panel {
+  grid-area: 1 / 1;
+  min-width: 0;
+}
+@media (min-width: 601px) {
+  /* Both panels size one grid row; switching views never moves the next chapter.
+     Visibility also removes the inactive panel's controls from focus and a11y. */
+  .printed-panel[hidden] {
+    display: block !important;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  #printed-workflow {
+    align-self: center;
+  }
+}
+.printed-capture {
+  display: block;
+  background: #10121e;
+}
+.printed-capture img {
+  width: 100%;
+  height: auto;
+}
+.printed-capture:focus-visible {
+  outline-offset: -5px;
+}
+.printed-website .artifact-bottom a {
+  gap: 8px;
 }
 .order-layout {
   display: grid;
@@ -562,7 +655,7 @@ main,
   min-height: 2em;
 }
 .other-projects {
-  padding: 10px 0 65px;
+  padding: 32px 0 65px;
 }
 .minor-list {
   border-top: 1px solid var(--line);
@@ -620,7 +713,7 @@ details[open] .disclosure {
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: 60px;
-  border-top: 1px solid var(--line);
+  border-top: 2px solid var(--line);
   padding: 65px 0;
 }
 .about h2 {
@@ -649,7 +742,7 @@ details[open] .disclosure {
   color: var(--muted);
 }
 .contact {
-  border-top: 1px solid var(--line);
+  border-top: 2px solid var(--line);
   padding: 55px 0 70px;
 }
 .email {
@@ -808,7 +901,11 @@ details[open] .disclosure {
     font-size: 16px;
   }
   .site-header {
-    height: 74px;
+    height: 96px;
+    padding: 0 14px;
+    gap: 12px;
+    top: 8px;
+    border-radius: 14px;
   }
   nav {
     gap: 17px;
@@ -869,8 +966,9 @@ details[open] .disclosure {
     font-size: 10px;
   }
   .project {
-    padding-top: 22px;
+    padding-top: 32px;
     padding-bottom: 40px;
+    margin: 20px 0;
   }
   .project-heading {
     grid-template-columns: 42px 1fr;
@@ -1138,21 +1236,79 @@ details[open] .disclosure {
     grid-template-columns: 55px 1fr;
   }
   .site-header nav {
-    max-width: 245px;
+    display: grid;
+    grid-template-columns: max-content max-content;
+    max-width: none;
+    font-size: 12px;
     justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: 0 15px;
+    gap: 0 14px;
   }
   .site-header nav a {
-    padding: 6px 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-height: 44px;
+    padding: 8px 0;
   }
   .site-header nav a:nth-child(2) {
-    display: block;
+    display: inline-flex;
   }
 }
 @media (max-width: 360px) {
   .site-header nav {
-    max-width: 205px;
-    font-size: 10px;
+    font-size: 12px;
+  }
+  .wordmark {
+    font-size: 23px;
+  }
+}
+
+/* One bounded blur surface only. Content panels use static highlights instead. */
+@supports (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
+  @media (min-width: 900px) and (hover: hover) and (prefers-reduced-transparency: no-preference) and (prefers-reduced-motion: no-preference) {
+    :root[data-effects="glass"] .site-header {
+      background: color-mix(in srgb, var(--surface) 82%, transparent);
+      -webkit-backdrop-filter: blur(10px) saturate(1.12);
+      backdrop-filter: blur(10px) saturate(1.12);
+    }
+  }
+}
+@media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+  .site-header,
+  .artifact,
+  .printed-view-controls {
+    background: var(--surface);
+    box-shadow: none;
+  }
+}
+@media (max-width: 600px) {
+  .printed-view-controls {
+    margin: 14px 16px;
+    max-width: calc(100% - 32px);
+  }
+  .printed-view-controls button {
+    font-size: 11px;
+    padding-inline: 12px;
+  }
+  .printed-views {
+    min-height: 0;
+  }
+}
+@media (max-width: 480px) {
+  .order-layout {
+    grid-template-columns: 1fr;
+  }
+  .order-details dl > div {
+    display: flex;
+  }
+  .order-review {
+    padding: 20px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+  .order-review strong {
+    font-size: 21px;
   }
 }

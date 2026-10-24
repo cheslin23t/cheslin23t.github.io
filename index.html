@@ -10,14 +10,15 @@
     />
     <title>Colin Heslin — Software & systems</title>
     <link rel="icon" href="/static/assets/favicon.png" />
+    <script src="/static/appearance.js"></script>
     <link rel="stylesheet" href="/static/index.css" />
     <script src="/static/index.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
-      <a class="wordmark" href="/" aria-label="Colin Heslin, home"
-        >ch<span>.</span></a
+      <a class="wordmark" href="/" aria-label="ches.dev, home"
+        >ches<span>.</span>dev</a
       >
       <nav aria-label="Main navigation">
         <a href="/#work">Work</a><a href="/#other-projects">Other projects</a
@@ -212,10 +213,10 @@
         </div>
         <div class="project-layout">
           <div class="project-copy">
-            <h4>From a customer request to a print record.</h4>
+            <h4>A storefront, backed by an order workflow.</h4>
             <p>
-              An order-management application I built for a 3D-printing business
-              with friends.
+              The public website and order-management application I built for a
+              3D-printing business with friends.
             </p>
             <p class="tech">Python · Flask · MySQL</p>
             <div class="engineering-note">
@@ -241,65 +242,136 @@
           </div>
           <div class="artifact print-art">
             <div class="artifact-heading">
-              <span>Interactive walkthrough</span
-              ><span>Fictional sample · local only</span>
+              <span>Printed / project preview</span
+              ><span id="printed-context">Original storefront</span>
             </div>
-            <div class="flow-track" aria-label="Order workflow">
-              <span id="pending-phase" class="current">Submission</span
-              ><span aria-hidden="true"
-                ><svg
-                  class="icon"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  aria-hidden="true"
+            <div
+              class="printed-view-controls"
+              role="group"
+              aria-label="Printed preview"
+            >
+              <button
+                type="button"
+                data-printed-view="website"
+                aria-pressed="true"
+                aria-controls="printed-website"
+                disabled
+              >
+                Storefront
+              </button>
+              <button
+                type="button"
+                data-printed-view="workflow"
+                aria-pressed="false"
+                aria-controls="printed-workflow"
+                disabled
+              >
+                Order workflow
+              </button>
+            </div>
+            <div class="printed-views">
+              <section
+                class="printed-panel printed-website"
+                id="printed-website"
+                aria-label="Printed storefront"
+              >
+                <a
+                  class="printed-capture"
+                  href="https://ches.dev/3D-Printing-Order-Management/index.html"
+                  aria-label="Open the original Printed website"
                 >
-                  <path d="M4 12h16m-7-7 7 7-7 7" /></svg></span
-              ><span id="active-phase">Print record</span>
-            </div>
-            <div class="order-layout">
-              <div class="order-details">
-                <span class="micro">Customer request</span>
-                <h4>Desk organizer</h4>
-                <dl>
-                  <div>
-                    <dt>Customer</dt>
-                    <dd>Sample customer</dd>
-                  </div>
-                  <div>
-                    <dt>Size</dt>
-                    <dd>120 × 80 × 50 mm</dd>
-                  </div>
-                  <div>
-                    <dt>Budget</dt>
-                    <dd>$25</dd>
-                  </div>
-                  <div>
-                    <dt>Payment</dt>
-                    <dd>Cash</dd>
-                  </div>
-                </dl>
-              </div>
-              <div class="order-review">
-                <span class="micro">Admin review</span
-                ><strong id="order-state">Pending submission</strong>
-                <p id="order-description">
-                  Approve to create an active print record, or deny the sample
-                  request.
-                </p>
-                <div class="button-row">
-                  <button id="approve" class="primary" disabled>Approve</button
-                  ><button id="deny" disabled>Deny</button
-                  ><button id="hide-order" disabled hidden>Hide record</button>
+                  <img
+                    src="/static/assets/printed-storefront.png"
+                    width="919"
+                    height="535"
+                    loading="lazy"
+                    alt="Original Printed storefront artwork: a coral and orange Printed wordmark over a dark grid and outlined mountain peaks, with the Irvington tagline."
+                  />
+                </a>
+                <div class="artifact-bottom">
+                  <p>The storefront for our 3D-printing business.</p>
+                  <a
+                    href="https://ches.dev/3D-Printing-Order-Management/index.html"
+                    >Visit Printed
+                    <svg
+                      class="icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 19 19 5M5 5h14v14" /></svg
+                  ></a>
                 </div>
-              </div>
-            </div>
-            <div class="artifact-bottom">
-              <p id="order-status" role="status">
-                No order has been submitted to a server.
-              </p>
-              <button id="reset-order" disabled>Restart example</button>
+              </section>
+              <section
+                class="printed-panel"
+                id="printed-workflow"
+                aria-label="Local order workflow"
+                hidden
+              >
+                <div class="flow-track" aria-label="Order workflow">
+                  <span id="pending-phase" class="current">Submission</span
+                  ><span aria-hidden="true"
+                    ><svg
+                      class="icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      aria-hidden="true"
+                    >
+                      <path d="M4 12h16m-7-7 7 7-7 7" /></svg></span
+                  ><span id="active-phase">Print record</span>
+                </div>
+                <div class="order-layout">
+                  <div class="order-details">
+                    <span class="micro">Customer request</span>
+                    <h4>Desk organizer</h4>
+                    <dl>
+                      <div>
+                        <dt>Customer</dt>
+                        <dd>Sample customer</dd>
+                      </div>
+                      <div>
+                        <dt>Size</dt>
+                        <dd>120 × 80 × 50 mm</dd>
+                      </div>
+                      <div>
+                        <dt>Budget</dt>
+                        <dd>$25</dd>
+                      </div>
+                      <div>
+                        <dt>Payment</dt>
+                        <dd>Cash</dd>
+                      </div>
+                    </dl>
+                  </div>
+                  <div class="order-review">
+                    <span class="micro">Admin review</span
+                    ><strong id="order-state">Pending submission</strong>
+                    <p id="order-description">
+                      Approve to create an active print record, or deny the
+                      sample request.
+                    </p>
+                    <div class="button-row">
+                      <button id="approve" class="primary" disabled>
+                        Approve</button
+                      ><button id="deny" disabled>Deny</button
+                      ><button id="hide-order" disabled hidden>
+                        Hide record
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="artifact-bottom">
+                  <p id="order-status" role="status">
+                    No order has been submitted to a server.
+                  </p>
+                  <button id="reset-order" disabled>Restart example</button>
+                </div>
+              </section>
             </div>
           </div>
         </div>
