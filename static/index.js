@@ -3,13 +3,15 @@
 const $ = (selector) => document.querySelector(selector);
 const screen = $("#app-screen");
 if (screen) {
+  const screenNames = ["Home", "About", "Settings"];
   const controls = [...document.querySelectorAll("[data-screen]")];
   controls.forEach((button) => {
     button.disabled = false;
     button.addEventListener("click", () => {
-      const n = button.dataset.screen;
-      screen.src = `/static/assets/badavo-screen-${n}.jpg`;
-      screen.alt = `Published BadAvo App Store screenshot ${n} of 3`;
+      const n = Number(button.dataset.screen);
+      const name = screenNames[n - 1];
+      screen.src = `/static/assets/badavo-${name.toLowerCase()}.png`;
+      screen.alt = `BadAvo ${name} screen, supplied by Colin Heslin`;
       controls.forEach((control) =>
         control.setAttribute("aria-pressed", String(control === button)),
       );

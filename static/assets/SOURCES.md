@@ -1,6 +1,6 @@
 # Authentic portfolio assets
 
-BadAvo screenshots are the app's published iPhone screenshots from Apple's public lookup API, app ID 6746645776, retrieved 2026-10-24. Local display order: Home, About, Settings. They are unmodified screenshots, not generated interface mockups. Source: https://apps.apple.com/us/app/badavo/id6746645776 . Preserve the original interface colors in either portfolio theme.
+BadAvo screenshots were supplied by Colin Heslin in this chat on October 24, 2026 (New York time). Display order: Home, About, Settings. Files badavo-home.png, badavo-about.png, and badavo-settings.png preserve the attached 942 × 2048 PNG images without pixel edits. Rounding, borders, and sizing are applied in CSS. These replace the older App Store captures; the current screenshots are not described as published App Store assets. Preserve their original interface colors in either portfolio theme.
 
 The CPU overview is generated from the actual exported schematic. See ../../cpu/README.md for source, checksum, and measured recording provenance.
 

@@ -390,12 +390,12 @@ main,
   align-items: center;
 }
 .app-screens img {
-  max-height: 340px;
+  max-height: 460px;
   width: auto;
   justify-self: center;
   box-shadow: 0 8px 24px #00000012;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: 18px;
 }
 .screen-note h4 {
   font-size: 24px;
@@ -881,7 +881,7 @@ details[open] .disclosure {
     grid-template-columns: 1fr 1fr;
   }
   .app-screens img {
-    max-height: 350px;
+    max-height: 460px;
   }
   .project-heading > .micro {
     font-size: 10px;
@@ -1310,5 +1310,31 @@ details[open] .disclosure {
   }
   .order-review strong {
     font-size: 21px;
+  }
+}
+@media (max-width: 600px) {
+  .app-screens {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 24px 20px;
+  }
+  .app-screens img {
+    max-height: 430px;
+    max-width: min(100%, 240px);
+    border-radius: 18px;
+  }
+  .screen-note {
+    text-align: center;
+    max-width: 320px;
+    margin-inline: auto;
+  }
+  .screen-note h4 {
+    font-size: 22px;
+  }
+  .screen-note p {
+    font-size: 12px;
+  }
+  .screen-controls {
+    justify-content: center;
   }
 }
