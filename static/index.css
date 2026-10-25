@@ -475,6 +475,33 @@ main,
     align-self: center;
   }
 }
+/* Touch browsing passes through the frame until the visitor chooses to use it. */
+.printed-site.scroll-through {
+  pointer-events: none;
+}
+.printed-touch-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.printed-touch-controls[hidden] {
+  display: none;
+}
+.printed-touch-controls p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.printed-touch-controls button {
+  flex-shrink: 0;
+  font-size: 12px;
+  max-width: 52%;
+}
+
 .printed-capture {
   display: block;
   background: #10121e;
@@ -1195,7 +1222,7 @@ details[open] .disclosure {
 @supports (
   (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
 ) {
-  @media (min-width: 900px) and (hover: hover) and (prefers-reduced-transparency: no-preference) and (prefers-reduced-motion: no-preference) {
+  @media (prefers-reduced-motion: no-preference) {
     :root[data-effects="glass"] .site-header {
       background: color-mix(in srgb, var(--surface) 82%, transparent);
       -webkit-backdrop-filter: blur(10px) saturate(1.12);

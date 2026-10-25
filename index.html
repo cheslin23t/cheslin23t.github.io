@@ -284,16 +284,30 @@
                 id="printed-website"
                 aria-label="Printed storefront"
               >
+                <div class="printed-touch-controls" hidden>
+                  <p id="printed-touch-hint">
+                    Swipe to keep exploring the portfolio.
+                  </p>
+                  <button
+                    type="button"
+                    id="printed-touch-toggle"
+                    disabled
+                    aria-pressed="false"
+                    aria-describedby="printed-touch-hint"
+                  >
+                    Use Printed
+                  </button>
+                </div>
                 <iframe
                   class="printed-site"
-                  src="/printed-preview/"
+                  src="https://ches.dev/3D-Printing-Order-Management/index.html?embed=1"
                   title="Printed interactive storefront and customer order form"
                   loading="lazy"
                   sandbox="allow-scripts allow-forms allow-popups"
                   referrerpolicy="no-referrer"
                 ></iframe>
                 <div class="artifact-bottom">
-                  <p>Explore the storefront and order form right here.</p>
+                  <p>The original published site, running here.</p>
                   <a
                     href="https://ches.dev/3D-Printing-Order-Management/index.html"
                     >Visit Printed
