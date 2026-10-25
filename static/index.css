@@ -1195,7 +1195,7 @@ details[open] .disclosure {
 @supports (
   (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
 ) {
-  @media (min-width: 900px) and (hover: hover) and (prefers-reduced-transparency: no-preference) and (prefers-reduced-motion: no-preference) {
+  @media (prefers-reduced-motion: no-preference) {
     :root[data-effects="glass"] .site-header {
       background: color-mix(in srgb, var(--surface) 82%, transparent);
       -webkit-backdrop-filter: blur(10px) saturate(1.12);
