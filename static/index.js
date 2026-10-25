@@ -20,6 +20,41 @@ if (screen) {
   });
 }
 if ($("#printed-website")) {
+  const frame = $(".printed-site");
+  const touchControls = $(".printed-touch-controls");
+  const touchToggle = $("#printed-touch-toggle");
+  const touch = matchMedia("(any-pointer: coarse)");
+  let interacting = false;
+  function setPrintedInteraction(active) {
+    interacting = touch.matches && active;
+    touchControls.hidden = !touch.matches;
+    frame.inert = touch.matches && !interacting;
+    frame.classList.toggle("scroll-through", touch.matches && !interacting);
+    touchToggle.setAttribute("aria-pressed", String(interacting));
+    touchToggle.textContent = interacting
+      ? "Resume page scrolling"
+      : "Use Printed";
+    $("#printed-touch-hint").textContent = interacting
+      ? "Printed is ready for taps and scrolling."
+      : "Swipe to keep exploring the portfolio.";
+  }
+  touchToggle.disabled = false;
+  touchToggle.addEventListener("click", () =>
+    setPrintedInteraction(!interacting),
+  );
+  touch.addEventListener("change", () => setPrintedInteraction(false));
+  // A new gesture outside the embedded document resumes normal browsing.
+  document.addEventListener(
+    "touchstart",
+    (event) => {
+      if (!touchControls.contains(event.target)) setPrintedInteraction(false);
+    },
+    { passive: true },
+  );
+  new IntersectionObserver(([entry]) => {
+    if (!entry.isIntersecting) setPrintedInteraction(false);
+  }).observe(frame);
+  setPrintedInteraction(false);
   const views = [...document.querySelectorAll("[data-printed-view]")];
   views.forEach((button) => {
     button.disabled = false;
