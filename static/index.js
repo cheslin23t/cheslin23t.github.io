@@ -28,55 +28,13 @@ if ($("#printed-website")) {
       $("#printed-website").hidden = workflow;
       $("#printed-workflow").hidden = !workflow;
       $("#printed-context").textContent = workflow
-        ? "Fictional sample · local only"
-        : "Original storefront";
+        ? "HTML · JavaScript · Flask · MySQL"
+        : "Interactive storefront";
       views.forEach((control) =>
         control.setAttribute("aria-pressed", String(control === button)),
       );
     });
   });
-}
-if ($("#order-state")) {
-  function updateOrder(state) {
-    const pending = state === "pending",
-      active = state === "active";
-    $("#order-state").textContent = {
-      pending: "Pending submission",
-      active: "Active print record",
-      denied: "Submission denied",
-      hidden: "Record hidden",
-    }[state];
-    $("#order-description").textContent = {
-      pending:
-        "Approve to create an active print record, or deny the sample request.",
-      active:
-        "The model, size, budget, and payment details are copied into the print record. Printed, paid, and delivered begin unset.",
-      denied:
-        "The sample leaves the pending queue. No print record is created.",
-      hidden: "The sample record is removed from the active list.",
-    }[state];
-    $("#approve").hidden = !pending;
-    $("#deny").hidden = !pending;
-    $("#hide-order").hidden = !active;
-    $("#pending-phase").classList.toggle("current", pending);
-    $("#active-phase").classList.toggle("current", active);
-    $("#order-status").textContent = pending
-      ? "No order has been submitted to a server."
-      : "Sample updated in this browser only.";
-  }
-  for (const [id, state] of [
-    ["approve", "active"],
-    ["deny", "denied"],
-    ["hide-order", "hidden"],
-    ["reset-order", "pending"],
-  ]) {
-    const button = $("#" + id);
-    button.disabled = false;
-    button.addEventListener("click", () => {
-      updateOrder(state);
-      if (id !== "reset-order") $("#reset-order").focus();
-    });
-  }
 }
 if ($("#command-form")) {
   const aliases = ["value", "v", "val", "item", "it", "itm"];
