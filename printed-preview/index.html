@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Printed — Interactive storefront</title>
+    <link rel="stylesheet" href="bootstrap.min.css" />
+    <link rel="stylesheet" href="original.css" />
+    <link rel="stylesheet" href="preview.css" />
+    <script src="preview.js" defer></script>
+  </head>
+  <body>
+    <a class="preview-skip" href="#main">Skip to storefront</a>
+    <nav class="preview-nav">
+      <a href="#storefront">Printed</a
+      ><button type="button" data-open-order disabled>Create order</button>
+    </nav>
+    <main id="main">
+      <section id="storefront">
+        <div class="preview-hero">
+          <div class="heroSubP">
+            <p>Introducing</p>
+          </div>
+          <div class="hero">
+            <div class="heroT">
+              <h2>Printed</h2>
+              <h2>Printed</h2>
+            </div>
+          </div>
+          <p class="heroP">Irvington's #1 3D printing supplier.</p>
+          <div class="mountains">
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+        </div>
+        <div class="preview-action">
+          <button
+            type="button"
+            data-open-order
+            class="preview-primary"
+            disabled
+          >
+            Create order
+          </button>
+        </div>
+        <section class="preview-quality">
+          <p>Only the best</p>
+          <h2>Smooth. Sleek. Strong. Premium.</h2>
+          <img
+            src="model.png"
+            alt="The original Printed green 3D Benchy model"
+            width="1000"
+            height="900"
+            loading="lazy"
+          />
+        </section>
+      </section>
+      <section id="order-view" class="preview-order" hidden>
+        <h1>Create an order</h1>
+        <p class="preview-note">
+          Explore the form. Details stay in this page; no order or payment is
+          sent.
+        </p>
+        <p id="form-error" role="alert" hidden></p>
+        <form id="request-form" novalidate>
+          <div
+            class="card text-center"
+            style="margin-left: 3%; margin-right: 3%"
+          >
+            <div class="card-header">
+              <h4 class="card-title">Order Menu</h4>
+            </div>
+            <div class="card-body --bs-secondary-color">
+              <div style="margin-left: 3%; margin-right: 3%">
+                <h2 class="h6">Contact information</h2>
+                <div class="row">
+                  <div class="col">
+                    <div class="input-group mb-3">
+                      <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Full Name"
+                        id="fullName"
+                        name="fullName"
+                        aria-label="Full name"
+                        autocomplete="off"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="col">
+                    <div class="input-group mb-3">
+                      <input
+                        type="text"
+                        class="form-control"
+                        placeholder="name@example.com"
+                        id="email"
+                        name="email"
+                        autocomplete="off"
+                        aria-label="Email Address"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="col">
+                    <div class="input-group mb-3">
+                      <span class="input-group-text">+1</span>
+                      <input
+                        type="tel"
+                        class="form-control"
+                        placeholder="(123) 456 - 7890"
+                        id="phoneNumber"
+                        name="phoneNumber"
+                        aria-label="Phone Number"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <hr />
+                <br />
+                <h2 class="h6">Print information</h2>
+                <div class="mb-3">
+                  <div class="row">
+                    <div class="col">
+                      <div class="mb-3">
+                        <label for="customModelAddon" class="form-label"
+                          >Would you like a custom-made model? (10% additional
+                          cost)</label
+                        >
+                        <select
+                          class="form-select"
+                          id="customModelAddon"
+                          aria-label="Custom model addon"
+                          name="printStuff"
+                        >
+                          <option value="no" selected>No</option>
+                          <option value="yes">Yes</option>
+                        </select>
+                      </div>
+
+                      <div id="customModelQuestions3" class="collapse">
+                        <div class="mb-3">
+                          <label for="modelImage" class="form-label"
+                            >Link of image to refer to</label
+                          >
+                          <input
+                            type="url"
+                            class="form-control"
+                            id="modelImage"
+                            name="modelImage"
+                            placeholder="https://fbi.cults3d.com/uploads/collection/shot_en/154/benchy_boat_slide.jpg"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col">
+                      <div id="customModelQuestions2" class="collapse">
+                        <label for="basic-url" class="form-label"
+                          >Find a 3D model online</label
+                        >
+                        <div class="input-group">
+                          <span class="input-group-text" id="basic-addon3">
+                            <a
+                              href="https://www.thingiverse.com/?page=1&order_print=0&sort=popular&posted_after=now-30d"
+                              target="_blank"
+                              >https://thingiverse.com/thing:</a
+                            >
+                          </span>
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="basic-url"
+                            required
+                            aria-describedby="basic-addon3"
+                            placeholder="6749943"
+                            name="thingiverseUrl"
+                          />
+                        </div>
+                        <div class="form-text" id="basic-addon4">
+                          Remember to copy ONLY the numbers right after the
+                          colon : at the end of the link.
+                        </div>
+                      </div>
+                      <div id="customModelQuestions" class="collapse">
+                        <div class="mb-3">
+                          <label for="modelDetails" class="form-label"
+                            >Describe the custom model you'd like</label
+                          >
+                          <textarea
+                            style="resize: none"
+                            class="form-control"
+                            id="modelDetails"
+                            rows="1"
+                            placeholder="Enter your model description"
+                            name="modelDetails"
+                          ></textarea>
+                        </div>
+                        <div class="mb-3">
+                          <label for="modelSize" class="form-label"
+                            >Size of Model</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="modelSize"
+                            name="modelSize"
+                            placeholder="3in Wide 4in Length 6in Tall"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div id="customModelQuestions4" class="collapse">
+                      <div class="mb-3">
+                        <label for="additionalNotes" class="form-label"
+                          >Additional Notes</label
+                        >
+                        <textarea
+                          style="resize: none"
+                          class="form-control"
+                          name="additionalNotes"
+                          id="additionalNotes"
+                          rows="3"
+                          placeholder="Make sure part A and part B are printed separately..."
+                        ></textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <hr />
+              <br />
+              <h2 class="h6">Pricing</h2>
+              <div class="row">
+                <div class="col">
+                  <div class="mb-3">
+                    <label for="refer" class="form-label"
+                      >Name of Referrer (Leave blank if N/A)</label
+                    >
+                    <select
+                      class="form-select"
+                      id="refer"
+                      aria-label="Referrer"
+                      name="Referrer"
+                    >
+                      <option value="None" selected>N/A</option>
+                      <option value="Matthew">Matthew Berger</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col">
+                  <label for="expectedAmount" class="form-label">Budget</label>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text">$</span>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="expectedAmount"
+                      aria-label="Amount (to the nearest dollar)"
+                      placeholder="25"
+                      name="budget"
+                      required
+                    />
+                    <span class="input-group-text">.00</span>
+                  </div>
+                  <div class="form-text" id="expectedAmountText">
+                    We will work to make the print match your budget by
+                    adjusting size, material, and quality. We will let you know
+                    if you're overpaying even after we use our highest quality
+                    materials.
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="mb-3">
+                    <label for="payment" class="form-label"
+                      >Payment Method</label
+                    >
+                    <select
+                      class="form-select"
+                      id="payment"
+                      aria-label="Payment preference"
+                      name="Payment"
+                    >
+                      <option value="Venmo" selected>Venmo</option>
+                      <option value="Cash">Cash</option>
+                      <option value="Credit / Debit Card">
+                        Credit / Debit Card (Increased Fees)
+                      </option>
+                    </select>
+                  </div>
+                  <div class="form-text" id="payment-help">
+                    You will not be paying now. We just need this information on
+                    record to account for certain costs such as transaction
+                    fees. Venmo and Cash are the best options to avoid these.<br />A
+                    maximum of $1.50 worth of coins are allowed for the cash
+                    option. The rest must be in dollar bills.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-footer text-body-secondary">
+              <button
+                disabled
+                type="button"
+                class="btn btn-secondary"
+                id="cancel-order"
+              >
+                Cancel
+              </button>
+              <button disabled type="submit" class="btn btn-primary">
+                Preview request
+              </button>
+            </div>
+          </div>
+        </form>
+      </section>
+      <section id="receipt" class="preview-receipt" hidden>
+        <h1>Your request</h1>
+        <p>
+          Here is how the submitted details are structured. Nothing has been
+          sent.
+        </p>
+        <dl id="receipt-fields"></dl>
+        <button disabled type="button" id="edit-request">Edit request</button
+        ><button disabled type="button" id="new-request">Start again</button>
+      </section>
+    </main>
+  </body>
+</html>

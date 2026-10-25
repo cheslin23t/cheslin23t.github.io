@@ -9,7 +9,13 @@
       content="Colin Heslin — backend systems, developer tools, iOS apps, and computer architecture. Explore the projects and the engineering behind them."
     />
     <title>Printed — Engineering notes — Colin Heslin</title>
-    <link rel="icon" href="/static/assets/favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="/static/assets/favicon.svg" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="64x64"
+      href="/static/assets/favicon.png?v=2"
+    />
     <script src="/static/appearance.js"></script>
     <link rel="stylesheet" href="/static/index.css" />
     <script src="/static/index.js" defer></script>
@@ -55,7 +61,7 @@
         >
         <h1>Printed<span class="accent">.</span></h1>
         <p class="case-deck">
-          Customer intake and admin review for a 3D-printing business.
+          A customer order form backed by Python, Flask, and MySQL.
         </p>
         <a
           class="text-link"
@@ -83,33 +89,54 @@
             <h2>Purpose</h2>
             <p>
               In 2024, my friends and I started a 3D-printing business. I built
-              software to connect customer requests with the admin workflow.
+              a website where customers could describe a print and provide the
+              details needed to prepare it.
             </p>
           </section>
           <section>
-            <h2>Implementation</h2>
+            <h2>Customer interface</h2>
             <p>
-              The Flask application separates customer submissions from accepted
-              print records. The intake captures model details, size, budget,
-              payment method, and contact information. Admin review approves or
-              denies submissions.
+              HTML and Bootstrap structure the storefront and order form.
+              Customers can supply contact information, a budget, payment
+              preference, and either a Thingiverse model ID or a description,
+              reference image, and dimensions for a custom model.
             </p>
           </section>
           <section>
-            <h2>Design</h2>
+            <h2>JavaScript</h2>
             <p>
-              The homepage opens with the original storefront artwork. Its Order
-              workflow view shows how submitted details become a print record,
-              using fictional data and local browser state.
+              Conditional fields adapt the form to the type of model requested.
+              Choosing a custom model reveals description, image-reference, and
+              size fields; choosing an existing model requests its Thingiverse
+              ID.
             </p>
           </section>
           <section>
-            <h2>Limits</h2>
+            <h2>Python and Flask</h2>
             <p>
-              The walkthrough does not submit real orders or connect to a
-              database. It demonstrates the intended source workflow, not
-              current deployment readiness. Editing paid, printed, or delivered
-              status is not demonstrated.
+              The order route is organized in a Flask blueprint. POST
+              /order/submit checks the expected field types, validates the
+              whole-number budget and supported payment method, and normalizes
+              the model information before storage.
+            </p>
+          </section>
+          <section>
+            <h2>MySQL</h2>
+            <p>
+              A database helper supplies the connection. A parameterized INSERT
+              stores the customer's contact details, budget, payment preference,
+              referral, and model requirements in the Submissions table,
+              followed by a database commit.
+            </p>
+          </section>
+          <section>
+            <h2>Embedded version</h2>
+            <p>
+              The portfolio runs an adapted version of the original storefront
+              and customer form, without the initial demo dialog or admin
+              controls. Its request summary stays in page memory: it does not
+              send an order, take payment, or run the Flask/MySQL backend. The
+              source links show that original backend separately.
             </p>
           </section>
         </div>

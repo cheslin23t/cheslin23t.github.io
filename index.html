@@ -9,7 +9,13 @@
       content="Colin Heslin — backend systems, developer tools, iOS apps, and computer architecture. Explore the projects and the engineering behind them."
     />
     <title>Colin Heslin — Software & systems</title>
-    <link rel="icon" href="/static/assets/favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="/static/assets/favicon.svg" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="64x64"
+      href="/static/assets/favicon.png?v=2"
+    />
     <script src="/static/appearance.js"></script>
     <link rel="stylesheet" href="/static/index.css" />
     <script src="/static/index.js" defer></script>
@@ -218,12 +224,15 @@
               The public website and order-management application I built for a
               3D-printing business with friends.
             </p>
-            <p class="tech">Python · Flask · MySQL</p>
+            <p class="tech">
+              HTML · Bootstrap · JavaScript · Python · Flask · MySQL
+            </p>
             <div class="engineering-note">
               <span class="micro">The workflow</span>
               <p>
-                Customer intake and admin review are separate steps. An accepted
-                submission becomes a tracked print record.
+                HTML and JavaScript collect the customer’s requirements. A
+                Python/Flask route validates the form and stores structured
+                order data in MySQL.
               </p>
             </div>
             <a class="text-link" href="/work/printed/"
@@ -243,7 +252,7 @@
           <div class="artifact print-art">
             <div class="artifact-heading">
               <span>Printed / project preview</span
-              ><span id="printed-context">Original storefront</span>
+              ><span id="printed-context">Interactive storefront</span>
             </div>
             <div
               class="printed-view-controls"
@@ -275,21 +284,16 @@
                 id="printed-website"
                 aria-label="Printed storefront"
               >
-                <a
-                  class="printed-capture"
-                  href="https://ches.dev/3D-Printing-Order-Management/index.html"
-                  aria-label="Open the original Printed website"
-                >
-                  <img
-                    src="/static/assets/printed-storefront.png"
-                    width="919"
-                    height="535"
-                    loading="lazy"
-                    alt="Original Printed storefront artwork: a coral and orange Printed wordmark over a dark grid and outlined mountain peaks, with the Irvington tagline."
-                  />
-                </a>
+                <iframe
+                  class="printed-site"
+                  src="/printed-preview/"
+                  title="Printed interactive storefront and customer order form"
+                  loading="lazy"
+                  sandbox="allow-scripts allow-forms allow-popups"
+                  referrerpolicy="no-referrer"
+                ></iframe>
                 <div class="artifact-bottom">
-                  <p>The storefront for our 3D-printing business.</p>
+                  <p>Explore the storefront and order form right here.</p>
                   <a
                     href="https://ches.dev/3D-Printing-Order-Management/index.html"
                     >Visit Printed
@@ -306,71 +310,57 @@
                 </div>
               </section>
               <section
-                class="printed-panel"
+                class="printed-panel workflow-explainer"
                 id="printed-workflow"
-                aria-label="Local order workflow"
+                aria-label="Printed order workflow and technologies"
                 hidden
               >
-                <div class="flow-track" aria-label="Order workflow">
-                  <span id="pending-phase" class="current">Submission</span
-                  ><span aria-hidden="true"
-                    ><svg
-                      class="icon"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                      aria-hidden="true"
-                    >
-                      <path d="M4 12h16m-7-7 7 7-7 7" /></svg></span
-                  ><span id="active-phase">Print record</span>
-                </div>
-                <div class="order-layout">
-                  <div class="order-details">
-                    <span class="micro">Customer request</span>
-                    <h4>Desk organizer</h4>
-                    <dl>
-                      <div>
-                        <dt>Customer</dt>
-                        <dd>Sample customer</dd>
-                      </div>
-                      <div>
-                        <dt>Size</dt>
-                        <dd>120 × 80 × 50 mm</dd>
-                      </div>
-                      <div>
-                        <dt>Budget</dt>
-                        <dd>$25</dd>
-                      </div>
-                      <div>
-                        <dt>Payment</dt>
-                        <dd>Cash</dd>
-                      </div>
-                    </dl>
-                  </div>
-                  <div class="order-review">
-                    <span class="micro">Admin review</span
-                    ><strong id="order-state">Pending submission</strong>
-                    <p id="order-description">
-                      Approve to create an active print record, or deny the
-                      sample request.
+                <h4>From form fields to a database record.</h4>
+                <p>
+                  The customer-facing flow I built, using HTML, Bootstrap,
+                  JavaScript, Python, Flask, and MySQL.
+                </p>
+                <ol class="technology-flow">
+                  <li>
+                    <span class="micro">HTML + Bootstrap</span
+                    ><strong>Collect the request</strong>
+                    <p>
+                      Contact details, a model link or custom-model description,
+                      dimensions, budget, and payment preference.
                     </p>
-                    <div class="button-row">
-                      <button id="approve" class="primary" disabled>
-                        Approve</button
-                      ><button id="deny" disabled>Deny</button
-                      ><button id="hide-order" disabled hidden>
-                        Hide record
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <div class="artifact-bottom">
-                  <p id="order-status" role="status">
-                    No order has been submitted to a server.
-                  </p>
-                  <button id="reset-order" disabled>Restart example</button>
-                </div>
+                  </li>
+                  <li>
+                    <span class="micro">JavaScript</span
+                    ><strong>Adapt the form</strong>
+                    <p>
+                      Show the relevant fields for an existing Thingiverse model
+                      or a custom-made model, and update the required inputs.
+                    </p>
+                  </li>
+                  <li>
+                    <span class="micro">Python + Flask</span
+                    ><strong>Validate the submission</strong>
+                    <p>
+                      The <code>POST /order/submit</code> route checks the
+                      expected field types, whole-number budget, and supported
+                      payment methods.
+                    </p>
+                  </li>
+                  <li>
+                    <span class="micro">MySQL</span
+                    ><strong>Store structured data</strong>
+                    <p>
+                      A parameterized <code>INSERT</code> writes the customer's
+                      details and model requirements to the
+                      <code>Submissions</code> table.
+                    </p>
+                  </li>
+                </ol>
+                <a
+                  class="text-link"
+                  href="https://github.com/cheslin23t/3D-Printing-Order-Management/blob/main/modules/orders/index.py"
+                  >Read the order route ↗</a
+                >
               </section>
             </div>
           </div>
@@ -502,8 +492,8 @@ Aliases: v, val, item, it, itm</pre>
                 from measured hardware state.
               </p>
             </div>
-            <a class="text-link" href="/cpu/"
-              >Read the engineering notes
+            <a class="cpu-tour-cta" href="/cpu/"
+              >Explore the CPU in 3D
               <span aria-hidden="true"
                 ><svg
                   class="icon"
@@ -515,6 +505,9 @@ Aliases: v, val, item, it, itm</pre>
                 >
                   <path d="M5 19 19 5M5 5h14v14" /></svg></span
             ></a>
+            <p class="cpu-tour-hint">
+              Interactive 3D build · circuit tour · recorded execution
+            </p>
           </div>
           <div class="artifact cpu-art">
             <div class="artifact-heading">
@@ -593,7 +586,7 @@ Aliases: v, val, item, it, itm</pre>
             <div class="artifact-bottom">
               <p>Accelerated explanation · no NOP steps · not live redstone</p>
               <a href="/cpu/"
-                >Inspect recorded hardware
+                >Open the full CPU walkthrough
                 <svg
                   class="icon"
                   viewBox="0 0 24 24"
