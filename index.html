@@ -19,6 +19,7 @@
     <script src="/static/appearance.js"></script>
     <link rel="stylesheet" href="/static/index.css" />
     <script src="/static/index.js" defer></script>
+    <script src="/static/services.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -775,6 +776,24 @@ Aliases: v, val, item, it, itm</pre>
             </div>
           </details>
         </div>
+      </section>
+      <section
+        class="live-services"
+        id="services"
+        aria-labelledby="services-heading"
+      >
+        <div class="section-line">
+          <h2 id="services-heading">Live services</h2>
+          <span>Web services &amp; Minecraft infrastructure</span>
+        </div>
+        <p id="services-status" class="services-status" role="status">
+          Live status requires JavaScript.
+        </p>
+        <div id="services-list" class="services-list" aria-busy="false"></div>
+        <p class="services-source">
+          <a href="https://api.ches.dev/v1/services">Public status API</a
+          ><span id="services-updated"></span>
+        </p>
       </section>
       <section class="about" id="about">
         <h2>About</h2>
