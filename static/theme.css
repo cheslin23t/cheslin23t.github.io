@@ -44,6 +44,8 @@
   --glass-sheen: #ffffffb3;
   --glass-shadow: #172c3310;
   --stage: var(--surface);
+  --status-online: #167047;
+  --status-warning: #85520a;
   --thumb: var(--muted);
   --thumb-hover: var(--accent);
   --sans: Manrope, system-ui, sans-serif;
@@ -69,6 +71,8 @@
     --glass-edge: #ffffff24;
     --glass-sheen: #ffffff0d;
     --glass-shadow: #00000026;
+    --status-online: #7bd5aa;
+    --status-warning: #efbd70;
   }
 }
 body {

@@ -67,3 +67,9 @@ static/index.css owns content layout and shared controls; static/index.js progre
 - Keep light/dark content and geometry identical and image colors authentic.
 - Verify 320px, phone, tablet, desktop, text zoom, no-JavaScript, and reduced motion.
 - Maintain technical notes as short editable HTML, with no generated filler or unfinished public placeholders.
+
+## Live services
+
+The homepage adds a compact Live services section between Other projects and About. It reports only services returned by the public Service Status API; no featured-project availability is inferred from Minecraft or unrelated services. Web and Minecraft groups use two columns on desktop and one on phones. Additional categories appear automatically. Rows use labeled static dots, names and check times, with safe public links when supplied. Runtime status tokens belong to static/theme.css: --status-online (#167047 light / #7bd5aa dark) and --status-warning (#85520a light / #efbd70 dark). Offline, unknown and last-known values use the existing muted token.
+
+static/services.js owns read-only fetching and rendering. Poll every 30 seconds only while the section and tab are visible, never less than 10 seconds apart, with one request at a time and an eight-second timeout. Rows are keyed by API id and sorted by category/name, independent of response order. Respect stale even on HTTP 200. Errors retain last-known values with an outdated notice; no data means Status unavailable. A snapshot older than 60 seconds is marked outdated when revisited. Unrecognized states are Unknown and inactive. Status changes use one polite message; routine timestamps do not announce repeatedly. No authentication, persistent cache, animation or backend changes.
