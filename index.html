@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="/static/index.css" />
     <script src="/static/index.js" defer></script>
     <script src="/static/services.js" defer></script>
+    <script src="/static/availability.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -55,6 +56,19 @@
           <h1>Colin Heslin<span class="accent">.</span></h1>
           <div class="intro-copy">
             <p>I build backend systems,<br />developer tools, and iOS apps.</p>
+            <a class="availability-link" href="#availability"
+              ><span class="availability-dot" aria-hidden="true"></span
+              ><span data-availability-label>Calendar availability</span
+              ><svg
+                class="icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <path d="M5 5 19 19M5 19h14V5" /></svg
+            ></a>
             <a class="text-link" href="mailto:colin@ches.dev"
               >Get in touch
               <span aria-hidden="true"
@@ -818,6 +832,30 @@ Aliases: v, val, item, it, itm</pre>
         </div>
       </section>
       <section class="contact" id="contact">
+        <aside
+          class="availability"
+          id="availability"
+          aria-labelledby="availability-heading"
+        >
+          <div>
+            <h2 id="availability-heading" class="micro">
+              Calendar availability
+            </h2>
+            <p class="availability-state" role="status">
+              <span class="availability-dot" aria-hidden="true"></span
+              ><span data-availability-label
+                >Live status requires JavaScript</span
+              >
+            </p>
+          </div>
+          <div class="availability-detail">
+            <p id="availability-detail">
+              Only events I’ve marked public appear here. Email me to arrange a
+              time.
+            </p>
+            <p id="availability-checked" class="availability-checked"></p>
+          </div>
+        </aside>
         <span class="micro">Contact</span
         ><a class="email" href="mailto:colin@ches.dev"
           >colin@ches.dev
