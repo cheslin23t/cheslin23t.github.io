@@ -6,8 +6,7 @@
   const labels = document.querySelectorAll("[data-availability-label]");
   const detail = panel.querySelector("#availability-detail");
   const checked = panel.querySelector("#availability-checked");
-  const note =
-    "Only events I’ve marked public appear here. Email me to arrange a time.";
+  const note = "Email me to arrange a time.";
   const format = new Intl.DateTimeFormat(undefined, {
     month: "short",
     day: "numeric",
@@ -107,12 +106,12 @@
         event && event.start <= Date.now() && event.end > Date.now();
       text = activeEvent
         ? `${event.title}${event.allDay ? " · All day" : ""}. Ends ${format.format(event.end)}.`
-        : "A public calendar event is in progress.";
+        : "Currently busy.";
       if (!activeEvent && snapshot.nextChange)
         text += ` Next change ${format.format(snapshot.nextChange)}.`;
       text += ` ${note}`;
     } else if (state === "free" && snapshot.nextChange) {
-      text = `No public events until ${format.format(snapshot.nextChange)}. ${note}`;
+      text = `Free until ${format.format(snapshot.nextChange)}. ${note}`;
     } else if (state === "unknown") {
       text = `Live availability ${outdated ? "may be outdated" : "is unavailable"}. Email me to arrange a time.`;
     }
