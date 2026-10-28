@@ -1,8 +1,24 @@
-# CPU V2 standalone tour
+# CPU V2 physical walkthrough
 
-Serve the repository root with `python3 -m http.server 8080`, then open `/cpu/`.
-No package installation or remote runtime assets are required. The homepage is unchanged.
-The route has `noindex, nofollow`; it is unlisted, not access-controlled.
+Serve the repository root with `python3 -m http.server 8087`, then open `/cpu/`.
+No package installation or remote runtime assets are required for the CPU tour.
+The homepage now links here through a featured CPU section. Its instruction-level register demo uses this tour’s verified compact program
+at addresses 1–3. The homepage explanation is accelerated and separate from
+the physical recording; it does not execute redstone or imply a hardware HALT.
+The route retains `noindex, nofollow`; it is linked, not access-controlled.
+
+## What the page shows
+
+The player moves from the complete build into a specific R1 input inverter, a
+locked storage cell, the operation signs, and the measured ALU output. Seventeen sections follow normal document scrolling. The physical model stays
+in view and follows the current section; no scene buttons are required. A separate recording scrubber
+replays 870 actual game-tick samples; it is not a browser redstone simulator.
+
+`data/recording.json` contains two controlled inverter captures, the compact ROM,
+the per-tick trace, a 240-cell register snapshot, and three native-clock test results. Only measured probes use
+orange (electrical 1) or gray (electrical 0); blue indicates a location highlight.
+Probe overlays remain visible through intervening geometry. Other power states
+are not animated or inferred. Repeater storage is electrically inverted.
 
 ## Physical source
 
@@ -17,33 +33,88 @@ python3 cpu/tools/export_schematic.py cpu/data/8bCPU-repaired-v1.schem cpu/data/
 ```
 
 The decoder asserts the source checksum, all palette references, 266,175 cells,
-and 32,543 non-air blocks. All physical block positions and state names are
-preserved in `build.json`. The WebGL renderer uses simplified block shapes,
-Minecraft wool color identities, directional shading, and exact repeater landmarks.
-It is not a textured Minecraft client or a redstone simulator. The original
-saved ROM and power states are not changed to match the separate addition demo.
+and 32,543 non-air blocks. `build.json` preserves source positions and states.
+The renderer uses simplified block shapes and the source's Minecraft wool colors.
+Dust geometry follows all saved side/up connection properties, including vertical
+traces. `block-geometry.mjs` owns this shape generation.
+It is not a textured Minecraft client. No wiring is invented.
 
-Camera framing and precise landmarks come from user-supplied repaired-schematic
-coordinates recorded in `data/landmarks.json`. PC, ALU, and register region boxes
-are approximate and inclusive. Highlighted repeater coordinates are exact and
-were checked against the parsed blocks: 6 PC + 8 ALU + 240 register landmarks.
-Highlighting is an explanatory overlay visible through other geometry, not power.
-The instruction chapter visits the operation-label sign neighborhood because a
-complete decoder ownership boundary has not been verified.
+For playback, the renderer replaces only the 1,024 documented ROM programming
+cells with the tested three-instruction program. Addresses 1–3 contain A58B,
+3C4B, and 48C1; address 0 and unused words are zero. The downloaded source
+schematic and `build.json` retain their original saved ROM. The static overview
+also depicts that original export, not the compact playback program.
 
-`data/build-overview.png` is a browser-rendered overview of this same model,
-used as the no-WebGL fallback. Regenerate it after changing the physical source.
-The conceptual SVG is not used as physical geometry.
+Exact landmarks and approximate module frames are in `data/landmarks.json`.
+The new circuit crops are in `build-viewer.js`. Coordinates below are local to
+the repaired export; add world minimum `(256,72,-4)` to obtain lab coordinates.
 
-## Interaction and accuracy
+| Landmark                                   | Local coordinate            |
+| ------------------------------------------ | --------------------------- |
+| R1 bit 0 input wire                        | `(60,22,43)`                |
+| Supporting block                           | `(61,22,43)`                |
+| East-facing inverter torch                 | `(62,22,43)`                |
+| R1 bit 0 storage / adjacent input repeater | `(62,22,39)` / `(62,22,40)` |
+| R3 bit 0 storage                           | `(66,22,39)`                |
+| ADD / LDI signs                            | `(55,26,60)` / `(75,26,60)` |
+| ALU bit i                                  | `(52,22+2i,18)`             |
+| PC bit i                                   | `(41,7+2i,15)`              |
 
-Document scrolling chooses camera focus. Drag horizontally to orbit; click/focus
-then use the wheel to zoom. Keyboard arrows orbit, +/- zoom, Home restores the
-chapter view, and Escape releases focus. Restore view also resets orbit/zoom.
-Touch keeps vertical document scrolling available. Reduced motion removes easing.
+## Hardware capture, 2026-10-18
 
-The separate demo advances through the exact 64-word padded ROM, including NOPs,
-fetch aliases, and wrap. Its Play control uses 7.3 seconds per address. Register
-values are unknown until written. Restart only resets explanatory demo state.
-There is no hardware HALT, general I/O, or verified startup/reset sequence implied.
-The canonical brief is `data/HANDOFF.md`, paired with `data/cpu.json`.
+The local Java 1.21.7 Fabric lab used vanilla redstone behavior and the repaired
+146-game-tick native clock. Tests used a fresh world snapshot, cleared registers
+as explicit test setup, programmed the documented ROM cells, and recorded native
+execution. After testing, the snapshot was restored and observable PC, ALU,
+register, manual-control, tick-rate, and ROM state were checked against the
+pre-test state. No hardware repairs were made for this website redesign.
+
+Two settled manual captures selected `LDI R1,0` and `LDI R1,1`. The input wire
+read power 0 / 15 respectively, and the _same_ torch read lit=true / false.
+The memory example uses native trace tick 350: R1 storage is off and locked,
+while its adjacent input repeater is on. R1 remains 165 while R2 receives 60.
+
+The complete run was sampled every game tick at a target of 200 TPS. Playback
+speed is relative to normal 20 TPS game time, not recording wall time. Repeaters
+encode `(powered ? 1 : 0) + (locked ? 2 : 0)`; wires retain analog strength.
+The browser never drops recorded transient values when seeking individual ticks.
+Real-time playback can naturally skip display frames depending on screen refresh.
+
+| Measurement                         | Game tick |
+| ----------------------------------- | --------- |
+| ADD instruction bus settles to 48C1 | 443       |
+| ALU reaches 225                     | 497       |
+| R3 reaches 225                      | 509       |
+| Next PC advance                     | 569       |
+| ALU is 0 while R3 still holds 225   | 650       |
+
+The compact addition sequence passed at both 20 and 200 TPS in both register
+banks. A six-consecutive-instruction LDI/LDI/ADD/SUB/AND/XOR program also passed
+at 200 TPS: R3=225, R4=151, R5=36, R6=153. No interleaved NOPs were needed for
+these sequences. This does not certify every program or source/destination
+aliasing pattern. `data/HANDOFF.md` and `data/cpu.json` describe the older
+conservative padded compiler policy; they are historical references, not the
+current website playback program. `data/CPU_REPAIRS.md` documents the repair.
+
+Known limits remain: faulty R15 reads, DEC, ROM fetch aliases 60→56 and 61→57;
+branches and overflow are not certified here. PC reset does not clear registers.
+There is no verified hardware HALT; the trace ending is only the end of playback.
+
+## Controls and fallbacks
+
+Document scrolling drives the walkthrough. Drag or use orbit/zoom sliders;
+with the model focused, arrows rotate, +/- zoom, Home restores framing, and
+Escape releases focus. Normal wheel input scrolls the page; Ctrl/Meta+wheel zooms.
+Whole CPU preserves spatial context around the
+selected circuit. Reduced motion removes camera easing; playback is user-started.
+Changing sections or hiding the page pauses recording. Mobile keeps a compact
+model above the text, capped at 46svh. Themes follow the device light/dark setting.
+The optional register inspector covers every bit in both physical banks.
+
+The schematic-derived PNG and static article remain available without WebGL.
+A recording failure disables playback and reports the failure. The page also
+provides a no-JavaScript overview. Run `node cpu/tools/verify.mjs` from the repository root to check dust connections,
+all register coordinates, trace milestones, recorded gate states, and source integrity.
+
+`data/build-overview.png` is the original
+schematic overview; regenerate it if the physical source changes.

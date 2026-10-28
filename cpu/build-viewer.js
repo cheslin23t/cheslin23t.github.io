@@ -1,19 +1,31 @@
-"use strict";
+import { wireBoxes } from "./block-geometry.mjs";
+("use strict");
 // Physical geometry comes exclusively from the parsed Sponge schematic.
 // The simplified shapes show block placement, not a redstone simulation.
 (() => {
   const canvas = document.querySelector("#build-canvas");
+
   const status = document.querySelector("#build-status");
   const gl = canvas.getContext("webgl", { antialias: true, alpha: true });
   const fallback = document.querySelector("#build-fallback");
-  if (!gl) {
-    status.textContent = "3D is unavailable in this browser.";
+  function showFallback(message) {
+    status.textContent = message;
     fallback.hidden = false;
     canvas.hidden = true;
     document.querySelector(".model-fallback").hidden = false;
-    document.querySelector("#hero-build").hidden = true;
-    document.querySelector(".hero-fallback").hidden = false;
+
     document.querySelector(".viewer-loading").hidden = true;
+    document.querySelector("#landmark-labels").replaceChildren();
+    document.querySelector("#view-badge").textContent =
+      "Static overview · all modules";
+    document
+      .querySelectorAll(".view-modes button, .view-controls input")
+      .forEach((el) => (el.disabled = true));
+  }
+  if (!gl) {
+    showFallback(
+      "3D is unavailable. The overview and module explanations remain available.",
+    );
     return;
   }
   const shader = (type, source) => {
@@ -29,14 +41,14 @@
     program,
     shader(
       gl.VERTEX_SHADER,
-      `attribute vec3 position; attribute vec3 color; attribute float region; uniform mat4 matrix; uniform float selected; uniform float highlightPass; varying vec3 vColor; varying float vChosen; void main(){ float chosen=1.0-step(0.1,abs(region-selected)); float all=1.0-step(0.1,selected); vChosen=chosen; vColor=mix(color*.32,mix(color,vec3(.40,.90,.97),.62),chosen); vColor=mix(vColor,color,all); gl_Position=matrix*vec4(position,1.0); }`,
+      `attribute vec3 position; attribute vec3 color; attribute vec3 blockCoord; attribute float region; uniform vec4 probes[16]; uniform mat4 matrix; uniform float selected; varying vec3 vColor; varying vec3 vPosition; varying float vChosen; varying vec3 vBlock; void main(){ float chosen=1.0-step(0.1,abs(region-selected)); float showAll=1.0-step(0.1,selected); vChosen=chosen; vPosition=position; vBlock=blockCoord; vColor=mix(color*.85,mix(color,vec3(.13,.46,.65),.65),chosen); vColor=mix(vColor,color,showAll); for(int i=0;i<16;i++){if(probes[i].w>=0.0 && all(lessThan(abs(blockCoord-probes[i].xyz),vec3(.1)))){ vChosen=1.0; vColor=probes[i].w>.5 ? vec3(.90,.24,.12) : vec3(.35,.40,.45); }} gl_Position=matrix*vec4(position,1.0); }`,
     ),
   );
   gl.attachShader(
     program,
     shader(
       gl.FRAGMENT_SHADER,
-      `precision mediump float; varying vec3 vColor; varying float vChosen; uniform float highlightPass; void main(){ if(highlightPass>0.5 && vChosen<0.5) discard; gl_FragColor=vec4(vColor,1.0); }`,
+      `precision mediump float; varying vec3 vColor; varying vec3 vPosition; varying float vChosen; varying vec3 vBlock; uniform float highlightPass; uniform float cropped; uniform vec3 cropMin; uniform vec3 cropMax; void main(){ if(cropped>0.5 && (any(lessThan(vBlock,cropMin)) || any(greaterThan(vBlock,cropMax)))) discard; if(highlightPass>0.5 && vChosen<0.5) discard; gl_FragColor=vec4(vColor,1.0); }`,
     ),
   );
   gl.linkProgram(program);
@@ -47,6 +59,20 @@
   const uniform = gl.getUniformLocation(program, "matrix"),
     selected = gl.getUniformLocation(program, "selected"),
     highlightPass = gl.getUniformLocation(program, "highlightPass");
+  const cropMin = gl.getUniformLocation(program, "cropMin"),
+    cropMax = gl.getUniformLocation(program, "cropMax"),
+    cropped = gl.getUniformLocation(program, "cropped");
+  const probeUniform = gl.getUniformLocation(program, "probes[0]");
+  let probeValues = new Float32Array(64);
+  for (let i = 0; i < 16; i++) probeValues[4 * i + 3] = -1;
+  window.setCpuProbes = (probes = []) => {
+    probeValues = new Float32Array(64);
+    for (let i = 0; i < 16; i++) probeValues[4 * i + 3] = -1;
+    probes
+      .slice(0, 16)
+      .forEach((p, i) => probeValues.set([...p.position, p.on ? 1 : 0], i * 4));
+    requestDraw();
+  };
   const faceCorners = [
     [
       [0, 1, 0],
@@ -117,9 +143,9 @@
     const short = name.replace("minecraft:", "").split("[")[0];
     if (short === "redstone_wire") {
       const power = Number(name.match(/power=(\d+)/)?.[1] || 0);
-      return hex(power === 0 ? "#722b2b" : "#df4c39");
+      return hex("#7b6c68");
     }
-    if (short.includes("torch")) return hex("#eea574");
+    if (short.includes("torch")) return hex("#8d7865");
     if (short === "comparator" || short === "repeater") return hex("#d0b6b1");
     if (short.includes("sign")) return hex("#b79c73");
     if (short === "lever" || short === "stone_button") return hex("#bcc4cc");
@@ -175,58 +201,263 @@
     a[0] * b[1] - a[1] * b[0],
   ];
   const dot = (a, b) => a.reduce((s, x, i) => s + x * b[i], 0);
+  // Region bounds are inclusive block coordinates, not netlist membership.
+  // Every preset keeps the same azimuth; cuts reveal buried landmarks without spinning the CPU.
   const views = {
     whole: {
-      center: [45, 21, 32],
-      yaw: 2.25,
-      pitch: 0.56,
-      size: 48,
+      bounds: [
+        [0, 0, 0],
+        [90, 44, 64],
+      ],
       region: 0,
-      label: "Complete physical build · original saved ROM",
+      label: "91 × 45 × 65 blocks",
+      pins: [],
     },
     clock: {
-      center: [46, 9, 13],
-      yaw: -0.65,
-      pitch: 0.35,
-      size: 22,
+      bounds: [
+        [39, 0, 9],
+        [53, 19, 17],
+      ],
       region: 1,
-      label: "PC · 6 confirmed state repeaters",
+      label: "PC · six state bits · approximate region",
+      pins: [
+        { p: [41.5, 7.5, 15.5], text: "PC bit 0 · weight 1" },
+        { p: [41.5, 17.5, 15.5], text: "PC bit 5 · weight 32" },
+      ],
     },
     rom: {
-      center: [15, 8, 49],
-      yaw: -0.85,
-      pitch: 0.55,
-      size: 33,
+      bounds: [
+        [0, 0, 32],
+        [33, 16, 64],
+      ],
       region: 2,
-      label: "ROM programming cells · documented coordinates",
+      label: "ROM · four layers × 16 words × 16 bits",
+      pins: [
+        { p: [30.5, 14.5, 34.5], text: "Address 0 · bit 0 cell" },
+        { p: [0.5, 2.5, 64.5], text: "Address 63 · bit 15 cell" },
+      ],
     },
     encoding: {
-      center: [64, 26, 57],
-      yaw: 2.0,
-      pitch: 0.55,
-      size: 31,
+      bounds: [
+        [48, 22, 52],
+        [84, 36, 62],
+      ],
       region: 3,
-      label: "Operation-label neighborhood · signs from the build",
+      label: "Decode · operation-sign neighborhood",
+      pins: [
+        { p: [55.5, 26.5, 60.5], text: "ADD · physical sign" },
+        { p: [75.5, 26.5, 60.5], text: "LDI · physical sign" },
+      ],
+    },
+    inverter: {
+      yaw: 0.15,
+      pitch: 0.85,
+      bounds: [
+        [59, 21, 42],
+        [63, 22, 44],
+      ],
+      region: 7,
+      label: "R1 input inverter · exact schematic crop",
+      pins: [
+        { p: [60.5, 22.08, 43.5], text: "Input wire" },
+        { p: [62.16, 22.45, 43.5], text: "Wall torch · output" },
+      ],
+    },
+    cell: {
+      bounds: [
+        [61, 21, 38],
+        [63, 22, 44],
+      ],
+      region: 4,
+      label: "R1 · bit 0 · data path and storage",
+      pins: [
+        { p: [62.5, 22.2, 39.5], text: "Storage · delay 1" },
+        { p: [62.5, 22.2, 40.5], text: "Input repeater · delay 2" },
+      ],
+    },
+    result: {
+      bounds: [
+        [65, 21, 38],
+        [67, 22, 41],
+      ],
+      region: 4,
+      label: "R3 · bit 0 · stored result",
+      pins: [{ p: [66.5, 22.2, 39.5], text: "R3 storage · bit 0" }],
     },
     registers: {
-      center: [75, 32, 43],
-      yaw: 1.25,
-      pitch: 0.46,
-      size: 29,
+      bounds: [
+        [60, 20, 36],
+        [90, 44, 50],
+      ],
       region: 4,
-      label: "Register banks · 240 confirmed storage repeaters",
+      label: "Registers · 15 bytes stored twice · 240 one-bit cells",
+      pins: [
+        { p: [62.5, 22.5, 39.5], text: "R1 · bit 0 · bank 1" },
+        { p: [62.5, 22.5, 47.5], text: "R1 · bit 0 · bank 2" },
+      ],
     },
     operation: {
-      center: [51, 32, 27],
-      yaw: 2.8,
-      pitch: 0.4,
-      size: 27,
+      bounds: [
+        [44, 20, 18],
+        [58, 44, 36],
+      ],
       region: 5,
-      label: "ALU · 8 confirmed output repeaters",
+      label: "ALU · eight isolated output repeaters",
+      pins: [
+        { p: [52.5, 22.5, 18.5], text: "Output bit 0 · weight 1" },
+        { p: [52.5, 36.5, 18.5], text: "Output bit 7 · weight 128" },
+      ],
     },
   };
-  let view = { ...views.whole, center: [...views.whole.center] },
-    goal = { ...views.whole },
+  views.memory = { ...views.cell, pins: [...views.cell.pins] };
+  views.romword = {
+    bounds: [
+      [27, 13, 33],
+      [29, 15, 64],
+    ],
+    region: 2,
+    label: "ROM address 1 · A58B",
+    pins: [
+      { p: [28.8, 14.5, 34.5], text: "Bit 0 · 1" },
+      { p: [28.8, 14.5, 64.5], text: "Bit 15 · 1" },
+    ],
+  };
+  views.alucontrols = {
+    bounds: [
+      [42, 21, 18],
+      [50, 27, 30],
+    ],
+    region: 8,
+    label: "ALU control inputs",
+    pins: [
+      { p: [43.5, 24.2, 25.5], text: "Carry-in · CIN" },
+      { p: [43.5, 25.2, 27.5], text: "Invert A · !A" },
+    ],
+  };
+  views.flags = {
+    bounds: [
+      [50, 21, 15],
+      [55, 39, 22],
+    ],
+    region: 5,
+    label: "ALU zero-detection path",
+    pins: [
+      { p: [53.5, 36.4, 16.8], text: "Zero detector" },
+      { p: [54.5, 38.07, 21.5], text: "Overflow-labelled path" },
+    ],
+  };
+  const baseYaw = 2.25,
+    basePitch = 0.5;
+  let context = false;
+  let zoom = 1;
+  function preset(id) {
+    const bounds = (context ? views.whole : views[id]).bounds;
+    const yaw = context ? baseYaw : (views[id].yaw ?? baseYaw);
+    const pitch = context ? basePitch : (views[id].pitch ?? basePitch);
+    return {
+      ...views[id],
+      center: bounds[0].map((v, i) => (v + bounds[1][i] + 1) / 2),
+      yaw,
+      pitch,
+      size: fitHalf(
+        bounds,
+        yaw,
+        pitch,
+        canvas.clientWidth / Math.max(1, canvas.clientHeight),
+      ),
+    };
+  }
+  function fitHalf(bounds, yaw, pitch, aspect) {
+    const z = [
+      Math.sin(yaw) * Math.cos(pitch),
+      Math.sin(pitch),
+      Math.cos(yaw) * Math.cos(pitch),
+    ];
+    const x = normalize(cross([0, 1, 0], z)),
+      y = cross(z, x);
+    const half = bounds[0].map((v, i) => (bounds[1][i] + 1 - v) / 2);
+    const extent = (axis) =>
+      half.reduce((sum, v, i) => sum + Math.abs(axis[i]) * v, 0);
+    return Math.max(extent(y), extent(x) / aspect) * 1.12;
+  }
+  const pinLayer = document.querySelector("#landmark-labels");
+  function setPins() {
+    pinLayer.innerHTML = '<svg class="pin-leaders" aria-hidden="true"></svg>';
+    const svg = pinLayer.firstChild;
+    for (const pin of views[currentChapter].pins) {
+      const line = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "line",
+      );
+      const dot = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "circle",
+      );
+      dot.setAttribute("r", "4");
+      svg.append(line, dot);
+      const label = document.createElement("span");
+      label.className = "landmark-pin";
+      label.textContent = pin.text;
+      pinLayer.append(label);
+    }
+  }
+  window.setCpuPinLabels = (labels) => {
+    views[currentChapter].pins.forEach((pin, i) => {
+      if (labels[i]) pin.text = labels[i];
+    });
+    setPins();
+    requestDraw();
+  };
+  function projectPins(matrix) {
+    const width = canvas.clientWidth,
+      height = canvas.clientHeight,
+      occupied = [];
+    views[currentChapter].pins.forEach((pin, i) => {
+      const [x, y, z] = pin.p;
+      const px =
+        ((matrix[0] * x + matrix[4] * y + matrix[8] * z + matrix[12] + 1) *
+          width) /
+        2;
+      const py =
+        ((1 - matrix[1] * x - matrix[5] * y - matrix[9] * z - matrix[13]) *
+          height) /
+        2;
+      const el = pinLayer.children[i + 1];
+      if (!el) return;
+      const line = pinLayer.firstChild.children[i * 2],
+        dot = pinLayer.firstChild.children[i * 2 + 1];
+      const visible = px > 5 && px < width - 5 && py > 5 && py < height - 5;
+      el.hidden = !visible;
+      line.style.display = dot.style.display = visible ? "" : "none";
+      if (!visible) return;
+      const ew = el.offsetWidth,
+        eh = el.offsetHeight;
+      const left = Math.max(
+        10,
+        Math.min(width - ew - 10, px < width / 2 ? px + 24 : px - ew - 24),
+      );
+      let top = Math.max(42, Math.min(height - eh - 10, py - eh - 28));
+      for (const prev of occupied)
+        if (
+          left < prev.right + 8 &&
+          left + ew > prev.left - 8 &&
+          top < prev.bottom + 8 &&
+          top + eh > prev.top - 8
+        )
+          top = Math.min(height - eh - 10, prev.bottom + 12);
+      occupied.push({ left, right: left + ew, top, bottom: top + eh });
+      el.style.left = `${left}px`;
+      el.style.top = `${top}px`;
+      line.setAttribute("x1", px);
+      line.setAttribute("y1", py);
+      line.setAttribute("x2", Math.max(left, Math.min(left + ew, px)));
+      line.setAttribute("y2", top + eh / 2);
+      dot.setAttribute("cx", px);
+      dot.setAttribute("cy", py);
+    });
+  }
+  let view = preset("whole"),
+    goal = preset("whole"),
     vertices = 0,
     lineVertices = 0,
     ready = false,
@@ -308,7 +539,13 @@
       -1,
       1,
     ]);
-    gl.uniformMatrix4fv(uniform, false, multiply(ortho, look));
+    const matrix = multiply(ortho, look);
+    gl.uniformMatrix4fv(uniform, false, matrix);
+    gl.uniform1f(cropped, !context && currentChapter !== "whole" ? 1 : 0);
+    gl.uniform3fv(cropMin, views[currentChapter].bounds[0]);
+    gl.uniform3fv(cropMax, views[currentChapter].bounds[1]);
+    projectPins(matrix);
+    gl.uniform4fv(probeUniform, probeValues);
     gl.uniform1f(selected, goal.region);
     gl.uniform1f(highlightPass, 0);
     gl.drawArrays(gl.TRIANGLES, 0, vertices);
@@ -318,16 +555,17 @@
       gl.drawArrays(gl.TRIANGLES, 0, vertices);
       gl.uniform1f(highlightPass, 0);
     }
-    if (lineVertices) {
+    if (
+      lineVertices &&
+      goal.region !== 0 &&
+      !["inverter", "cell", "memory", "result", "romword", "flags"].includes(
+        currentChapter,
+      )
+    ) {
+      gl.uniform1f(cropped, 0);
       gl.uniform1f(highlightPass, 1);
       gl.drawArrays(gl.LINES, vertices, lineVertices);
       gl.uniform1f(highlightPass, 0);
-    }
-    const hero = document.querySelector("#hero-build");
-    if (currentChapter === "whole" && hero) {
-      hero.width = w;
-      hero.height = h;
-      hero.getContext("2d").drawImage(canvas, 0, 0);
     }
     if (distance > 0.03) frame = requestAnimationFrame(draw);
   }
@@ -337,15 +575,103 @@
   function focus(id) {
     if (!views[id]) id = "whole";
     currentChapter = id;
-    goal = { ...views[id], center: [...views[id].center] };
+    if (!ready) return;
+    zoom = 1;
+    goal = preset(id);
+    // Take the shortest angular path after a manual orbit.
+    view.yaw =
+      goal.yaw +
+      Math.atan2(Math.sin(view.yaw - goal.yaw), Math.cos(view.yaw - goal.yaw));
+    document.querySelector("#orbit-angle").value = "0";
+    document.querySelector("#view-zoom").value = "100";
+    canvas.dataset.chapter = id;
+    canvas.dataset.mode = context ? "context" : "region";
+    document.querySelector("#view-badge").textContent =
+      id === "whole" || context
+        ? "Complete build"
+        : ["inverter", "cell", "memory", "result", "romword", "flags"].includes(
+              id,
+            )
+          ? "Circuit cutaway · exact block positions"
+          : "Module cutaway · approximate bounds";
+    document
+      .querySelector("#region-view")
+      .setAttribute("aria-pressed", String(!context));
+    document
+      .querySelector("#context-view")
+      .setAttribute("aria-pressed", String(context));
+    setPins();
     status.textContent = goal.label;
     lastFrame = performance.now();
     requestDraw();
   }
-  window.focusCpuBuild = focus;
+  window.focusCpuBuild = (id) => {
+    context = false;
+    focus(id);
+  };
+  window.inspectCpuCell = (register, bit, bank) => {
+    const x = 60 + 2 * register,
+      y = 22 + 2 * bit + (register % 2 === 0 ? 1 : 0),
+      z = bank === 0 ? 39 : 47;
+    views.cell.bounds = [
+      [x - 1, y - 1, z - 1],
+      [x + 1, y, z + (bank === 0 ? 2 : 1)],
+    ];
+    views.cell.pins = [
+      {
+        p: [x + 0.5, y + 0.2, z + 0.5],
+        text: `R${register} · bit ${bit} · bank ${bank + 1}`,
+      },
+    ];
+    views.cell.label = `R${register}, bit ${bit} · bank ${bank + 1}`;
+    focus("cell");
+  };
   document
     .querySelector("#restore-view")
     .addEventListener("click", () => focus(currentChapter));
+  for (const [id, value] of [
+    ["region-view", false],
+    ["context-view", true],
+  ]) {
+    document.getElementById(id).addEventListener("click", () => {
+      context = value;
+      focus(currentChapter);
+    });
+  }
+  function refit() {
+    const bounds = (context ? views.whole : views[currentChapter]).bounds;
+    goal.size =
+      fitHalf(
+        bounds,
+        goal.yaw,
+        goal.pitch,
+        canvas.clientWidth / Math.max(1, canvas.clientHeight),
+      ) / zoom;
+    requestDraw();
+  }
+  document.querySelector("#orbit-angle").addEventListener("input", (e) => {
+    goal.yaw =
+      (context ? baseYaw : (views[currentChapter].yaw ?? baseYaw)) +
+      (Number(e.target.value) * Math.PI) / 180;
+    refit();
+  });
+  document.querySelector("#view-zoom").addEventListener("input", (e) => {
+    zoom = Number(e.target.value) / 100;
+    refit();
+  });
+  function syncControls() {
+    const originYaw = context
+      ? baseYaw
+      : (views[currentChapter].yaw ?? baseYaw);
+    const angle = Math.atan2(
+      Math.sin(goal.yaw - originYaw),
+      Math.cos(goal.yaw - originYaw),
+    );
+    document.querySelector("#orbit-angle").value = String(
+      (angle * 180) / Math.PI,
+    );
+    document.querySelector("#view-zoom").value = String(zoom * 100);
+  }
   let pointer = null;
   canvas.addEventListener("pointerdown", (e) => {
     canvas.focus({ preventScroll: true });
@@ -360,7 +686,8 @@
       Math.min(1.45, goal.pitch + (e.clientY - pointer[1]) * 0.005),
     );
     pointer = [e.clientX, e.clientY];
-    requestDraw();
+    syncControls();
+    refit();
   });
   const release = () => {
     pointer = null;
@@ -370,13 +697,11 @@
   canvas.addEventListener(
     "wheel",
     (e) => {
-      if (document.activeElement !== canvas) return;
+      if (!(e.ctrlKey || e.metaKey)) return;
       e.preventDefault();
-      goal.size = Math.max(
-        12,
-        Math.min(100, goal.size * Math.exp(e.deltaY * 0.0015)),
-      );
-      requestDraw();
+      zoom = Math.max(0.65, Math.min(6, zoom * Math.exp(-e.deltaY * 0.0015)));
+      syncControls();
+      refit();
     },
     { passive: false },
   );
@@ -407,25 +732,60 @@
     if (e.key === "ArrowRight") goal.yaw += 0.2;
     if (e.key === "ArrowUp") goal.pitch = Math.min(1.45, goal.pitch + 0.1);
     if (e.key === "ArrowDown") goal.pitch = Math.max(0.12, goal.pitch - 0.1);
-    if (["+", "="].includes(e.key)) goal.size = Math.max(12, goal.size * 0.85);
-    if (["-", "_"].includes(e.key)) goal.size = Math.min(100, goal.size / 0.85);
-    requestDraw();
+    if (["+", "="].includes(e.key)) zoom = Math.min(6, zoom / 0.85);
+    if (["-", "_"].includes(e.key)) zoom = Math.max(0.65, zoom * 0.85);
+    syncControls();
+    refit();
   });
-  addEventListener("resize", requestDraw);
+  addEventListener("resize", refit);
   canvas.addEventListener("webglcontextlost", (e) => {
     e.preventDefault();
     ready = false;
-    status.textContent = "3D graphics paused. Reload to restore the view.";
-    fallback.hidden = false;
+    showFallback("3D graphics paused. Reload to restore the interactive view.");
   });
   fetch("./data/build.json")
     .then((r) => {
       if (!r.ok) throw Error("Build data unavailable");
       return r.json();
     })
-    .then((data) => {
+    .then(async (data) => {
+      const record = await window.cpuRecording;
+      const sourceCount = data.blocks.length;
+      // Program only the documented ROM cells. No routing or supports are changed.
+      const isRom = ([x, y, z]) =>
+        x >= 0 &&
+        x <= 30 &&
+        x % 2 === 0 &&
+        [2, 6, 10, 14].includes(y) &&
+        z >= 34 &&
+        z <= 64 &&
+        z % 2 === 0;
+      data.blocks = data.blocks.filter((b) => !isRom(b));
+      let torch = data.palette.indexOf(
+        "minecraft:redstone_wall_torch[facing=west,lit=true]",
+      );
+      if (torch < 0) {
+        torch = data.palette.length;
+        data.palette.push(
+          "minecraft:redstone_wall_torch[facing=west,lit=true]",
+        );
+      }
+      for (const [address, hex] of record.program) {
+        const word = parseInt(hex, 16);
+        for (let bit = 0; bit < 16; bit++)
+          if ((word >> bit) & 1)
+            data.blocks.push([
+              30 - 2 * (address % 16),
+              14 - 4 * Math.floor(address / 16),
+              34 + 2 * bit,
+              torch,
+            ]);
+      }
+      canvas.dataset.sourceBlocks = String(sourceCount);
+
       const positions = [],
         colors = [],
+        blockCoords = [],
         regions = [];
       const names = data.palette;
       const solid = (name) =>
@@ -436,6 +796,9 @@
           .map((b) => `${b[0]},${b[1]},${b[2]}`),
       );
       function regionFor(x, y, z, name) {
+        if (x === 43 && ((y === 24 && z === 25) || (y === 25 && z === 27)))
+          return 8;
+        if (y === 22 && z === 43 && [60, 61, 62].includes(x)) return 7;
         // ROM mask is the exact 1024-coordinate placement formula, in local coordinates.
         if (
           x >= 0 &&
@@ -447,14 +810,37 @@
           z % 2 === 0
         )
           return 2;
-        if (x === 41 && z === 15 && y >= 7 && y <= 17 && y % 2 === 1) return 1;
-        if (x >= 62 && x <= 90 && x % 2 === 0 && [39, 47].includes(z)) {
+        if (
+          name.startsWith("minecraft:repeater[") &&
+          x === 41 &&
+          z === 15 &&
+          y >= 7 &&
+          y <= 17 &&
+          y % 2 === 1
+        )
+          return 1;
+        if (
+          name.startsWith("minecraft:repeater[") &&
+          x >= 62 &&
+          x <= 90 &&
+          x % 2 === 0 &&
+          [39, 47].includes(z)
+        ) {
           const r = (x - 60) / 2;
           const bit = (y - 22 - (r % 2 === 0 ? 1 : 0)) / 2;
           if (Number.isInteger(bit) && bit >= 0 && bit < 8) return 4;
         }
-        if (x >= 51 && x <= 79 && y >= 23 && y <= 29 && z >= 55) return 3;
-        if (x === 52 && z === 18 && y >= 22 && y <= 36 && y % 2 === 0) return 5;
+        if (name.includes("sign") && x >= 53 && x <= 77 && y === 26 && z === 60)
+          return 3;
+        if (
+          name.startsWith("minecraft:repeater[") &&
+          x === 52 &&
+          z === 18 &&
+          y >= 22 &&
+          y <= 36 &&
+          y % 2 === 0
+        )
+          return 5;
         return 6;
       }
       function box(x, y, z, sx, sy, sz, color, region, full) {
@@ -470,6 +856,7 @@
           const n = neighbors[f];
           if (
             full &&
+            !(x >= 39 && x <= 91 && y >= 20) &&
             occupancy.has(
               `${Math.floor(x) + n[0]},${Math.floor(y) + n[1]},${Math.floor(z) + n[2]}`,
             )
@@ -480,13 +867,16 @@
             positions.push(x + v[0] * sx, y + v[1] * sy, z + v[2] * sz);
             colors.push(...color.map((c) => c * faces[f]));
             regions.push(region);
+            blockCoords.push(Math.floor(x), Math.floor(y), Math.floor(z));
           }
         }
       }
+      const counts = {};
       for (const [x, y, z, p] of data.blocks) {
         const name = names[p],
           color = typeColor(name),
           region = regionFor(x, y, z, name);
+        counts[region] = (counts[region] || 0) + 1;
         let sx = 0.97,
           sy = 0.97,
           sz = 0.97,
@@ -494,10 +884,19 @@
           oy = 0,
           oz = 0.015;
         if (name.includes("redstone_wire")) {
-          sx = 0.84;
-          sy = 0.035;
-          sz = 0.84;
-          ox = oz = 0.08;
+          for (const [dx, dy, dz, width, height, depth] of wireBoxes(name))
+            box(
+              x + dx,
+              y + dy,
+              z + dz,
+              width,
+              height,
+              depth,
+              hex("#a52c29"),
+              region,
+              false,
+            );
+          continue;
         } else if (/repeater|comparator/.test(name)) {
           sy = 0.14;
         } else if (/wall_torch/.test(name)) {
@@ -538,9 +937,9 @@
         if (/repeater|comparator/.test(name))
           for (const offset of [0.25, 0.68])
             box(
-              x + 0.4,
+              x + (/facing=(east|west)/.test(name) ? offset : 0.4),
               y + 0.14,
-              z + offset,
+              z + (/facing=(east|west)/.test(name) ? 0.4 : offset),
               0.14,
               0.2,
               0.14,
@@ -552,7 +951,8 @@
       vertices = regions.length;
       const bounds = [
         { region: 1, min: [39, 0, 9], max: [53, 19, 17] },
-        { region: 2, min: [0, 2, 34], max: [30, 14, 64] },
+        { region: 2, min: [0, 0, 32], max: [33, 16, 64] },
+        { region: 3, min: [48, 22, 52], max: [84, 36, 62] },
         { region: 4, min: [60, 20, 36], max: [90, 44, 50] },
         { region: 5, min: [44, 20, 18], max: [58, 44, 36] },
       ];
@@ -587,12 +987,14 @@
             positions.push(...c[i]);
             colors.push(0.3, 0.65, 0.7);
             regions.push(b.region);
+            blockCoords.push(-999, -999, -999);
           }
       }
       lineVertices = regions.length - vertices;
       for (const [name, values, size] of [
         ["position", positions, 3],
         ["color", colors, 3],
+        ["blockCoord", blockCoords, 3],
         ["region", regions, 1],
       ]) {
         const buffer = gl.createBuffer();
@@ -607,17 +1009,20 @@
         gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0);
       }
       ready = true;
-      document.querySelector("#restore-view").disabled = false;
+      document
+        .querySelectorAll(".view-modes button, .view-controls input")
+        .forEach((el) => (el.disabled = false));
+      canvas.dataset.landmarks = JSON.stringify(counts);
       canvas.dataset.blocks = String(data.blocks.length);
       canvas.dataset.ready = "true";
       focus(currentChapter);
       document.querySelector(".viewer-loading").hidden = true;
+      dispatchEvent(new Event("cpu-model-ready"));
     })
     .catch((error) => {
-      status.textContent = "The physical model could not load.";
-      fallback.hidden = false;
-      document.querySelector(".model-fallback").hidden = false;
-      document.querySelector(".viewer-loading").hidden = true;
+      showFallback(
+        "The model could not load. A static overview is shown; reload to retry.",
+      );
       console.error(error);
     });
 })();

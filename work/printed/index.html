@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="description"
+      content="Colin Heslin — backend systems, developer tools, iOS apps, and computer architecture. Explore the projects and the engineering behind them."
+    />
+    <title>Printed — Engineering notes — Colin Heslin</title>
+    <link rel="icon" type="image/svg+xml" href="/static/assets/favicon.svg" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="64x64"
+      href="/static/assets/favicon.png?v=2"
+    />
+    <script src="/static/appearance.js"></script>
+    <link rel="stylesheet" href="/static/index.css" />
+    <script src="/static/index.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="wordmark" href="/" aria-label="ches.dev, home"
+        >ches<span>.</span>dev</a
+      >
+      <nav aria-label="Main navigation">
+        <a href="/#work">Work</a><a href="/#other-projects">Other projects</a
+        ><a href="/#about">About</a
+        ><a href="mailto:colin@ches.dev"
+          >Contact
+          <span aria-hidden="true"
+            ><svg
+              class="icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              aria-hidden="true"
+            >
+              <path d="M5 19 19 5M5 5h14v14" /></svg></span
+        ></a>
+      </nav>
+    </header>
+    <main id="main">
+      <article class="case-study">
+        <a class="text-link" href="/#project-printed"
+          ><svg
+            class="icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            aria-hidden="true"
+          >
+            <path d="M20 12H4m7-7-7 7 7 7" />
+          </svg>
+          Back to selected work</a
+        >
+        <h1>Printed<span class="accent">.</span></h1>
+        <p class="case-deck">
+          A customer order form backed by Python, Flask, and MySQL.
+        </p>
+        <a
+          class="text-link"
+          href="https://github.com/cheslin23t/3D-Printing-Order-Management"
+          >View source
+          <svg
+            class="icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            aria-hidden="true"
+          >
+            <path d="M5 19 19 5M5 5h14v14" /></svg
+        ></a>
+        <p>
+          <a
+            class="text-link"
+            href="https://ches.dev/3D-Printing-Order-Management/index.html"
+            >Original project</a
+          >
+        </p>
+        <div class="case-sections">
+          <section>
+            <h2>Purpose</h2>
+            <p>
+              In 2024, my friends and I started a 3D-printing business. I built
+              a website where customers could describe a print and provide the
+              details needed to prepare it.
+            </p>
+          </section>
+          <section>
+            <h2>Customer interface</h2>
+            <p>
+              HTML and Bootstrap structure the storefront and order form.
+              Customers can supply contact information, a budget, payment
+              preference, and either a Thingiverse model ID or a description,
+              reference image, and dimensions for a custom model.
+            </p>
+          </section>
+          <section>
+            <h2>JavaScript</h2>
+            <p>
+              Conditional fields adapt the form to the type of model requested.
+              Choosing a custom model reveals description, image-reference, and
+              size fields; choosing an existing model requests its Thingiverse
+              ID.
+            </p>
+          </section>
+          <section>
+            <h2>Python and Flask</h2>
+            <p>
+              The order route is organized in a Flask blueprint. POST
+              /order/submit checks the expected field types, validates the
+              whole-number budget and supported payment method, and normalizes
+              the model information before storage.
+            </p>
+          </section>
+          <section>
+            <h2>MySQL</h2>
+            <p>
+              A database helper supplies the connection. A parameterized INSERT
+              stores the customer's contact details, budget, payment preference,
+              referral, and model requirements in the Submissions table,
+              followed by a database commit.
+            </p>
+          </section>
+          <section>
+            <h2>Embedded version</h2>
+            <p>
+              The portfolio embeds Printed’s published site directly, using the
+              same HTML, styles, assets, and customer form as the standalone
+              project. Its embed option skips the opening dialog and keeps the
+              original form usable within the frame. The published archive does
+              not send orders or run the Flask/MySQL backend; those remain
+              inspectable in the linked source.
+            </p>
+          </section>
+        </div>
+      </article>
+    </main>
+    <footer class="site-footer">
+      <span>Colin Heslin · New York</span
+      ><a href="https://github.com/cheslin23t"
+        >GitHub
+        <svg
+          class="icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          aria-hidden="true"
+        >
+          <path d="M5 19 19 5M5 5h14v14" /></svg></a
+      ><a href="#main"
+        >Back to top
+        <svg
+          class="icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          aria-hidden="true"
+        >
+          <path d="M12 20V4M5 11l7-7 7 7" /></svg
+      ></a>
+    </footer>
+  </body>
+</html>
