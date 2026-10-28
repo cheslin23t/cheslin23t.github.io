@@ -106,9 +106,7 @@
         event && event.start <= Date.now() && event.end > Date.now();
       text = activeEvent
         ? `${event.title}${event.allDay ? " · All day" : ""}. Ends ${format.format(event.end)}.`
-        : "Currently busy.";
-      if (!activeEvent && snapshot.nextChange)
-        text += ` Next change ${format.format(snapshot.nextChange)}.`;
+        : "Busy.";
       text += ` ${note}`;
     } else if (state === "free" && snapshot.nextChange) {
       text = `Free until ${format.format(snapshot.nextChange)}. ${note}`;
