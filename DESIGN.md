@@ -33,7 +33,7 @@ components:
 
 ## Overview
 
-The publishing branch is master, also the repository default. GitHub Pages builds the repository root with its built-in branch deployment. CNAME remains ches.dev. Merge website updates into master; codex branches are feature/history branches and do not own production deployment. No separate deployment workflow is required.
+The canonical website branch is master, also the repository default. Configure GitHub Pages to build the repository root from master with its built-in branch deployment. CNAME remains ches.dev. Merge website updates into master; codex branches are feature/history branches. No separate deployment workflow is required. The migration merged all current website history into master; switching the Pages source in repository Settings → Pages requires a connection with permission to update Pages settings.
 
 Colin Heslin's portfolio presents inspectable software and systems to employers and technical reviewers. Precision comes from typography, proportion, authentic artifacts, and concise evidence. This replaces the navy/gold showcase and the rejected generated-image/project-selector explorations. All four featured projects have the same heading hierarchy and comparable presentation: BadAvo, Printed, JB-X, CPU V2. No project owns the hero. Copy is deliberately short so Colin can replace it with personal build notes.
 
