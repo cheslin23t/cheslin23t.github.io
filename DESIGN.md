@@ -1,59 +1,83 @@
 ---
 version: alpha
 colors:
-  background: "#061021"
-  surface: "#0b1a2c"
-  text: "#f3f7fb"
-  muted: "#a8b9cb"
-  border: "#294257"
-  primary: "#67dce8"
-  result: "#ef886f"
+  background: "#ffffff"
+  surface: "#f2f5f5"
+  text: "#202428"
+  muted: "#58626b"
+  border: "#cbd1d5"
+  accent: "#006d77"
+  primary: "#006d77"
 typography:
   sans:
-    fontFamily: "-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+    fontFamily: "Manrope, system-ui, sans-serif"
   mono:
-    fontFamily: "ui-monospace, SFMono-Regular, Consolas, monospace"
+    fontFamily: "Plex Mono, ui-monospace, monospace"
 rounded:
   control: "5px"
-  console: "9px"
+  artifact: "14px"
+  header: "18px"
 spacing:
-  gutter: "6vw"
+  gutter: "4.3vw"
 components:
-  cpuViewer:
-    backgroundColor: "{colors.background}"
+  artifact:
+    backgroundColor: "{colors.surface}"
     textColor: "{colors.text}"
+  caption:
+    textColor: "{colors.muted}"
+  primaryButton:
+    backgroundColor: "{colors.primary}"
+  link:
+    textColor: "{colors.accent}"
 ---
-
-# ches.dev design context
 
 ## Overview
 
-The existing portfolio uses midnight navy, cyan highlights, system sans typography, and glass panels. Its source remains unchanged. `/cpu/` is a separate, unlinked brand story for the physical Minecraft redstone CPU. Reference: the pacing of a product launch, grounded in the actual exported build rather than an invented processor render. The memorable element is the real schematic moving through a guided tour.
+The publishing branch is master, also the repository default. GitHub Pages builds the repository root with its built-in branch deployment. CNAME remains ches.dev. Merge website updates into master; codex branches are feature/history branches and do not own production deployment. No separate deployment workflow is required.
+
+Colin Heslin's portfolio presents inspectable software and systems to employers and technical reviewers. Precision comes from typography, proportion, authentic artifacts, and concise evidence. This replaces the navy/gold showcase and the rejected generated-image/project-selector explorations. All four featured projects have the same heading hierarchy and comparable presentation: BadAvo, Printed, JB-X, CPU V2. No project owns the hero. Copy is deliberately short so Colin can replace it with personal build notes.
 
 ## Colors
 
-The CPU page's runtime token owner is `cpu/cpu.css` `:root`; the frontmatter records its mapping. `--bg`, `--surface`, `--ink`, `--muted`, `--line`, `--accent`, `--warm` correspond in order to background, surface, text, muted, border, primary, result. Physical wool colors derive from Minecraft block-state color names in `build-viewer.js`; scene lighting shades them. Cyan is a temporary explanatory highlight, not simulated redstone power. The overview retains all original wool color identities.
+Runtime ownership is static/theme.css: --bg, --surface, --ink, --muted, --line, and --accent map to the frontmatter. Light appearance is white, cool silver, charcoal, and deep teal. System dark appearance uses #141619 / #1e2328 / #eff2f4 / #b2bbc2 / #4b5962 / #9dd6d8, respectively. --on-accent is white in light mode and carbon in dark mode. --active marks state selection. CSS prefers-color-scheme owns appearance, with no persistent override or startup script. Native controls receive color-scheme. The CPU route loads the same tokens after its scoped stylesheet; physical probe colors and recorded data retain their meaning.
 
 ## Typography
 
-System sans avoids network font dependencies and layout shifts. Large, closely tracked headings carry the story. Monospace identifies code, binary values, addresses, and viewer captions. Body text uses normal tracking and generous line height.
+Manrope is locally hosted at weights 400–700; Plex Mono identifies addresses, commands, and technical metadata. Body text is normal tracking. Headings use deliberate tight tracking. Arrows are real SVG icons to avoid missing font glyphs. Font licenses and asset provenance live under static/assets.
 
 ## Layout
 
-Desktop pairs long narrative chapters with a sticky physical model. Phone layouts place a compact model above the naturally scrolling chapter. The page is English. It is not linked from the homepage and has noindex metadata; this is discoverability control, not access control.
+The wordmark is ches.dev on the homepage, engineering notes, and CPU walkthrough. A compact introduction and four-link work index lead to four continuous project chapters. The project index is anchor navigation, not a selector hiding other work. Descriptions and artifacts share a consistent grid; individual artifacts are author-supplied app screenshots, an order workflow, a command registry, and a CPU explanation. Full-width chapter bands alternate the base and --section-bg surfaces, separated by visible seams and open gutters. Minor projects form six smaller native disclosures. About and contact finish the page. Three short static engineering-note routes share the same shell; /cpu/ preserves the detailed physical walkthrough. Mobile keeps the desktop design intact while stacking content in document flow: a two-column navigation has 44px targets, and the Printed request/review panels stack below 480px. No scroll-jacking, forced full-height sections, or horizontal-only actions.
 
 ## Elevation & Depth
 
-The model's actual geometry provides depth. Do not invent CPU internals, decorative circuit traces, or unsupported hardware claims. Console borders separate interactive demo state from physical model state.
+Use restrained glass-inspired chrome: a fine highlight, a translucent tint, and a shallow static shadow. Only the bounded navigation header may use backdrop blur (10px); artifact panels never use live blur. The header supports touch and desktop layouts, including iOS Safari with prefixed backdrop-filter. static/appearance.js enables glass when supported unless reduced motion/transparency, forced colors, data saving, or known very limited hardware (at most 2GB RAM or two logical cores) calls for the solid fallback. Missing hardware hints do not exclude Safari. Brief frame sampling during scroll disables blur for the rest of the page visit after sustained slow rendering; it stops when idle or hidden. No benchmark or permanent render loop runs. Disabled JavaScript and unsupported CSS use the solid header. No full-screen filters, animated refraction, or permanent GPU-layer promotion. Static surfaces keep the same contrast and geometry. A small shadow also belongs to authentic app captures. BadAvo screenshots keep their full aspect ratio with 18px CSS corners; desktop displays up to 460px tall, and phone layouts stack the image above its controls. Do not generate project visuals or reconstruct fake product screens. No glows, magnetic controls, custom cursors, or decorative parallax.
 
 ## Shapes
 
-Restrained 5px control corners and a 9px demo console. No default card grids. Diagram highlight boxes are inclusive, approximate framing regions, never certified wire ownership.
+5px control, 14px artifact, and 18px desktop header corners. The favicon uses a crisp vector c-and-dot mark, with a matching 64px PNG fallback. A filled Explore the CPU in 3D link and a short destination description make the separate /cpu/ route explicit. The Printed view selector uses a 12px outer and 8px inner radius. Open text remains unboxed. Dividers encode section and workflow boundaries.
 
 ## Components
 
-The physical viewer uses exact schematic positions and simplified block geometry. Mouse dragging rotates; focused wheel zoom and keyboard arrows/+/- provide direct control. Escape releases focus so page scrolling remains available. Restore returns to the current chapter view. Motion follows document scrolling without scroll-jacking; reduced motion removes camera easing. The addition console is separate host-side explanatory state and preserves the exact words, NOPs, alias addresses, and PC wrap. Unknown registers display `?` until written. Restart resets only the viewer demo, not the hardware.
+static/index.css owns content layout and shared controls; static/index.js progressively enhances the homepage. All essential content and links work without JavaScript. Demo controls remain disabled until handlers are installed. Printed loads the original published project at https://ches.dev/3D-Printing-Order-Management/index.html?embed=1 inside a sandboxed iframe. No local storefront copy or replacement form logic is maintained in this repository. Touch devices start with the iframe inert and pointer events passing to the portfolio, so swipes continue down the page. Use Printed explicitly enables frame interaction; Resume page scrolling, a touch outside the frame, or leaving the viewport restores scroll-through behavior. Desktop pointer interaction remains immediate. Native Storefront / Order workflow buttons switch the preview without reloading the storefront iframe or discarding its in-memory form state. At tablet/desktop widths a shared CSS grid row reserves both panel sizes, so switching cannot move the next chapter; the inactive panel is visibility-hidden and inaccessible. Phones retain natural panel height. The workflow panel explains HTML/Bootstrap inputs, JavaScript conditional fields, Python/Flask validation, and parameterized MySQL storage. Admin approval is not part of Colin’s presented workflow. The original project owns embed mode: it skips the initial dialog, preserves the original customer fields, keeps navigation within the frame, and disables its particle loop. Submission gives inline archive status without sending orders or payments. Original visual styling and assets remain project-owned. JB-X demonstrates verified command help and aliases without third-party API requests. CPU uses the compact recorded program at addresses 1,2,3, preserving A58B/3C4B/48C1. Registers begin unknown until written; playback finishes after ADD without implying hardware HALT. Pause when offscreen or hidden. Keep full model/recording on /cpu/; do not rewrite hardware source data. Native details provide keyboard-operable minor-project disclosure. Clipboard failure has inline recovery. The system pointer, visible focus, 44px controls, semantic statuses, natural scrolling, and reduced-motion behavior apply throughout.
 
 ## Do's and Don'ts
 
-Keep module landmarks traceable to `cpu/data/landmarks.json` and the user-provided coordinate formulas. Highlight confirmed repeaters; frame approximate principal module regions. Preserve R15's physical presence while documenting its faulty reads. Keep the original saved ROM in the physical scene distinct from the addition demo. The page must work without remote assets; provide a schematic-derived static fallback when WebGL fails. Do not add a homepage link until requested.
+- Preserve all four featured projects and six smaller projects, original destinations, and maturity distinctions.
+- Use real captures, measured data, source-linked explanations, and honest local demo labels.
+- Do not invent accuracy, speed, adoption, current market values, or personal engineering decisions.
+- Keep light/dark content and geometry identical and image colors authentic.
+- Verify 320px, phone, tablet, desktop, text zoom, no-JavaScript, and reduced motion.
+- Maintain technical notes as short editable HTML, with no generated filler or unfinished public placeholders.
+
+## Live services
+
+The homepage adds a compact Live services section between Other projects and About. It reports only services returned by the public Service Status API; no featured-project availability is inferred from Minecraft or unrelated services. Web and Minecraft groups use two columns on desktop and one on phones. Additional categories appear automatically. Rows use labeled static dots, names and check times, with safe public links when supplied. Runtime status tokens belong to static/theme.css: --status-online (#167047 light / #7bd5aa dark) and --status-warning (#85520a light / #efbd70 dark). Offline, unknown and last-known values use the existing muted token.
+
+static/services.js owns read-only fetching and rendering. Poll every 30 seconds only while the section and tab are visible, never less than 10 seconds apart, with one request at a time and an eight-second timeout. Rows are keyed by API id and sorted by category/name, independent of response order. Respect stale even on HTTP 200. Errors retain last-known values with an outdated notice; no data means Status unavailable. A snapshot older than 60 seconds is marked outdated when revisited. Unrecognized states are Unknown and inactive. Status changes use one polite message; routine timestamps do not announce repeatedly. No authentication, persistent cache, animation or backend changes.
+
+## Calendar availability
+
+The intro has a quiet dot-and-label anchor to a calendar summary above the contact email. This is calendar availability, never a claim about hiring or response time. Events marked public or private affect the API; unmarked events are ignored, and private takes precedence when both markers exist. This filtering mechanism stays out of visitor-facing copy. Fresh busy data with an event may show the approved event title, an all-day label, and its end time. Busy responses without an event show only “Busy” and the email action; never display or infer private event details or timing from nextChangeAt. Keep nextChangeAt for internal refresh scheduling; free data may show the next change as “Free until”. Dates include the visitor’s local timezone. Keep the email action explicit. Reuse --status-online for free, --status-warning for busy, and --muted for unknown; dots are static and always paired with text. No additional glass, animation, dependencies, or persistent calendar storage.
+
+static/availability.js owns one read-only request stream for both surfaces, polling every 30 seconds only while either is onscreen and the tab is visible, at least 10 seconds apart. Requests time out after eight seconds and are cancelled when hidden. Respect stale on HTTP 200, unknown values, malformed data, and failures with a neutral unavailable/outdated state; never retain a green free indicator after failure. Expired next-change/event-end boundaries clear the status immediately and trigger revalidation. Snapshots expire after 65 seconds in memory or 90 seconds from API generation. Only the contact status label is a polite live region. Event titles use textContent. No-JavaScript visitors retain the email action.

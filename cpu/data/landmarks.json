@@ -4,16 +4,28 @@
   "world_minimum": [256, 72, -4],
   "bounds_are": "Approximate principal camera regions, inclusive. Not ownership of every wire or all connected control circuitry.",
   "regions": {
-    "pc": {"minimum": [39,0,9], "maximum": [53,19,17]},
-    "alu": {"minimum": [44,20,18], "maximum": [58,44,36]},
-    "registers": {"minimum": [60,20,36], "maximum": [90,44,50]}
+    "pc": {
+      "minimum": [39, 0, 9],
+      "maximum": [53, 19, 17]
+    },
+    "alu": {
+      "minimum": [44, 20, 18],
+      "maximum": [58, 44, 36]
+    },
+    "registers": {
+      "minimum": [60, 20, 36],
+      "maximum": [90, 44, 50]
+    }
   },
   "exact_landmarks": {
     "pc_state_repeaters": "(41, 7 + 2*i, 15), i=0..5",
     "alu_output_repeaters": "(52, 22 + 2*i, 18), i=0..7",
-    "register_storage_repeaters": "(60 + 2*r, 22 + 2*i + (1 if r % 2 == 0 else 0), z), r=1..15, i=0..7, z in {39,47}"
+    "register_storage_repeaters": "(60 + 2*r, 22 + 2*i + (1 if r % 2 == 0 else 0), z), r=1..15, i=0..7, z in {39,47}",
+    "register_input_repeaters": "Same x/y as register storage; z in {40,46}. Delay 2 after repair; distinct from storage repeaters at z {39,47}, delay 1."
   },
   "validation": "All 254 supplied PC/ALU/register landmark coordinates match repeater blocks in the parsed schematic.",
   "rom_cells": "Exact manifest formula, transformed into local coordinates: x=30-2*(address%16), y=14-4*(address//16), z=34+2*bit.",
-  "encoding_view": "Operation-label sign neighborhood; not a certified decoder module boundary."
+  "encoding_view": "Operation-label sign neighborhood; not a certified decoder module boundary.",
+  "storage_encoding": "At the storage probes: powered=false is logical 1, powered=true is logical 0. Both banks store mirrored values.",
+  "pc_reset": "Synchronous PC-only reset tested: assert lever, allow settling, then clock. Not a full CPU reset; does not clear register banks."
 }
