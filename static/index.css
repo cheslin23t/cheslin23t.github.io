@@ -220,6 +220,65 @@ main,
 .intro-copy .text-link {
   border: 0;
 }
+.availability-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: fit-content;
+  min-height: 44px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.availability-dot {
+  display: inline-block;
+  flex: 0 0 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+[data-availability="free"] .availability-dot {
+  background: var(--status-online);
+}
+[data-availability="busy"] .availability-dot {
+  background: var(--status-warning);
+}
+.availability {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) 2fr;
+  gap: 20px 60px;
+  margin-bottom: 40px;
+  padding-bottom: 30px;
+  border-bottom: 1px solid var(--line);
+}
+.availability h2 {
+  letter-spacing: 0.015em;
+}
+.availability-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0 0;
+  font-size: 17px;
+}
+.availability-detail {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  color: var(--muted);
+}
+.availability-detail p {
+  margin: 0;
+}
+.availability-detail .availability-checked {
+  margin-top: 10px;
+  font-size: 11px;
+}
+@media (max-width: 600px) {
+  .availability {
+    grid-template-columns: 1fr;
+  }
+}
 .work-index {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
