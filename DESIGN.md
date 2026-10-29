@@ -47,7 +47,7 @@ Manrope is locally hosted at weights 400–700; Plex Mono identifies addresses, 
 
 ## Layout
 
-The wordmark is ches.dev on the homepage, engineering notes, and CPU walkthrough. A compact introduction and four-link work index lead to four continuous project chapters. The project index is anchor navigation, not a selector hiding other work. Descriptions and artifacts share a consistent grid; individual artifacts are author-supplied app screenshots, an order workflow, a command registry, and a CPU explanation. Full-width chapter bands alternate the base and --section-bg surfaces, separated by visible seams and open gutters. Minor projects form six smaller native disclosures. About and contact finish the page. Three short static engineering-note routes share the same shell; /cpu/ preserves the detailed physical walkthrough. Mobile keeps the desktop design intact while stacking content in document flow: a two-column navigation has 44px targets, and the Printed request/review panels stack below 480px. No scroll-jacking, forced full-height sections, or horizontal-only actions.
+The wordmark is ches.dev on the homepage, engineering notes, and CPU walkthrough. A compact introduction and four-link work index lead to four continuous project chapters. The project index is anchor navigation, not a selector hiding other work. Descriptions and artifacts share a consistent grid; individual artifacts are author-supplied app screenshots, an order workflow, a command registry, and a CPU explanation. Full-width chapter bands alternate the base and --section-bg surfaces, separated by visible seams and open gutters. Minor projects form six smaller native disclosures. About and contact finish the page. The three engineering-note routes share the same shell and show “Engineering notes coming soon”; homepage labels are plain text until the notes are ready; /cpu/ preserves the detailed physical walkthrough. Mobile keeps the desktop design intact while stacking content in document flow: a two-column navigation has 44px targets, and the Printed request/review panels stack below 480px. No scroll-jacking, forced full-height sections, or horizontal-only actions.
 
 ## Elevation & Depth
 
@@ -68,7 +68,7 @@ static/index.css owns content layout and shared controls; static/index.js progre
 - Do not invent accuracy, speed, adoption, current market values, or personal engineering decisions.
 - Keep light/dark content and geometry identical and image colors authentic.
 - Verify 320px, phone, tablet, desktop, text zoom, no-JavaScript, and reduced motion.
-- Maintain technical notes as short editable HTML, with no generated filler or unfinished public placeholders.
+- Keep engineering notes explicitly marked Coming soon until ready; do not present unfinished notes as published content.
 
 ## Live services
 
