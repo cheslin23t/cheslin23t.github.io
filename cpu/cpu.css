@@ -856,3 +856,93 @@ footer {
   height: 1rem;
   accent-color: var(--accent);
 }
+
+.replay-output {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.25rem 0;
+  border-block: 1px solid var(--line);
+  font-family: var(--mono);
+}
+.replay-output > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.replay-output span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.replay-output output {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  line-height: 1.1;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.replay-output code {
+  font-size: clamp(16px, 2vw, 22px);
+  letter-spacing: 0.06em;
+}
+.replay-output.is-complete output {
+  color: var(--accent);
+}
+.replay-explanation {
+  min-height: 19rem;
+  margin-top: 1.5rem;
+}
+.replay-explanation h3 {
+  font-size: 17px;
+  line-height: 1.4;
+  min-height: 3em;
+}
+.replay-explanation .trace-values {
+  font: 13px/1.7 var(--mono);
+  color: var(--accent);
+}
+.is-replaying .state-strip > span:last-child {
+  color: var(--accent);
+  background: var(--active);
+}
+
+.controller-state {
+  border-top: 1px solid var(--line);
+  padding-top: 1.25rem;
+  margin-top: 1rem;
+}
+.controller-state h3 {
+  font-size: 18px;
+  margin: 0;
+}
+.controller-state > code {
+  display: block;
+  font: 13px/1.7 var(--mono);
+  overflow-wrap: anywhere;
+}
+.controller-state dl {
+  margin: 1rem 0;
+}
+.controller-state dl > div {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+.controller-state dt {
+  color: var(--muted);
+}
+.controller-state dd {
+  margin: 0;
+  font-family: var(--mono);
+}
+.controller-state #controller-detail {
+  min-height: 12rem;
+  font-size: 14px;
+}
+.controller-state .trace-values {
+  font: 13px/1.7 var(--mono);
+  color: var(--accent);
+}

@@ -1,4 +1,4 @@
-import { wireBoxes, torchPoint } from "./block-geometry.mjs?v=20261029-torches";
+import { wireBoxes, torchPoint } from "./block-geometry.mjs?v=20261029-replay2";
 ("use strict");
 // Physical geometry comes exclusively from the parsed Sponge schematic.
 // The simplified shapes show block placement, not a redstone simulation.
@@ -641,6 +641,29 @@ import { wireBoxes, torchPoint } from "./block-geometry.mjs?v=20261029-torches";
   window.focusCpuBuild = (id, preserveMode = false) => {
     if (!preserveMode) context = false;
     focus(id);
+  };
+  window.focusCpuController = (opcode) => {
+    const x = 53 + 2 * opcode;
+    views.controller = {
+      bounds: [
+        [Math.max(48, x - 5), 22, 52],
+        [Math.min(84, x + 5), 32, 62],
+      ],
+      region: 3,
+      label: `Controller · ${opcode === 11 ? "LDI" : "ADD"} operation sign`,
+      pins: [
+        {
+          p: [x + 0.5, 26.5, 60.5],
+          text: `${opcode === 11 ? "LDI" : "ADD"} · opcode ${opcode.toString(16).toUpperCase()}`,
+        },
+      ],
+    };
+    focus("controller");
+  };
+  window.enableCpuXray = () => {
+    ghost = true;
+    context = false;
+    focus(currentChapter);
   };
   window.focusCpuRegister = (r) => {
     const x = 60 + 2 * r,

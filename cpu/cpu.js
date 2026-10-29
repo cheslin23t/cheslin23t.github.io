@@ -107,6 +107,7 @@ function applyScene(index, force = false) {
       index <= 3 ? "rom" : index <= 8 ? "registers" : index <= 14 ? "alu" : "";
     if (a.hash === `#${group}`) a.setAttribute("aria-current", "location");
   });
+  $(".physical-stage").classList.toggle("is-replaying", Boolean(scene.replay));
   window.focusCpuBuild?.(scene.view);
   if (!recording) return;
   if (scene.gate !== undefined) {
@@ -142,6 +143,7 @@ function applyScene(index, force = false) {
       window.setCpuPinLabels?.(["R3 bit 0 · logical 1"]);
     if (scene.inspector) showCell();
     if (scene.replay) {
+      window.enableCpuXray?.();
       replayFocus = "";
       showTick(0);
     }
@@ -168,6 +170,75 @@ function queueScroll() {
 }
 addEventListener("scroll", queueScroll, { passive: true });
 addEventListener("resize", queueScroll);
+function showController(f) {
+  const reverse4 = (n) =>
+    ((n & 1) << 3) | ((n & 2) << 1) | ((n & 4) >> 1) | ((n & 8) >> 3);
+  const op = f.word & 15,
+    dest = reverse4((f.word >> 4) & 15),
+    a = reverse4((f.word >> 12) & 15),
+    b = reverse4((f.word >> 8) & 15);
+  const names = [
+    "NOP",
+    "ADD",
+    "SUB",
+    "AND",
+    "NAND",
+    "OR",
+    "XOR",
+    "NOR",
+    "XNOR",
+    "INC",
+    "DEC",
+    "LDI",
+    "Branch",
+  ];
+  const registerValue = (r) =>
+    r === 0
+      ? "0"
+      : r >= 1 && r <= 3
+        ? String(f.registers[r - 1])
+        : "not sampled";
+  $("#controller-word").textContent =
+    `${hex(f.word)} · ${f.word.toString(2).padStart(16, "0").match(/.{4}/g).join(" ")}`;
+  $("#controller-op").textContent =
+    `${names[op] || "Unspecified"} · opcode ${op.toString(16).toUpperCase()}`;
+  if (op === 0) {
+    $("#controller-source").textContent = "No operand required";
+    $("#controller-destination").textContent = "No register write";
+    $("#controller-alu").textContent =
+      `No result selected for writing · output ${f.alu}`;
+    $("#controller-route").textContent = `PC ${f.pc} → ROM → 0000 → NOP`;
+    $("#controller-detail").textContent =
+      "NOP leaves the registers unchanged. It does not stop the clock or clear the ALU; signals from the previous instruction may still be settling.";
+  } else if (op === 11) {
+    const immediate = f.word >> 8;
+    $("#controller-source").textContent =
+      `Immediate ${immediate} · ${immediate.toString(2).padStart(8, "0")}`;
+    $("#controller-destination").textContent =
+      `R${dest} · currently ${registerValue(dest)}`;
+    $("#controller-alu").textContent =
+      "Immediate write path · no arithmetic required";
+    $("#controller-route").textContent =
+      `ROM word → immediate ${immediate} → R${dest}`;
+    $("#controller-detail").textContent =
+      `The low four bits select LDI. The next four bits select R${dest}; this field is bit-reversed in the wiring. The upper eight bits supply the byte to write. The destination selects which register cells accept it; the other registers retain their values.`;
+  } else {
+    $("#controller-source").textContent =
+      `A: R${a} = ${registerValue(a)} · B: R${b} = ${registerValue(b)}`;
+    $("#controller-destination").textContent =
+      `R${dest} · currently ${registerValue(dest)}`;
+    $("#controller-alu").textContent =
+      `${names[op] || "Unspecified operation"} · measured output ${f.alu}`;
+    $("#controller-route").textContent =
+      op === 9
+        ? `R${b} + 1 → ALU → R${dest}`
+        : `R${a} ${op === 2 ? "−" : "+"} R${b} → ALU → R${dest}`;
+    $("#controller-detail").textContent =
+      op !== 1
+        ? "This is a transient instruction-bus value between program words. The fields shown are its current decode; it is not an extra instruction in the program. Different wires settle at different times before the next complete word arrives."
+        : "The controller uses separate fields for the two register reads, the ALU operation, and the destination write. For this ADD, the register banks supply 60 and 165. The ALU performs the addition, and the destination write path transfers the result into R3. Selecting an operation does not make its output settle instantly.";
+  }
+}
 let replayFocus = "";
 function replayStage(t) {
   if (t < 131)
@@ -211,10 +282,13 @@ function showTick(value) {
   tick = Math.max(0, Math.min(recording.frames.length - 1, Math.round(value)));
   const f = recording.frames[tick];
   state(f);
+  showController(f);
   const stage = replayStage(tick);
   const key = `${stage.view}:${stage.register || 0}`;
   if ($("#follow-replay").checked && replayFocus !== key) {
     if (stage.register) window.focusCpuRegister?.(stage.register);
+    else if (stage.view === "encoding")
+      window.focusCpuController?.(f.word & 15);
     else window.focusCpuBuild?.(stage.view, true);
     replayFocus = key;
   }
@@ -236,6 +310,53 @@ function showTick(value) {
     : probes(f, visibleStage.view);
   window.setCpuProbes?.(signals);
   $("#trace-phase").textContent = stage.label;
+  $("#replay-result").textContent = f.registers[2];
+  $("#replay-binary").textContent = f.registers[2].toString(2).padStart(8, "0");
+  $("#replay-result-state").textContent =
+    tick >= 509
+      ? "Stored result"
+      : tick >= 443
+        ? "Write in progress"
+        : "Waiting for ADD";
+  $(".replay-output").classList.toggle("is-complete", tick >= 509);
+  let explanation, values;
+  if (tick < 131) {
+    explanation =
+      "The program counter is at address 0. The clock is running; its next advance will select the first load instruction in ROM.";
+    values = `PC = ${f.pc} · instruction word = ${hex(f.word)}`;
+  } else if (stage.view === "rom") {
+    explanation = `The PC now selects ROM address ${f.pc}. The torch pattern at that address encodes a 16-bit instruction. The instruction bus is still catching up with the new address.`;
+    const expected = recording.program.find((p) => p[0] === f.pc);
+    values = `Address ${f.pc} → ${expected?.[1] || "0000"} · bus currently ${hex(f.word)}`;
+  } else if (tick < 423) {
+    const r = tick < 277 ? 1 : 2,
+      immediate = r === 1 ? 165 : 60;
+    explanation =
+      stage.view === "encoding"
+        ? `The word has reached the instruction bus. Opcode B selects LDI; its immediate field supplies ${immediate}, and its destination field selects R${r}. This instruction writes the byte directly into the register.`
+        : `The write path delivers ${immediate} to R${r}'s eight storage cells. Their signals take time to settle. When the write finishes, the cells retain the byte for the later ADD.`;
+    values = `LDI R${r}, ${immediate} · R${r} now = ${f.registers[r - 1]} (${f.registers[r - 1].toString(2).padStart(8, "0")})`;
+  } else if (tick < 509) {
+    explanation =
+      stage.view === "encoding"
+        ? "Opcode 1 selects ADD. The register fields select R2 as operand A, R1 as operand B, and R3 as the destination. The CPU reads the two stored bytes; the instruction contains their register numbers."
+        : "The ALU adds the bytes from R2 and R1. The output changes as signals propagate through the circuit. The current ALU value below is measured; R3 can show intermediate values until the write settles.";
+    values = `R2 (${f.registers[1]}) + R1 (${f.registers[0]}) → ALU now ${f.alu} · expected 225`;
+  } else if (tick < 569) {
+    explanation =
+      "The sum has reached R3. Its eight cells now hold 11100001: 128 + 64 + 32 + 1 = 225. R1 and R2 keep the original operands.";
+    values = `${f.registers[1]} + ${f.registers[0]} = ${f.registers[2]} · ALU = ${f.alu}`;
+  } else if (tick < 631) {
+    explanation =
+      "The clock advances the PC past the program. The next ROM word is zero (NOP), so no new register write is selected once it reaches the decoder. The ALU can change while R3 keeps the result.";
+    values = `PC = ${f.pc} · bus = ${hex(f.word)} · ALU = ${f.alu} · R3 = ${f.registers[2]}`;
+  } else {
+    explanation =
+      "The ALU has returned to zero, but R3 still holds 225. The result lives in the register's storage cells, ready to be used as an operand by another instruction. The clock continues advancing the PC.";
+    values = `R1 = ${f.registers[0]} · R2 = ${f.registers[1]} · ALU = ${f.alu} · R3 = ${f.registers[2]}`;
+  }
+  $("#trace-explanation").textContent = explanation;
+  $("#trace-values").textContent = values;
   $("#trace-seek").value = tick;
   $("#trace-tick").textContent = `${tick} / ${recording.frames.length - 1}`;
   $("#signal-caption").textContent =

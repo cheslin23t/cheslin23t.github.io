@@ -17,10 +17,10 @@
       sizes="64x64"
       href="/static/assets/favicon.png?v=2"
     />
-    <link rel="stylesheet" href="./cpu.css?v=20261029-torches" />
+    <link rel="stylesheet" href="./cpu.css?v=20261029-replay2" />
     <link rel="stylesheet" href="/static/theme.css" />
-    <script src="./cpu.js?v=20261029-torches" defer></script>
-    <script type="module" src="./build-viewer.js?v=20261029-torches"></script>
+    <script src="./cpu.js?v=20261029-replay2" defer></script>
+    <script type="module" src="./build-viewer.js?v=20261029-replay2"></script>
     <noscript
       ><style>
         .model-fallback[hidden] {
@@ -523,13 +523,26 @@ ADD R3, R2, R1</code></pre>
               writes, and ALU. Turn off camera following to inspect a circuit
               while the recording continues.
             </p>
+            <div
+              class="replay-output"
+              aria-label="Recorded destination register"
+            >
+              <div>
+                <span>R3 · destination register</span
+                ><output id="replay-result">0</output>
+              </div>
+              <div>
+                <code id="replay-binary">00000000</code
+                ><span id="replay-result-state">Waiting for ADD</span>
+              </div>
+            </div>
             <div class="run-controls">
               <button id="run-play" type="button" disabled>
                 Play recording</button
               ><label
                 >Speed<select id="run-speed">
-                  <option value="1">1×</option>
-                  <option value="4" selected>4×</option>
+                  <option value="1" selected>1×</option>
+                  <option value="4">4×</option>
                   <option value="0.25">¼×</option>
                 </select></label
               >
@@ -548,7 +561,39 @@ ADD R3, R2, R1</code></pre>
               ><input type="checkbox" id="follow-replay" checked /> Follow
               execution camera</label
             >
-            <p id="trace-phase" class="aside"></p>
+            <div class="replay-explanation">
+              <h3 id="trace-phase">Reading the program</h3>
+              <p id="trace-explanation">Loading recorded execution…</p>
+              <p id="trace-values" class="trace-values"></p>
+            </div>
+            <section
+              class="controller-state"
+              aria-labelledby="controller-title"
+            >
+              <h3 id="controller-title">Inside the controller</h3>
+              <p class="aside">Decoded from the current instruction bus.</p>
+              <code id="controller-word">0000 · 0000 0000 0000 0000</code>
+              <dl>
+                <div>
+                  <dt>Operation</dt>
+                  <dd id="controller-op">NOP · opcode 0</dd>
+                </div>
+                <div>
+                  <dt>Data source</dt>
+                  <dd id="controller-source">None</dd>
+                </div>
+                <div>
+                  <dt>Destination</dt>
+                  <dd id="controller-destination">No register write</dd>
+                </div>
+                <div>
+                  <dt>ALU selection</dt>
+                  <dd id="controller-alu">Not used by this instruction</dd>
+                </div>
+              </dl>
+              <p id="controller-route" class="trace-values"></p>
+              <p id="controller-detail"></p>
+            </section>
             <p id="trace-status" class="aside">Loading recording…</p>
             <small
               >Game time · 870 samples ·

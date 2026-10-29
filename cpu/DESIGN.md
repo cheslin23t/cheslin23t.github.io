@@ -122,3 +122,13 @@ faint depth-tested silhouette, without hiding internal details behind it.
 Replay camera following is optional and visits PC, ROM, decode, each written
 register, and the ALU at recorded milestones. These are viewing intervals, not
 an invented cycle-accurate simulation of unmeasured wires.
+
+Replay defaults to 1× (20 game ticks per second) and X-ray. A persistent decimal
+and binary R3 readout distinguishes pending writes from the stored result.
+Stage explanations describe the selected ROM word, decode, register write,
+ALU propagation, and retention using the current recorded numbers.
+
+The replay controller panel decodes the observed 16-bit bus into opcode, source
+registers or immediate byte, and destination. These are logical selections from
+the instruction format, not measured individual enable wires. Controller camera
+close-ups use the documented opcode sign coordinates.
