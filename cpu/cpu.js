@@ -18,7 +18,7 @@ const scenes = [
   { view: "flags", tick: 497 },
   { view: "result", tick: 650 },
   { view: "clock", tick: 569 },
-  { view: "operation", tick: 0, replay: true },
+  { view: "clock", tick: 0, replay: true },
 ];
 const steps = [...document.querySelectorAll(".step")];
 let recording = null,
@@ -141,7 +141,10 @@ function applyScene(index, force = false) {
     if (scene.view === "result")
       window.setCpuPinLabels?.(["R3 bit 0 · logical 1"]);
     if (scene.inspector) showCell();
-    if (scene.replay) showTick(0);
+    if (scene.replay) {
+      replayFocus = "";
+      showTick(0);
+    }
   }
 }
 function updateScroll() {
@@ -165,12 +168,74 @@ function queueScroll() {
 }
 addEventListener("scroll", queueScroll, { passive: true });
 addEventListener("resize", queueScroll);
+let replayFocus = "";
+function replayStage(t) {
+  if (t < 131)
+    return { view: "clock", label: "PC 0 · waiting for the next clock edge" };
+  if (t < 151) return { view: "rom", label: "PC 1 · ROM address changes" };
+  if (t < 175) return { view: "encoding", label: "A58B · decode LDI R1, 165" };
+  if (t < 277)
+    return {
+      view: "registers",
+      register: 1,
+      label: "R1 write · immediate byte 165",
+    };
+  if (t < 297) return { view: "rom", label: "PC 2 · ROM address changes" };
+  if (t < 313) return { view: "encoding", label: "3C4B · decode LDI R2, 60" };
+  if (t < 423)
+    return {
+      view: "registers",
+      register: 2,
+      label: "R2 write · immediate byte 60",
+    };
+  if (t < 443) return { view: "rom", label: "PC 3 · fetch the ADD word" };
+  if (t < 463)
+    return { view: "encoding", label: "48C1 · decode ADD R3, R2, R1" };
+  if (t < 509)
+    return {
+      view: "operation",
+      label: "ALU · 60 + 165 propagates to the output",
+    };
+  if (t < 569)
+    return { view: "registers", register: 3, label: "R3 write · result 225" };
+  if (t < 631)
+    return { view: "clock", label: "PC advances · the next ROM word is zero" };
+  return {
+    view: "registers",
+    register: 3,
+    label: "R3 holds 225 after the ALU returns to zero",
+  };
+}
 function showTick(value) {
   if (!recording) return;
   tick = Math.max(0, Math.min(recording.frames.length - 1, Math.round(value)));
   const f = recording.frames[tick];
   state(f);
-  window.setCpuProbes?.(probes(f, "operation"));
+  const stage = replayStage(tick);
+  const key = `${stage.view}:${stage.register || 0}`;
+  if ($("#follow-replay").checked && replayFocus !== key) {
+    if (stage.register) window.focusCpuRegister?.(stage.register);
+    else window.focusCpuBuild?.(stage.view, true);
+    replayFocus = key;
+  }
+  const held = replayFocus.split(":");
+  const visibleStage = $("#follow-replay").checked
+    ? stage
+    : { view: held[0] || stage.view, register: Number(held[1]) };
+  const signals = visibleStage.register
+    ? Array.from({ length: 8 }, (_, bit) =>
+        probe(
+          [
+            60 + 2 * visibleStage.register,
+            22 + 2 * bit + (visibleStage.register % 2 === 0 ? 1 : 0),
+            39,
+          ],
+          !((f.registers[visibleStage.register - 1] >> bit) & 1),
+        ),
+      )
+    : probes(f, visibleStage.view);
+  window.setCpuProbes?.(signals);
+  $("#trace-phase").textContent = stage.label;
   $("#trace-seek").value = tick;
   $("#trace-tick").textContent = `${tick} / ${recording.frames.length - 1}`;
   $("#signal-caption").textContent =
@@ -185,6 +250,10 @@ function showTick(value) {
         ? `${selected[2]} · measured register and bus values`
         : "Clock running · no register write selected";
 }
+$("#follow-replay").addEventListener("change", () => {
+  if ($("#follow-replay").checked) replayFocus = "";
+  showTick(tick);
+});
 function stop() {
   playing = false;
   cancelAnimationFrame(playFrame);

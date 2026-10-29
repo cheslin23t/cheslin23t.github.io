@@ -1,4 +1,4 @@
-import { wireBoxes } from "./block-geometry.mjs";
+import { wireBoxes, torchPoint } from "./block-geometry.mjs";
 ("use strict");
 // Physical geometry comes exclusively from the parsed Sponge schematic.
 // The simplified shapes show block placement, not a redstone simulation.
@@ -41,14 +41,14 @@ import { wireBoxes } from "./block-geometry.mjs";
     program,
     shader(
       gl.VERTEX_SHADER,
-      `attribute vec3 position; attribute vec3 color; attribute vec3 blockCoord; attribute float region; uniform vec4 probes[16]; uniform mat4 matrix; uniform float selected; varying vec3 vColor; varying vec3 vPosition; varying float vChosen; varying vec3 vBlock; void main(){ float chosen=1.0-step(0.1,abs(region-selected)); float showAll=1.0-step(0.1,selected); vChosen=chosen; vPosition=position; vBlock=blockCoord; vColor=mix(color*.85,mix(color,vec3(.13,.46,.65),.65),chosen); vColor=mix(vColor,color,showAll); for(int i=0;i<16;i++){if(probes[i].w>=0.0 && all(lessThan(abs(blockCoord-probes[i].xyz),vec3(.1)))){ vChosen=1.0; vColor=probes[i].w>.5 ? vec3(.90,.24,.12) : vec3(.35,.40,.45); }} gl_Position=matrix*vec4(position,1.0); }`,
+      `attribute vec3 position; attribute vec3 color; attribute vec3 blockCoord; attribute float region; attribute float naturalMaterial; uniform vec4 probes[16]; uniform mat4 matrix; uniform float selected; varying vec3 vColor; varying vec3 vPosition; varying float vChosen; varying vec3 vBlock; void main(){ float chosen=1.0-step(0.1,abs(region-selected)); float showAll=1.0-step(0.1,selected); vChosen=chosen; vPosition=position; vBlock=blockCoord; vColor=mix(color*.85,mix(color,vec3(.13,.46,.65),.65),chosen); vColor=mix(vColor,color,showAll); for(int i=0;i<16;i++){if(probes[i].w>=0.0 && all(lessThan(abs(blockCoord-probes[i].xyz),vec3(.1)))){ vChosen=1.0; vColor=probes[i].w>.5 ? vec3(.90,.24,.12) : vec3(.35,.40,.45); }} if(naturalMaterial>.5) vColor=color; gl_Position=matrix*vec4(position,1.0); }`,
     ),
   );
   gl.attachShader(
     program,
     shader(
       gl.FRAGMENT_SHADER,
-      `precision mediump float; varying vec3 vColor; varying vec3 vPosition; varying float vChosen; varying vec3 vBlock; uniform float highlightPass; uniform float cropped; uniform vec3 cropMin; uniform vec3 cropMax; void main(){ if(cropped>0.5 && (any(lessThan(vBlock,cropMin)) || any(greaterThan(vBlock,cropMax)))) discard; if(highlightPass>0.5 && vChosen<0.5) discard; gl_FragColor=vec4(vColor,1.0); }`,
+      `precision mediump float; varying vec3 vColor; varying vec3 vPosition; varying float vChosen; varying vec3 vBlock; uniform float highlightPass; uniform float cropped; uniform float ghostPass; uniform vec3 cropMin; uniform vec3 cropMax; void main(){ bool outside=any(lessThan(vBlock,cropMin)) || any(greaterThan(vBlock,cropMax)); if(ghostPass>0.5){ if(!outside) discard; gl_FragColor=vec4(vColor,.075); return; } if(cropped>0.5 && (any(lessThan(vBlock,cropMin)) || any(greaterThan(vBlock,cropMax)))) discard; if(highlightPass>0.5 && vChosen<0.5) discard; gl_FragColor=vec4(vColor,1.0); }`,
     ),
   );
   gl.linkProgram(program);
@@ -62,6 +62,7 @@ import { wireBoxes } from "./block-geometry.mjs";
   const cropMin = gl.getUniformLocation(program, "cropMin"),
     cropMax = gl.getUniformLocation(program, "cropMax"),
     cropped = gl.getUniformLocation(program, "cropped");
+  const ghostPass = gl.getUniformLocation(program, "ghostPass");
   const probeUniform = gl.getUniformLocation(program, "probes[0]");
   let probeValues = new Float32Array(64);
   for (let i = 0; i < 16; i++) probeValues[4 * i + 3] = -1;
@@ -349,6 +350,7 @@ import { wireBoxes } from "./block-geometry.mjs";
   const baseYaw = 2.25,
     basePitch = 0.5;
   let context = false;
+  let ghost = false;
   let zoom = 1;
   function preset(id) {
     const bounds = (context ? views.whole : views[id]).bounds;
@@ -548,6 +550,21 @@ import { wireBoxes } from "./block-geometry.mjs";
     gl.uniform4fv(probeUniform, probeValues);
     gl.uniform1f(selected, goal.region);
     gl.uniform1f(highlightPass, 0);
+    if (ghost && currentChapter !== "whole") {
+      // A depth-tested silhouette avoids opacity accumulating across every layer.
+      gl.uniform1f(ghostPass, 1);
+      gl.colorMask(false, false, false, false);
+      gl.drawArrays(gl.TRIANGLES, 0, vertices);
+      gl.colorMask(true, true, true, true);
+      gl.depthFunc(gl.EQUAL);
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      gl.drawArrays(gl.TRIANGLES, 0, vertices);
+      gl.disable(gl.BLEND);
+      gl.depthFunc(gl.LESS);
+      gl.clear(gl.DEPTH_BUFFER_BIT);
+      gl.uniform1f(ghostPass, 0);
+    }
     gl.drawArrays(gl.TRIANGLES, 0, vertices);
     if (goal.region !== 0) {
       gl.clear(gl.DEPTH_BUFFER_BIT);
@@ -558,9 +575,15 @@ import { wireBoxes } from "./block-geometry.mjs";
     if (
       lineVertices &&
       goal.region !== 0 &&
-      !["inverter", "cell", "memory", "result", "romword", "flags"].includes(
-        currentChapter,
-      )
+      ![
+        "inverter",
+        "cell",
+        "memory",
+        "result",
+        "romword",
+        "flags",
+        "replayregister",
+      ].includes(currentChapter)
     ) {
       gl.uniform1f(cropped, 0);
       gl.uniform1f(highlightPass, 1);
@@ -585,29 +608,56 @@ import { wireBoxes } from "./block-geometry.mjs";
     document.querySelector("#orbit-angle").value = "0";
     document.querySelector("#view-zoom").value = "100";
     canvas.dataset.chapter = id;
-    canvas.dataset.mode = context ? "context" : "region";
+    canvas.dataset.mode = context ? "context" : ghost ? "ghost" : "region";
     document.querySelector("#view-badge").textContent =
-      id === "whole" || context
-        ? "Complete build"
-        : ["inverter", "cell", "memory", "result", "romword", "flags"].includes(
-              id,
-            )
-          ? "Circuit cutaway · exact block positions"
-          : "Module cutaway · approximate bounds";
+      ghost && id !== "whole"
+        ? "X-ray · surrounding build faded"
+        : id === "whole" || context
+          ? "Complete build"
+          : [
+                "inverter",
+                "cell",
+                "memory",
+                "result",
+                "romword",
+                "flags",
+              ].includes(id)
+            ? "Circuit cutaway · exact block positions"
+            : "Module cutaway · approximate bounds";
     document
       .querySelector("#region-view")
-      .setAttribute("aria-pressed", String(!context));
+      .setAttribute("aria-pressed", String(!context && !ghost));
     document
       .querySelector("#context-view")
       .setAttribute("aria-pressed", String(context));
+    document
+      .querySelector("#ghost-view")
+      .setAttribute("aria-pressed", String(ghost));
     setPins();
     status.textContent = goal.label;
     lastFrame = performance.now();
     requestDraw();
   }
-  window.focusCpuBuild = (id) => {
-    context = false;
+  window.focusCpuBuild = (id, preserveMode = false) => {
+    if (!preserveMode) context = false;
     focus(id);
+  };
+  window.focusCpuRegister = (r) => {
+    const x = 60 + 2 * r,
+      y = 22 + (r % 2 === 0 ? 1 : 0);
+    views.replayregister = {
+      bounds: [
+        [x - 1, y - 1, 38],
+        [x + 1, y + 15, 48],
+      ],
+      region: 4,
+      label: `R${r} · eight bits · both storage banks`,
+      pins: [
+        { p: [x + 0.5, y + 0.3, 39.5], text: `R${r} · bit 0` },
+        { p: [x + 0.5, y + 14.3, 39.5], text: `R${r} · bit 7` },
+      ],
+    };
+    focus("replayregister");
   };
   window.inspectCpuCell = (register, bit, bank) => {
     const x = 60 + 2 * register,
@@ -635,9 +685,15 @@ import { wireBoxes } from "./block-geometry.mjs";
   ]) {
     document.getElementById(id).addEventListener("click", () => {
       context = value;
+      ghost = false;
       focus(currentChapter);
     });
   }
+  document.querySelector("#ghost-view").addEventListener("click", () => {
+    ghost = true;
+    context = false;
+    focus(currentChapter);
+  });
   function refit() {
     const bounds = (context ? views.whole : views[currentChapter]).bounds;
     goal.size =
@@ -697,9 +753,23 @@ import { wireBoxes } from "./block-geometry.mjs";
   canvas.addEventListener(
     "wheel",
     (e) => {
-      if (!(e.ctrlKey || e.metaKey)) return;
       e.preventDefault();
-      zoom = Math.max(0.65, Math.min(6, zoom * Math.exp(-e.deltaY * 0.0015)));
+      zoom = Math.max(
+        0.65,
+        Math.min(
+          6,
+          zoom *
+            Math.exp(
+              -e.deltaY *
+                (e.deltaMode === 1
+                  ? 16
+                  : e.deltaMode === 2
+                    ? canvas.clientHeight
+                    : 1) *
+                0.0015,
+            ),
+        ),
+      );
       syncControls();
       refit();
     },
@@ -786,7 +856,8 @@ import { wireBoxes } from "./block-geometry.mjs";
       const positions = [],
         colors = [],
         blockCoords = [],
-        regions = [];
+        regions = [],
+        naturalMaterials = [];
       const names = data.palette;
       const solid = (name) =>
         !/wire|repeater|comparator|torch|sign|lever|button/.test(name);
@@ -843,7 +914,20 @@ import { wireBoxes } from "./block-geometry.mjs";
           return 5;
         return 6;
       }
-      function box(x, y, z, sx, sy, sz, color, region, full) {
+      function box(
+        x,
+        y,
+        z,
+        sx,
+        sy,
+        sz,
+        color,
+        region,
+        full,
+        transform = null,
+        owner = null,
+        naturalMaterial = 0,
+      ) {
         const neighbors = [
           [0, 1, 0],
           [1, 0, 0],
@@ -864,10 +948,14 @@ import { wireBoxes } from "./block-geometry.mjs";
             continue;
           for (const i of [0, 1, 2, 0, 2, 3]) {
             const v = faceCorners[f][i];
-            positions.push(x + v[0] * sx, y + v[1] * sy, z + v[2] * sz);
+            const point = [x + v[0] * sx, y + v[1] * sy, z + v[2] * sz];
+            positions.push(...(transform ? transform(point) : point));
             colors.push(...color.map((c) => c * faces[f]));
             regions.push(region);
-            blockCoords.push(Math.floor(x), Math.floor(y), Math.floor(z));
+            naturalMaterials.push(naturalMaterial);
+            blockCoords.push(
+              ...(owner || [Math.floor(x), Math.floor(y), Math.floor(z)]),
+            );
           }
         }
       }
@@ -899,25 +987,51 @@ import { wireBoxes } from "./block-geometry.mjs";
           continue;
         } else if (/repeater|comparator/.test(name)) {
           sy = 0.14;
-        } else if (/wall_torch/.test(name)) {
-          sx = 0.18;
-          sy = 0.55;
-          sz = 0.18;
-          ox = name.includes("facing=west")
-            ? 0.75
-            : name.includes("facing=east")
-              ? 0.07
-              : 0.41;
-          oz = name.includes("facing=north")
-            ? 0.75
-            : name.includes("facing=south")
-              ? 0.07
-              : 0.41;
-          oy = 0.15;
-        } else if (/redstone_torch/.test(name)) {
-          sx = sz = 0.18;
-          sy = 0.65;
-          ox = oz = 0.41;
+        } else if (/torch/.test(name)) {
+          const transform = (point) =>
+            torchPoint(point, name).map((v, i) => v + [x, y, z][i]);
+          box(
+            0.4375,
+            0,
+            0.4375,
+            0.125,
+            0.625,
+            0.125,
+            hex("#8b6845"),
+            region,
+            false,
+            transform,
+            [x, y, z],
+            1,
+          );
+          box(
+            0.40625,
+            0.4375,
+            0.40625,
+            0.1875,
+            0.1875,
+            0.1875,
+            hex(name.includes("lit=false") ? "#542b25" : "#ed3d22"),
+            region,
+            false,
+            transform,
+            [x, y, z],
+          );
+          if (!name.includes("lit=false"))
+            box(
+              0.4375,
+              0.625,
+              0.4375,
+              0.125,
+              0.025,
+              0.125,
+              hex("#ffc16b"),
+              region,
+              false,
+              transform,
+              [x, y, z],
+            );
+          continue;
         } else if (/wall_sign/.test(name)) {
           sy = 0.45;
           oy = 0.25;
@@ -987,6 +1101,7 @@ import { wireBoxes } from "./block-geometry.mjs";
             positions.push(...c[i]);
             colors.push(0.3, 0.65, 0.7);
             regions.push(b.region);
+            naturalMaterials.push(0);
             blockCoords.push(-999, -999, -999);
           }
       }
@@ -996,6 +1111,7 @@ import { wireBoxes } from "./block-geometry.mjs";
         ["color", colors, 3],
         ["blockCoord", blockCoords, 3],
         ["region", regions, 1],
+        ["naturalMaterial", naturalMaterials, 1],
       ]) {
         const buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);

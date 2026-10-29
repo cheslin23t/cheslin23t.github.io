@@ -74,7 +74,7 @@
             /><canvas
               id="build-canvas"
               tabindex="0"
-              aria-label="CPU model. Arrow keys rotate; plus and minus zoom; Escape releases scrolling."
+              aria-label="CPU model. Scroll to zoom. Arrow keys rotate; plus and minus zoom; Escape releases scrolling."
             ></canvas>
             <div id="landmark-labels" aria-hidden="true"></div>
             <span id="view-badge">Complete build</span>
@@ -96,6 +96,13 @@
                 aria-pressed="false"
               >
                 Whole CPU</button
+              ><button
+                type="button"
+                disabled
+                id="ghost-view"
+                aria-pressed="false"
+              >
+                X-ray</button
               ><button type="button" disabled id="restore-view">
                 Reset camera
               </button>
@@ -128,8 +135,8 @@
           </div>
           <p id="build-status">Loading physical model</p>
           <p id="signal-caption">
-            Scroll to follow the program. Drag or use the camera sliders to
-            inspect.
+            Scroll over the model to zoom; scroll beside it to follow the
+            program. Drag to orbit.
           </p>
           <p id="build-fallback" hidden>
             Interactive graphics unavailable. The schematic overview and
@@ -512,7 +519,9 @@ ADD R3, R2, R1</code></pre>
             <h2 id="title-run">Replay the program.</h2>
             <p>
               This is the complete run on the CPU. Scrub to any game tick, or
-              play it while watching the result bus and registers.
+              play it as the camera follows the PC, ROM, decoder, register
+              writes, and ALU. Turn off camera following to inspect a circuit
+              while the recording continues.
             </p>
             <div class="run-controls">
               <button id="run-play" type="button" disabled>
@@ -535,6 +544,11 @@ ADD R3, R2, R1</code></pre>
               value="0"
               disabled
             />
+            <label class="follow-control"
+              ><input type="checkbox" id="follow-replay" checked /> Follow
+              execution camera</label
+            >
+            <p id="trace-phase" class="aside"></p>
             <p id="trace-status" class="aside">Loading recording…</p>
             <small
               >Game time · 870 samples ·

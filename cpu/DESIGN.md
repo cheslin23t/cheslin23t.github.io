@@ -61,8 +61,7 @@ reading sequence. No remote font requests.
 
 Desktop uses a broad sticky model beside naturally scrolling sections. There is
 no scene player, carousel, next button, timed slideshow, or scroll hijacking.
-Header anchors jump to ROM, registers, ALU, and instructions. Normal wheel input
-over the model scrolls the document; only Ctrl/Meta+wheel zooms.
+Header anchors jump to ROM, registers, ALU, and instructions. Wheel input over the model zooms; scrolling beside it moves the document.
 
 Mobile stacks a compact sticky model above the reading area. The model is capped
 at 46svh; chapter anchor offsets account for it once, without doubling CSS
@@ -113,3 +112,13 @@ mapped zero detector; put unresolved branch/overflow details in the disclosure.
 Every visible instruction semantic and highlighted coordinate needs source
 support. Preserve the downloadable source schematic. Provide a static model and
 readable prose if WebGL or JavaScript is unavailable.
+
+Torch meshes have separate wooden stems and red caps. Wall torches tilt away from
+the support indicated by their saved facing. Static cap colors come from the
+schematic; electrical overlays remain limited to recorded probes.
+
+X-ray keeps the selected circuit opaque and renders the surrounding build as a
+faint depth-tested silhouette, without hiding internal details behind it.
+Replay camera following is optional and visits PC, ROM, decode, each written
+register, and the ALU at recorded milestones. These are viewing intervals, not
+an invented cycle-accurate simulation of unmeasured wires.

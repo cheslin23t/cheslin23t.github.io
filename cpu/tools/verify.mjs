@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
-import { wireBoxes } from "../block-geometry.mjs";
+import { wireBoxes, torchPoint } from "../block-geometry.mjs";
 const read = (name) => readFile(new URL(`../${name}`, import.meta.url));
 const build = JSON.parse(await read("data/build.json"));
 const recording = JSON.parse(await read("data/recording.json"));
@@ -76,3 +76,30 @@ assert.equal(recording.inverterCaptures[1].probes.torch[1].lit, "false");
 console.log(
   `Verified ${wireStates} wire states, ${cells} storage locations, 870 trace frames, both register banks, inverter states, and source checksum.`,
 );
+
+for (const facing of ["north", "south", "east", "west"]) {
+  const state = `minecraft:redstone_wall_torch[facing=${facing},lit=true]`;
+  const base = torchPoint([0.5, 0, 0.5], state),
+    tip = torchPoint([0.5, 0.625, 0.5], state);
+  const [dx, dz] = {
+    east: [1, 0],
+    west: [-1, 0],
+    north: [0, -1],
+    south: [0, 1],
+  }[facing];
+  assert.ok(
+    (tip[0] - base[0]) * dx + (tip[2] - base[2]) * dz > 0,
+    "Torch leans away from its support",
+  );
+  assert.ok(
+    Math.abs(Math.hypot(...tip.map((v, i) => v - base[i])) - 0.625) < 1e-9,
+    "Rotation preserves stem length",
+  );
+  for (const point of [base, tip])
+    assert.ok(point.every((v) => v >= 0 && v <= 1));
+}
+assert.deepEqual(
+  torchPoint([0.5, 0.625, 0.5], "minecraft:redstone_torch[lit=true]"),
+  [0.5, 0.625, 0.5],
+);
+console.log("Verified standing torches and all four wall-torch orientations.");

@@ -104,7 +104,7 @@ There is no verified hardware HALT; the trace ending is only the end of playback
 
 Document scrolling drives the walkthrough. Drag or use orbit/zoom sliders;
 with the model focused, arrows rotate, +/- zoom, Home restores framing, and
-Escape releases focus. Normal wheel input scrolls the page; Ctrl/Meta+wheel zooms.
+Escape releases focus. Wheel input over the model zooms; scroll beside it to move the page.
 Whole CPU preserves spatial context around the
 selected circuit. Reduced motion removes camera easing; playback is user-started.
 Changing sections or hiding the page pauses recording. Mobile keeps a compact
@@ -118,3 +118,13 @@ all register coordinates, trace milestones, recorded gate states, and source int
 
 `data/build-overview.png` is the original
 schematic overview; regenerate it if the physical source changes.
+
+Torch meshes have separate wooden stems and red caps. Wall torches tilt away from
+the support indicated by their saved facing. Static cap colors come from the
+schematic; electrical overlays remain limited to recorded probes.
+
+X-ray keeps the selected circuit opaque and renders the surrounding build as a
+faint depth-tested silhouette, without hiding internal details behind it.
+Replay camera following is optional and visits PC, ROM, decode, each written
+register, and the ALU at recorded milestones. These are viewing intervals, not
+an invented cycle-accurate simulation of unmeasured wires.
