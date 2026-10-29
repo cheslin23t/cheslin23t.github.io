@@ -123,12 +123,11 @@ Replay camera following is optional and visits PC, ROM, decode, each written
 register, and the ALU at recorded milestones. These are viewing intervals, not
 an invented cycle-accurate simulation of unmeasured wires.
 
-Replay defaults to 1× (20 game ticks per second) and X-ray. A persistent decimal
-and binary R3 readout distinguishes pending writes from the stored result.
-Stage explanations describe the selected ROM word, decode, register write,
-ALU propagation, and retention using the current recorded numbers.
+Replay defaults to 1× and X-ray. One short title and caption live inside the
+model frame; the side column remains static apart from playback controls.
+The model's numeric strip shows recorded values. Its compact flow indicator
+illustrates the current transfer stage, not an inferred physical wire route.
+Flow motion pauses with playback and respects reduced motion.
 
-The replay controller panel decodes the observed 16-bit bus into opcode, source
-registers or immediate byte, and destination. These are logical selections from
-the instruction format, not measured individual enable wires. Controller camera
-close-ups use the documented opcode sign coordinates.
+Controller replay uses the full decoder region for both LDI and ADD. Only the
+opcode landmark changes; it must not crop away neighboring instruction columns.

@@ -129,8 +129,8 @@ Replay camera following is optional and visits PC, ROM, decode, each written
 register, and the ALU at recorded milestones. These are viewing intervals, not
 an invented cycle-accurate simulation of unmeasured wires.
 
-Replay starts at 1× with X-ray enabled. Its live controller panel decodes the
-recorded instruction bus, while the large R3 output shows decimal and binary
-values. Stage descriptions cover fetch, decode, writes, ALU settling, and
-retention; transient bus words are identified rather than treated as extra
-program instructions.
+Replay defaults to 1× and X-ray. One short title and caption live inside the
+model frame; the side column remains static apart from playback controls.
+The model's numeric strip shows recorded values. Its compact flow indicator
+illustrates the current transfer stage, not an inferred physical wire route.
+Flow motion pauses with playback and respects reduced motion.

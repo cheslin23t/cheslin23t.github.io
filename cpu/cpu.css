@@ -857,92 +857,97 @@ footer {
   accent-color: var(--accent);
 }
 
-.replay-output {
+.replay-caption {
+  display: none;
+  padding: 10px 15px;
+  border-top: 1px solid var(--line);
+  flex: none;
+  height: 112px;
+}
+.is-replaying .replay-caption {
+  display: block;
+}
+.replay-caption strong {
+  display: block;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.replay-caption p {
+  margin: 4px 0 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  min-height: 2.9em;
+}
+.signal-flow {
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
   align-items: center;
-  padding: 1.25rem 0;
-  border-block: 1px solid var(--line);
-  font-family: var(--mono);
-}
-.replay-output > div {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-.replay-output span {
-  font-size: 12px;
+  gap: 8px;
+  font: 11px var(--mono);
   color: var(--muted);
 }
-.replay-output output {
-  font-size: clamp(2.5rem, 5vw, 4rem);
-  line-height: 1.1;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-.replay-output code {
-  font-size: clamp(16px, 2vw, 22px);
-  letter-spacing: 0.06em;
-}
-.replay-output.is-complete output {
+.signal-flow span.is-active {
   color: var(--accent);
+  font-weight: 700;
 }
-.replay-explanation {
-  min-height: 19rem;
-  margin-top: 1.5rem;
+.signal-flow i {
+  font-style: normal;
+  position: relative;
 }
-.replay-explanation h3 {
-  font-size: 17px;
-  line-height: 1.4;
-  min-height: 3em;
+.signal-flow i:has(+ .is-active)::after {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  top: 5px;
+  left: 0;
 }
-.replay-explanation .trace-values {
-  font: 13px/1.7 var(--mono);
-  color: var(--accent);
+.is-playing .signal-flow i:has(+ .is-active)::after {
+  animation: signal-transfer 1s linear infinite;
+}
+@keyframes signal-transfer {
+  from {
+    transform: translateX(-4px);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  to {
+    transform: translateX(12px);
+    opacity: 0;
+  }
 }
 .is-replaying .state-strip > span:last-child {
   color: var(--accent);
   background: var(--active);
 }
-
-.controller-state {
-  border-top: 1px solid var(--line);
-  padding-top: 1.25rem;
-  margin-top: 1rem;
+@media (max-width: 800px) {
+  .physical-stage.is-replaying {
+    height: 440px;
+    max-height: 56svh;
+  }
+  .replay-caption {
+    height: 112px;
+    padding: 8px 10px;
+  }
+  .replay-caption strong {
+    font-size: 12px;
+  }
+  .replay-caption p {
+    font-size: 11px;
+  }
+  .signal-flow {
+    gap: 5px;
+    font-size: 10px;
+  }
+  .is-replaying #signal-caption {
+    display: none;
+  }
 }
-.controller-state h3 {
-  font-size: 18px;
-  margin: 0;
-}
-.controller-state > code {
-  display: block;
-  font: 13px/1.7 var(--mono);
-  overflow-wrap: anywhere;
-}
-.controller-state dl {
-  margin: 1rem 0;
-}
-.controller-state dl > div {
-  display: grid;
-  grid-template-columns: 7rem 1fr;
-  gap: 0.75rem;
-  padding: 0.6rem 0;
-  border-bottom: 1px solid var(--line);
-  font-size: 13px;
-}
-.controller-state dt {
-  color: var(--muted);
-}
-.controller-state dd {
-  margin: 0;
-  font-family: var(--mono);
-}
-.controller-state #controller-detail {
-  min-height: 12rem;
-  font-size: 14px;
-}
-.controller-state .trace-values {
-  font: 13px/1.7 var(--mono);
-  color: var(--accent);
+@media (prefers-reduced-motion: reduce) {
+  .is-playing .signal-flow i::after {
+    animation: none !important;
+  }
 }

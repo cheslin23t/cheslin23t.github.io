@@ -17,10 +17,10 @@
       sizes="64x64"
       href="/static/assets/favicon.png?v=2"
     />
-    <link rel="stylesheet" href="./cpu.css?v=20261029-replay2" />
+    <link rel="stylesheet" href="./cpu.css?v=20261029-replay4" />
     <link rel="stylesheet" href="/static/theme.css" />
-    <script src="./cpu.js?v=20261029-replay2" defer></script>
-    <script type="module" src="./build-viewer.js?v=20261029-replay2"></script>
+    <script src="./cpu.js?v=20261029-replay4" defer></script>
+    <script type="module" src="./build-viewer.js?v=20261029-replay4"></script>
     <noscript
       ><style>
         .model-fallback[hidden] {
@@ -79,6 +79,18 @@
             <div id="landmark-labels" aria-hidden="true"></div>
             <span id="view-badge">Complete build</span>
             <p class="viewer-loading">Loading schematic…</p>
+          </div>
+          <div class="replay-caption">
+            <strong id="trace-phase">Reading the program</strong>
+            <p id="trace-explanation"></p>
+            <div class="signal-flow" aria-label="Execution flow">
+              <span data-flow="clock">PC</span><i>→</i
+              ><span data-flow="rom">ROM</span><i>→</i
+              ><span data-flow="encoding">Control</span><i>→</i
+              ><span data-flow="registers">Register</span><i>→</i
+              ><span data-flow="operation">ALU</span><i>→</i
+              ><span data-flow="result">R3</span>
+            </div>
           </div>
           <div class="camera-controls">
             <div class="view-modes">
@@ -523,19 +535,6 @@ ADD R3, R2, R1</code></pre>
               writes, and ALU. Turn off camera following to inspect a circuit
               while the recording continues.
             </p>
-            <div
-              class="replay-output"
-              aria-label="Recorded destination register"
-            >
-              <div>
-                <span>R3 · destination register</span
-                ><output id="replay-result">0</output>
-              </div>
-              <div>
-                <code id="replay-binary">00000000</code
-                ><span id="replay-result-state">Waiting for ADD</span>
-              </div>
-            </div>
             <div class="run-controls">
               <button id="run-play" type="button" disabled>
                 Play recording</button
@@ -561,40 +560,10 @@ ADD R3, R2, R1</code></pre>
               ><input type="checkbox" id="follow-replay" checked /> Follow
               execution camera</label
             >
-            <div class="replay-explanation">
-              <h3 id="trace-phase">Reading the program</h3>
-              <p id="trace-explanation">Loading recorded execution…</p>
-              <p id="trace-values" class="trace-values"></p>
-            </div>
-            <section
-              class="controller-state"
-              aria-labelledby="controller-title"
-            >
-              <h3 id="controller-title">Inside the controller</h3>
-              <p class="aside">Decoded from the current instruction bus.</p>
-              <code id="controller-word">0000 · 0000 0000 0000 0000</code>
-              <dl>
-                <div>
-                  <dt>Operation</dt>
-                  <dd id="controller-op">NOP · opcode 0</dd>
-                </div>
-                <div>
-                  <dt>Data source</dt>
-                  <dd id="controller-source">None</dd>
-                </div>
-                <div>
-                  <dt>Destination</dt>
-                  <dd id="controller-destination">No register write</dd>
-                </div>
-                <div>
-                  <dt>ALU selection</dt>
-                  <dd id="controller-alu">Not used by this instruction</dd>
-                </div>
-              </dl>
-              <p id="controller-route" class="trace-values"></p>
-              <p id="controller-detail"></p>
-            </section>
-            <p id="trace-status" class="aside">Loading recording…</p>
+            <p id="trace-status" class="aside">
+              Recorded game ticks · the model shows the current instruction and
+              values.
+            </p>
             <small
               >Game time · 870 samples ·
               <a href="./data/recording.json">Download recording</a></small

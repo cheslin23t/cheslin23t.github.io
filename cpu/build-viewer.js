@@ -1,4 +1,4 @@
-import { wireBoxes, torchPoint } from "./block-geometry.mjs?v=20261029-replay2";
+import { wireBoxes, torchPoint } from "./block-geometry.mjs?v=20261029-replay4";
 ("use strict");
 // Physical geometry comes exclusively from the parsed Sponge schematic.
 // The simplified shapes show block placement, not a redstone simulation.
@@ -645,10 +645,8 @@ import { wireBoxes, torchPoint } from "./block-geometry.mjs?v=20261029-replay2";
   window.focusCpuController = (opcode) => {
     const x = 53 + 2 * opcode;
     views.controller = {
-      bounds: [
-        [Math.max(48, x - 5), 22, 52],
-        [Math.min(84, x + 5), 32, 62],
-      ],
+      // Keep every controller column visible; only the operation label moves.
+      bounds: views.encoding.bounds,
       region: 3,
       label: `Controller · ${opcode === 11 ? "LDI" : "ADD"} operation sign`,
       pins: [
