@@ -148,3 +148,26 @@ The renderer uploads a compact spatial signal texture rather than scanning a
 large uniform probe list per vertex. Repeater bases and torch stems remain
 neutral; their tips and actual connecting dust carry the power colors.
 No synthetic connecting paths or estimated propagation have been added.
+
+## Line algorithm replay
+
+The existing layout and addition walkthrough stay intact. The final replay runs
+a fixed-point line rasterizer from (0,0) to (8,3): 28 ROM words, four setup loads
+and eight unrolled INC/ADD/AND iterations. Height uses Q4 (16 counts per pixel),
+starts at 8 for rounding, and advances by 6 per X step. AND with 240 retains the
+whole-pixel nibble in R4; the host plot interprets R4/16 as the row. R1/R6 and
+R2/R7 alternate X and height to keep operands stable during writes. The
+initial in-place trial showed read/write feedback and is not the shipped program.
+No hardware was modified.
+
+`line-recording.json` contains all 4,470 actual tick samples, instruction intervals,
+and committed coordinates. `line-signals.json` contains full component states.
+Every instruction was checked against expected register values in both banks;
+the nine output points are (0,0), (1,0), (2,1), (3,1), (4,2), (5,2), (6,2),
+(7,3), (8,3). The plot shows these measured completed writes, not a host-computed
+line animation or a claimed Minecraft display peripheral. Seeking backward
+removes later pixels and restores the corresponding signal state. The ROM
+texture switches actual torch occupancy between the two captured programs.
+The small plot stays inside the model frame, with concise in-frame captions and
+static sidebar content. Its colors reuse --surface, --ink, --line, --muted, and
+--accent from static/theme.css; no additional palette or page layout.

@@ -951,3 +951,56 @@ footer {
     animation: none !important;
   }
 }
+
+/* The output is a small readout inside the same model frame, not a new sidebar. */
+.line-output {
+  display: none;
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 155px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  pointer-events: none;
+}
+.is-replaying .line-output {
+  display: block;
+}
+.line-output span,
+.line-output strong {
+  display: block;
+  font:
+    10px/1.4 ui-monospace,
+    monospace;
+}
+.line-output svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 3px 0;
+}
+.line-output path {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+#line-output-pixels rect {
+  fill: var(--muted);
+}
+#line-output-pixels rect.latest {
+  fill: var(--accent);
+}
+@media (max-width: 800px) {
+  .line-output {
+    width: 112px;
+    right: 6px;
+    bottom: 6px;
+    padding: 5px;
+  }
+  .line-output span,
+  .line-output strong {
+    font-size: 8px;
+  }
+}

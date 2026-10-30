@@ -1,7 +1,4 @@
-import {
-  wireBoxes,
-  torchPoint,
-} from "./block-geometry.mjs?v=20261029-signals1";
+import { wireBoxes, torchPoint } from "./block-geometry.mjs?v=20261029-line1";
 ("use strict");
 // Physical geometry comes exclusively from the parsed Sponge schematic.
 // The simplified shapes show block placement, not a redstone simulation.
@@ -51,7 +48,7 @@ import {
     program,
     shader(
       gl.FRAGMENT_SHADER,
-      `precision highp float; uniform sampler2D signalMap; uniform float physicalEnabled; varying float vNatural; varying vec3 vColor; varying vec3 vPosition; varying float vChosen; varying vec3 vBlock; uniform float highlightPass; uniform float cropped; uniform float ghostPass; uniform vec3 cropMin; uniform vec3 cropMax; void main(){ float index=vBlock.x+91.0*(vBlock.z+65.0*vBlock.y); vec4 measured=texture2D(signalMap,vec2((mod(index,512.0)+.5)/512.0,(floor(index/512.0)+.5)/520.0)); vec3 actual=vColor; if(physicalEnabled>.5 && measured.r>0.0 && vNatural<.5){ float power=max(0.0,measured.r*255.0-1.0)/15.0; actual=mix(vec3(.28,.12,.10),vec3(1.0,.25,.06),power); } bool outside=any(lessThan(vBlock,cropMin)) || any(greaterThan(vBlock,cropMax)); if(ghostPass>0.5){ if(!outside) discard; gl_FragColor=vec4(actual,.075); return; } if(cropped>0.5 && (any(lessThan(vBlock,cropMin)) || any(greaterThan(vBlock,cropMax)))) discard; if(highlightPass>0.5 && vChosen<0.5) discard; gl_FragColor=vec4(actual,1.0); }`,
+      `precision highp float; uniform sampler2D signalMap; uniform sampler2D romMap; uniform float romProgram; uniform float physicalEnabled; varying float vNatural; varying vec3 vColor; varying vec3 vPosition; varying float vChosen; varying vec3 vBlock; uniform float highlightPass; uniform float cropped; uniform float ghostPass; uniform vec3 cropMin; uniform vec3 cropMax; void main(){ bool romCell=vBlock.x>=0.0 && vBlock.x<=30.0 && mod(vBlock.x,2.0)<.1 && vBlock.y>=2.0 && vBlock.y<=14.0 && mod(vBlock.y-2.0,4.0)<.1 && vBlock.z>=34.0 && vBlock.z<=64.0 && mod(vBlock.z,2.0)<.1; if(romCell){float address=(30.0-vBlock.x)/2.0+16.0*(14.0-vBlock.y)/4.0;float bit=(vBlock.z-34.0)/2.0;if(texture2D(romMap,vec2((bit+.5)/16.0,(address+64.0*romProgram+.5)/128.0)).r<.5) discard;} float index=vBlock.x+91.0*(vBlock.z+65.0*vBlock.y); vec4 measured=texture2D(signalMap,vec2((mod(index,512.0)+.5)/512.0,(floor(index/512.0)+.5)/520.0)); vec3 actual=vColor; if(physicalEnabled>.5 && measured.r>0.0 && vNatural<.5){ float power=max(0.0,measured.r*255.0-1.0)/15.0; actual=mix(vec3(.28,.12,.10),vec3(1.0,.25,.06),power); } bool outside=any(lessThan(vBlock,cropMin)) || any(greaterThan(vBlock,cropMax)); if(ghostPass>0.5){ if(!outside) discard; gl_FragColor=vec4(actual,.075); return; } if(cropped>0.5 && (any(lessThan(vBlock,cropMin)) || any(greaterThan(vBlock,cropMax)))) discard; if(highlightPass>0.5 && vChosen<0.5) discard; gl_FragColor=vec4(actual,1.0); }`,
     ),
   );
   gl.linkProgram(program);
@@ -89,7 +86,20 @@ import {
   );
   let physicalTick = -1;
   let physicalData = null;
-  window.setCpuPhysicalTick = (tick) => {
+  let captures = null;
+  let physicalSource = "addition";
+  const romProgram = gl.getUniformLocation(program, "romProgram");
+  window.setCpuProgram = (line = false) => {
+    gl.uniform1f(romProgram, line ? 1 : 0);
+    canvas.dataset.program = line ? "line" : "addition";
+    requestDraw();
+  };
+  window.setCpuPhysicalTick = (tick, source = "addition") => {
+    if (captures && source !== physicalSource) {
+      physicalSource = source;
+      physicalData = captures[source];
+      physicalTick = -1;
+    }
     if (!physicalData) return;
     if (tick !== physicalTick) {
       // Initial values plus deltas support deterministic forward and backward seeking.
@@ -707,15 +717,17 @@ import {
   };
   window.focusCpuController = (opcode) => {
     const x = 53 + 2 * opcode;
+    const operation =
+      { 1: "ADD", 3: "AND", 9: "INC", 11: "LDI" }[opcode] || "NOP";
     views.controller = {
       // Keep every controller column visible; only the operation label moves.
       bounds: views.encoding.bounds,
       region: 3,
-      label: `Controller · ${opcode === 11 ? "LDI" : "ADD"} operation sign`,
+      label: `Controller · ${operation} operation sign`,
       pins: [
         {
           p: [x + 0.5, 26.5, 60.5],
-          text: `${opcode === 11 ? "LDI" : "ADD"} · opcode ${opcode.toString(16).toUpperCase()}`,
+          text: `${operation} · opcode ${opcode.toString(16).toUpperCase()}`,
         },
       ],
     };
@@ -905,6 +917,34 @@ import {
     .then(async (data) => {
       const record = await window.cpuRecording;
       physicalData = record.physical;
+      captures = { addition: record.physical, line: record.linePhysical };
+      const romPixels = new Uint8Array(16 * 128);
+      [record.program, record.line.program].forEach((words, row) => {
+        for (const [address, hex] of words)
+          for (let bit = 0; bit < 16; bit++)
+            romPixels[(row * 64 + address) * 16 + bit] =
+              (parseInt(hex, 16) >> bit) & 1 ? 255 : 0;
+      });
+      const romTexture = gl.createTexture();
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, romTexture);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.LUMINANCE,
+        16,
+        128,
+        0,
+        gl.LUMINANCE,
+        gl.UNSIGNED_BYTE,
+        romPixels,
+      );
+      gl.uniform1i(gl.getUniformLocation(program, "romMap"), 1);
+      gl.activeTexture(gl.TEXTURE0);
       const sourceCount = data.blocks.length;
       // Program only the documented ROM cells. No routing or supports are changed.
       const isRom = ([x, y, z]) =>
@@ -925,17 +965,16 @@ import {
           "minecraft:redstone_wall_torch[facing=west,lit=true]",
         );
       }
-      for (const [address, hex] of record.program) {
-        const word = parseInt(hex, 16);
+      // Both programs use the exact same 1024 ROM positions. The ROM texture
+      // selects actual installed torches for the active captured program.
+      for (let address = 0; address < 64; address++)
         for (let bit = 0; bit < 16; bit++)
-          if ((word >> bit) & 1)
-            data.blocks.push([
-              30 - 2 * (address % 16),
-              14 - 4 * Math.floor(address / 16),
-              34 + 2 * bit,
-              torch,
-            ]);
-      }
+          data.blocks.push([
+            30 - 2 * (address % 16),
+            14 - 4 * Math.floor(address / 16),
+            34 + 2 * bit,
+            torch,
+          ]);
       canvas.dataset.sourceBlocks = String(sourceCount);
 
       const positions = [],

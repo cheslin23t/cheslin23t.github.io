@@ -30,12 +30,22 @@ let tick = 0,
   lastTime = 0,
   scrollFrame = 0;
 window.cpuRecording = Promise.all(
-  ["recording.json", "physical-signals.json"].map(async (name) => {
+  [
+    "recording.json",
+    "physical-signals.json",
+    "line-recording.json",
+    "line-signals.json",
+  ].map(async (name) => {
     const r = await fetch(`./data/${name}`);
     if (!r.ok) throw Error("Recording unavailable");
     return r.json();
   }),
-).then(([record, physical]) => ({ ...record, physical }));
+).then(([record, physical, line, linePhysical]) => ({
+  ...record,
+  physical,
+  line,
+  linePhysical,
+}));
 function probe(position, on) {
   return { position, on: Boolean(on) };
 }
@@ -43,7 +53,9 @@ function state(frame) {
   $("#state-pc").textContent = String(frame.pc).padStart(2, "0");
   $("#state-word").textContent = hex(frame.word);
   $("#state-alu").textContent = frame.alu;
-  frame.registers.forEach((v, i) => ($(`#state-r${i + 1}`).textContent = v));
+  frame.registers
+    .slice(0, 3)
+    .forEach((v, i) => ($(`#state-r${i + 1}`).textContent = v));
 }
 function probes(frame, view) {
   if (view === "memory")
@@ -111,6 +123,10 @@ function applyScene(index, force = false) {
     if (a.hash === `#${group}`) a.setAttribute("aria-current", "location");
   });
   $(".physical-stage").classList.toggle("is-replaying", Boolean(scene.replay));
+  window.setCpuProgram?.(Boolean(scene.replay));
+  $("#state-register-one").textContent = "R1";
+  $("#state-register-two").textContent = "R2";
+  $("#state-register-result").textContent = scene.replay ? "R4" : "R3";
   window.focusCpuBuild?.(scene.view);
   if (!recording) return;
   if (scene.gate !== undefined) {
@@ -176,93 +192,117 @@ addEventListener("scroll", queueScroll, { passive: true });
 addEventListener("resize", queueScroll);
 let replayFocus = "";
 function replayStage(t) {
-  if (t < 131)
-    return { view: "clock", label: "PC 0 · waiting for the next clock edge" };
-  if (t < 151) return { view: "rom", label: "PC 1 · ROM address changes" };
-  if (t < 175) return { view: "encoding", label: "A58B · decode LDI R1, 165" };
-  if (t < 277)
+  const run = recording.line;
+  const instruction = run.instructions.find(
+    (i) => t >= i.pcTick && t < i.endTick,
+  );
+  if (!instruction)
     return {
-      view: "registers",
-      register: 1,
-      label: "R1 write · immediate byte 165",
+      view: t < run.instructions[0].pcTick ? "clock" : "registers",
+      register: t < run.instructions[0].pcTick ? 0 : 4,
+      label:
+        t < run.instructions[0].pcTick
+          ? "Line program · waiting for the clock"
+          : "Line complete · nine calculated pixels",
+      caption:
+        t < run.instructions[0].pcTick
+          ? "The ROM holds 28 instructions. The CPU will set up the fixed-point values, then calculate eight steps."
+          : "The CPU reached (8, 3). The plot preserves each completed coordinate read from its registers.",
     };
-  if (t < 297) return { view: "rom", label: "PC 2 · ROM address changes" };
-  if (t < 313) return { view: "encoding", label: "3C4B · decode LDI R2, 60" };
-  if (t < 423)
+  const i = instruction;
+  const prefix = i.iteration ? `Pixel ${i.iteration}/8` : "Setup";
+  const base = { instruction: i, label: `${prefix} · ${i.asm}` };
+  if (t < i.wordTick)
     return {
-      view: "registers",
-      register: 2,
-      label: "R2 write · immediate byte 60",
+      ...base,
+      view: "rom",
+      caption: `PC ${i.address} selects ROM word ${hex(i.word)}. The instruction bits travel to the controller.`,
     };
-  if (t < 443) return { view: "rom", label: "PC 3 · fetch the ADD word" };
-  if (t < 463)
-    return { view: "encoding", label: "48C1 · decode ADD R3, R2, R1" };
-  if (t < 509)
+  if (t < i.wordTick + 20)
     return {
-      view: "operation",
-      label: "ALU · 60 + 165 propagates to the output",
+      ...base,
+      view: "encoding",
+      caption: `The controller selects ${i.op} and enables the path to R${i.dest}. ${i.op === "LDI" ? `The immediate byte is ${i.immediate}.` : `The source ${i.op === "INC" ? `is R${i.b}` : `registers are R${i.a} and R${i.b}`}.`}`,
     };
-  if (t < 569)
-    return { view: "registers", register: 3, label: "R3 write · result 225" };
-  if (t < 631)
-    return { view: "clock", label: "PC advances · the next ROM word is zero" };
-  return {
-    view: "registers",
-    register: 3,
-    label: "R3 holds 225 after the ALU returns to zero",
-  };
+  let caption;
+  if (i.op === "LDI")
+    caption = {
+      1: "R1 starts X at zero.",
+      2: "R2 starts at 8/16: the half-pixel offset rounds the height to the nearest row.",
+      3: "R3 stores 6/16, the vertical increment for a slope of 3/8.",
+      5: "R5 stores 240 (11110000), the mask that keeps the whole-pixel part of the height.",
+    }[i.dest];
+  else if (i.op === "INC")
+    caption = `INC reads R${i.b} = ${i.operands[1]} and writes X = ${i.expected} to R${i.dest}.`;
+  else if (i.op === "ADD")
+    caption = `ADD advances the fractional height: ${i.operands[0]}/16 + 6/16 = ${i.expected}/16, written to R${i.dest}.`;
+  else
+    caption = `AND keeps the upper four bits: ${i.operands[0]} & 240 = ${i.expected}. R4's upper nibble is pixel row ${i.expected / 16}.`;
+  if (i.op === "LDI" || t >= Math.max(i.settledTick, i.wordTick + 44))
+    return { ...base, view: "registers", register: i.dest, caption };
+  return { ...base, view: "operation", caption };
 }
 function showTick(value) {
   if (!recording) return;
-  tick = Math.max(0, Math.min(recording.frames.length - 1, Math.round(value)));
-  const f = recording.frames[tick];
+  const run = recording.line;
+  tick = Math.max(0, Math.min(run.frames.length - 1, Math.round(value)));
+  const f = run.frames[tick];
   state(f);
   const stage = replayStage(tick);
-  const key = `${stage.view}:${stage.register || 0}:${stage.view === "encoding" ? f.word & 15 : ""}`;
+  const i = stage.instruction;
+  const xRegister = i?.xRegister || 1,
+    accRegister = i?.accRegister || 2;
+  $("#state-register-one").textContent = `R${xRegister} · X`;
+  $("#state-register-two").textContent = `R${accRegister} · Q4`;
+  $("#state-register-result").textContent = "R4 · Y×16";
+  $("#state-r1").textContent = f.registers[xRegister - 1];
+  $("#state-r2").textContent = f.registers[accRegister - 1];
+  $("#state-r3").textContent = f.registers[3];
+  const key = `${stage.view}:${stage.register || 0}:${stage.view === "encoding" ? i.word & 15 : ""}`;
   if ($("#follow-replay").checked && replayFocus !== key) {
     if (stage.register) window.focusCpuRegister?.(stage.register);
     else if (stage.view === "encoding")
-      window.focusCpuController?.(f.word & 15);
+      window.focusCpuController?.(i.word & 15);
     else window.focusCpuBuild?.(stage.view, true);
     replayFocus = key;
   }
   window.setCpuProbes?.([]);
-  window.setCpuPhysicalTick?.(tick);
+  window.setCpuPhysicalTick?.(tick, "line");
   $("#trace-phase").textContent = stage.label;
-  let caption;
-  if (tick < 131)
-    caption =
-      "The clock is running. The PC will select the first instruction at address 1.";
-  else if (stage.view === "rom")
-    caption = `PC ${f.pc} selects the next 16-bit ROM word. Its bits are reaching the controller.`;
-  else if (tick < 423) {
-    const r = tick < 277 ? 1 : 2,
-      value = r === 1 ? 165 : 60;
-    caption =
-      stage.view === "encoding"
-        ? `Opcode B selects LDI: route the immediate ${value} to register R${r}.`
-        : `The selected cells accept ${value}. R${r} currently holds ${f.registers[r - 1]}; other registers keep their values.`;
-  } else if (tick < 509)
-    caption =
-      stage.view === "encoding"
-        ? "Opcode 1 selects ADD: read R2 = 60 and R1 = 165, then write the ALU result to R3."
-        : `60 + 165 is propagating through the ALU. Output now: ${f.alu}; destination R3: ${f.registers[2]}.`;
-  else if (tick < 569)
-    caption = `60 + 165 = 225. R3 now stores ${f.registers[2]} (${f.registers[2].toString(2).padStart(8, "0")}).`;
-  else if (tick < 631)
-    caption = `The PC advances to a NOP. The ALU is ${f.alu}; R3 keeps the result ${f.registers[2]}.`;
-  else
-    caption =
-      "R3 retains 225 (11100001), even with the ALU back at zero. The result is ready for another instruction.";
-  $("#trace-explanation").textContent = caption;
-  const flow = stage.register === 3 ? "result" : stage.view;
+  $("#trace-explanation").textContent = stage.caption;
+  const flow = stage.register === 4 ? "result" : stage.view;
   document
     .querySelectorAll("[data-flow]")
     .forEach((el) =>
       el.classList.toggle("is-active", el.dataset.flow === flow),
     );
+  const points = run.points.filter((p) => p.tick <= tick);
+  const latest = points.at(-1);
+  $("#line-output-value").textContent = latest
+    ? `(${latest.x}, ${latest.y}) · ${points.length}/9 pixels`
+    : "Waiting for coordinates";
+  $("#line-output-pixels").replaceChildren(
+    ...points.map((p) => {
+      const cell = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "rect",
+      );
+      cell.setAttribute("x", String(7 + p.x * 15));
+      cell.setAttribute("y", String(7 + (3 - p.y) * 15));
+      cell.setAttribute("width", "11");
+      cell.setAttribute("height", "11");
+      cell.setAttribute("class", p === latest ? "latest" : "");
+      return cell;
+    }),
+  );
+  $("#line-output-plot").setAttribute(
+    "aria-label",
+    points.length
+      ? `Recorded CPU coordinates: ${points.map((p) => `(${p.x}, ${p.y})`).join(", ")}`
+      : "No completed CPU coordinates yet",
+  );
   $("#trace-seek").value = tick;
-  $("#trace-tick").textContent = `${tick} / ${recording.frames.length - 1}`;
+  $("#trace-tick").textContent = `${tick} / ${run.frames.length - 1}`;
   $("#signal-caption").textContent =
     `Game tick ${tick} · orange = on · dark red = off`;
 }
@@ -283,7 +323,7 @@ function advance(now) {
     (Math.min(100, now - lastTime) / 1000) * 20 * Number($("#run-speed").value);
   lastTime = now;
   if (Math.floor(position) !== tick) showTick(position);
-  if (tick >= recording.frames.length - 1) {
+  if (tick >= recording.line.frames.length - 1) {
     stop();
     return;
   }
@@ -294,7 +334,7 @@ $("#run-play").addEventListener("click", () => {
     stop();
     return;
   }
-  if (tick === recording.frames.length - 1) showTick(0);
+  if (tick === recording.line.frames.length - 1) showTick(0);
   playing = true;
   $(".physical-stage").classList.add("is-playing");
   position = tick;
@@ -318,6 +358,7 @@ window.addEventListener("cpu-model-ready", () =>
 window.cpuRecording
   .then((data) => {
     recording = data;
+    $("#trace-seek").max = data.line.frames.length - 1;
     $("#run-play").disabled = false;
     $("#trace-seek").disabled = false;
     applyScene(Math.max(0, active), true);

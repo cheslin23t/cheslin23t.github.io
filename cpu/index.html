@@ -17,10 +17,10 @@
       sizes="64x64"
       href="/static/assets/favicon.png?v=2"
     />
-    <link rel="stylesheet" href="./cpu.css?v=20261029-signals1" />
+    <link rel="stylesheet" href="./cpu.css?v=20261029-line1" />
     <link rel="stylesheet" href="/static/theme.css" />
-    <script src="./cpu.js?v=20261029-signals1" defer></script>
-    <script type="module" src="./build-viewer.js?v=20261029-signals1"></script>
+    <script src="./cpu.js?v=20261029-line1" defer></script>
+    <script type="module" src="./build-viewer.js?v=20261029-line1"></script>
     <noscript
       ><style>
         .model-fallback[hidden] {
@@ -78,6 +78,37 @@
             ></canvas>
             <div id="landmark-labels" aria-hidden="true"></div>
             <span id="view-badge">Complete build</span>
+            <div class="line-output">
+              <span>Recorded CPU coordinates</span>
+              <svg
+                id="line-output-plot"
+                viewBox="0 0 145 70"
+                role="img"
+                aria-label="No completed CPU coordinates yet"
+              >
+                <defs>
+                  <pattern
+                    id="pixel-grid"
+                    width="15"
+                    height="15"
+                    patternUnits="userSpaceOnUse"
+                    x="5"
+                    y="5"
+                  >
+                    <path d="M 15 0 H 0 V 15" fill="none" />
+                  </pattern>
+                </defs>
+                <rect
+                  x="5"
+                  y="5"
+                  width="135"
+                  height="60"
+                  fill="url(#pixel-grid)"
+                />
+                <g id="line-output-pixels"></g>
+              </svg>
+              <strong id="line-output-value">Waiting for coordinates</strong>
+            </div>
             <p class="viewer-loading">Loading schematic…</p>
           </div>
           <div class="replay-caption">
@@ -89,7 +120,7 @@
               ><span data-flow="encoding">Control</span><i>→</i
               ><span data-flow="registers">Register</span><i>→</i
               ><span data-flow="operation">ALU</span><i>→</i
-              ><span data-flow="result">R3</span>
+              ><span data-flow="result">R4</span>
             </div>
           </div>
           <div class="camera-controls">
@@ -140,10 +171,17 @@
           <div class="state-strip" aria-label="Recorded CPU state">
             <span>PC <b id="state-pc">00</b></span
             ><span>Word <b id="state-word">0000</b></span
-            ><span>R1 <b id="state-r1">0</b></span
-            ><span>R2 <b id="state-r2">0</b></span
+            ><span
+              ><span id="state-register-one">R1</span>
+              <b id="state-r1">0</b></span
+            ><span
+              ><span id="state-register-two">R2</span>
+              <b id="state-r2">0</b></span
             ><span>ALU <b id="state-alu">0</b></span
-            ><span>R3 <b id="state-r3">0</b></span>
+            ><span
+              ><span id="state-register-result">R3</span>
+              <b id="state-r3">0</b></span
+            >
           </div>
           <p id="build-status">Loading physical model</p>
           <p id="signal-caption">
@@ -528,12 +566,17 @@ ADD R3, R2, R1</code></pre>
           </section>
           <section class="step" id="run" aria-labelledby="title-run">
             <p class="location">Recorded execution</p>
-            <h2 id="title-run">Replay the program.</h2>
+            <h2 id="title-run">Draw a line with the CPU.</h2>
             <p>
-              This is the complete run on the CPU. Scrub to any game tick, or
-              play it as the camera follows the PC, ROM, decoder, register
-              writes, and ALU. Turn off camera following to inspect a circuit
-              while the recording continues.
+              This program calculates a line from (0, 0) to (8, 3). Each step
+              increments X, adds 6/16 to the height, and masks off the
+              fractional bits to select a pixel row. The plot shows coordinates
+              read from the CPU's registers.
+            </p>
+            <p class="aside">
+              28 ROM words · LDI, INC, ADD, AND · eight unrolled steps.
+              Alternate scratch registers keep the read operands stable during
+              each write.
             </p>
             <div class="run-controls">
               <button id="run-play" type="button" disabled>
@@ -547,12 +590,12 @@ ADD R3, R2, R1</code></pre>
               >
             </div>
             <label class="trace-label" for="trace-seek"
-              >Game tick <output id="trace-tick">0 / 869</output></label
+              >Game tick <output id="trace-tick">0 / 4469</output></label
             ><input
               id="trace-seek"
               type="range"
               min="0"
-              max="869"
+              max="4469"
               value="0"
               disabled
             />
@@ -565,8 +608,9 @@ ADD R3, R2, R1</code></pre>
               values.
             </p>
             <small
-              >Game time · 870 samples ·
-              <a href="./data/recording.json">Download recording</a></small
+              >Game time · 4,470 samples ·
+              <a href="./data/line-recording.json">Download recording</a> ·
+              <a href="./data/line-program.asm">Assembly</a></small
             >
           </section>
         </div>
@@ -672,10 +716,11 @@ ADD R3, R2, R1</code></pre>
         <summary>Build files and implementation notes</summary>
         <p>
           The 3D model uses the physical schematic with simplified block shapes.
-          The ROM is programmed with the example shown here. Orange shows
-          powered dust and component tips; dark red shows off. Their states are
-          captured from Minecraft each game tick; blue identifies components.
-          Module crops are viewing regions, not complete netlists.
+          The walkthrough uses the addition program; the replay switches the ROM
+          to the line program. Orange shows powered dust and component tips;
+          dark red shows off. Their states are captured from Minecraft each game
+          tick; blue identifies components. Module crops are viewing regions,
+          not complete netlists.
         </p>
         <p>
           R1–R14 are available to the compiler; R0 reads as zero. R15 stores
@@ -685,12 +730,15 @@ ADD R3, R2, R1</code></pre>
           input combination.
         </p>
         <p>
-          The recording began with registers cleared as test setup. PC reset
-          does not clear registers. The test world was restored after capture.
+          The line plot reads the captured register coordinates; it is not a
+          Minecraft display peripheral. The recordings began with registers
+          cleared as test setup. PC reset does not clear registers. The test
+          world was restored after capture.
         </p>
         <p>
           <a href="./data/8bCPU-repaired-v1.schem">Download schematic</a> ·
-          <a href="./data/physical-signals.json">Download component states</a> ·
+          <a href="./data/physical-signals.json">Addition component states</a> ·
+          <a href="./data/line-signals.json">Line component states</a> ·
           <a href="./data/recording.json">Measurement data</a> ·
           <a href="./README.md">Technical reference</a>
         </p>

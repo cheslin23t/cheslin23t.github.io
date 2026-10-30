@@ -187,3 +187,5 @@ for (const type of [
 console.log(
   `Verified ${physical.positions.length} physical positions across all ${physical.changes.length} ticks, including both register banks and live repeater/comparator/torch/wire changes.`,
 );
+
+await import("./verify-line.mjs");
