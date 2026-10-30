@@ -168,3 +168,10 @@ texture switches actual torch occupancy between the two captured programs.
 The small plot stays inside the model frame, with concise in-frame captions and
 static sidebar content. Its colors reuse --surface, --ink, --line, --muted, and
 --accent from static/theme.css; no additional palette or page layout.
+
+Replay review: result captions and scratch-register role changes use each
+instruction's measured settledTick. Before that sample, captions describe
+propagation and report the current raw destination. The brief opcode close-up
+is a camera dwell, not a measured decode phase. Playback uses elapsed game time
+without capping slow display frames; hiding the page still pauses playback.
+The pixel plot updates only when the committed coordinate count changes.

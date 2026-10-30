@@ -1,4 +1,4 @@
-import { wireBoxes, torchPoint } from "./block-geometry.mjs?v=20261029-line1";
+import { wireBoxes, torchPoint } from "./block-geometry.mjs?v=20261030-review1";
 ("use strict");
 // Physical geometry comes exclusively from the parsed Sponge schematic.
 // The simplified shapes show block placement, not a redstone simulation.

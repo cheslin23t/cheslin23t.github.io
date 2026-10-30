@@ -133,3 +133,26 @@ for (const [x, y, z, p] of build.blocks)
 console.log(
   "Verified 28 encoded instructions, 4,470 full physical frames, both register banks, and all nine line coordinates.",
 );
+
+const { replayStage, roleRegisters, advancePosition } = await import(
+  "../replay-state.mjs"
+);
+assert.equal(advancePosition(100, 500, 1), 110);
+assert.equal(advancePosition(100, 500, 4), 140);
+for (const i of run.instructions) {
+  assert.equal(replayStage(run, i.settledTick).register, i.dest);
+  if (i.settledTick > i.wordTick + 20) {
+    assert.match(replayStage(run, i.settledTick - 1).caption, /propagating/);
+    if (i.op === "INC")
+      assert.notEqual(roleRegisters(run, i.settledTick - 1).x, i.dest);
+    if (i.op === "ADD")
+      assert.notEqual(roleRegisters(run, i.settledTick - 1).height, i.dest);
+  }
+}
+assert.equal(roleRegisters(run, 793).x, 6);
+assert.equal(roleRegisters(run, 792).x, 1);
+assert.equal(roleRegisters(run, 939).height, 7);
+assert.equal(roleRegisters(run, 938).height, 2);
+console.log(
+  "Verified measured write boundaries, register roles, and elapsed-time playback.",
+);

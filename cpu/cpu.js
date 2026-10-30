@@ -1,4 +1,9 @@
-"use strict";
+import {
+  replayStage,
+  roleRegisters,
+  advancePosition,
+} from "./replay-state.mjs?v=20261030-review1";
+("use strict");
 const $ = (selector) => document.querySelector(selector);
 const hex = (n) => n.toString(16).toUpperCase().padStart(4, "0");
 const scenes = [
@@ -191,67 +196,16 @@ function queueScroll() {
 addEventListener("scroll", queueScroll, { passive: true });
 addEventListener("resize", queueScroll);
 let replayFocus = "";
-function replayStage(t) {
-  const run = recording.line;
-  const instruction = run.instructions.find(
-    (i) => t >= i.pcTick && t < i.endTick,
-  );
-  if (!instruction)
-    return {
-      view: t < run.instructions[0].pcTick ? "clock" : "registers",
-      register: t < run.instructions[0].pcTick ? 0 : 4,
-      label:
-        t < run.instructions[0].pcTick
-          ? "Line program · waiting for the clock"
-          : "Line complete · nine calculated pixels",
-      caption:
-        t < run.instructions[0].pcTick
-          ? "The ROM holds 28 instructions. The CPU will set up the fixed-point values, then calculate eight steps."
-          : "The CPU reached (8, 3). The plot preserves each completed coordinate read from its registers.",
-    };
-  const i = instruction;
-  const prefix = i.iteration ? `Pixel ${i.iteration}/8` : "Setup";
-  const base = { instruction: i, label: `${prefix} · ${i.asm}` };
-  if (t < i.wordTick)
-    return {
-      ...base,
-      view: "rom",
-      caption: `PC ${i.address} selects ROM word ${hex(i.word)}. The instruction bits travel to the controller.`,
-    };
-  if (t < i.wordTick + 20)
-    return {
-      ...base,
-      view: "encoding",
-      caption: `The controller selects ${i.op} and enables the path to R${i.dest}. ${i.op === "LDI" ? `The immediate byte is ${i.immediate}.` : `The source ${i.op === "INC" ? `is R${i.b}` : `registers are R${i.a} and R${i.b}`}.`}`,
-    };
-  let caption;
-  if (i.op === "LDI")
-    caption = {
-      1: "R1 starts X at zero.",
-      2: "R2 starts at 8/16: the half-pixel offset rounds the height to the nearest row.",
-      3: "R3 stores 6/16, the vertical increment for a slope of 3/8.",
-      5: "R5 stores 240 (11110000), the mask that keeps the whole-pixel part of the height.",
-    }[i.dest];
-  else if (i.op === "INC")
-    caption = `INC reads R${i.b} = ${i.operands[1]} and writes X = ${i.expected} to R${i.dest}.`;
-  else if (i.op === "ADD")
-    caption = `ADD advances the fractional height: ${i.operands[0]}/16 + 6/16 = ${i.expected}/16, written to R${i.dest}.`;
-  else
-    caption = `AND keeps the upper four bits: ${i.operands[0]} & 240 = ${i.expected}. R4's upper nibble is pixel row ${i.expected / 16}.`;
-  if (i.op === "LDI" || t >= Math.max(i.settledTick, i.wordTick + 44))
-    return { ...base, view: "registers", register: i.dest, caption };
-  return { ...base, view: "operation", caption };
-}
+let plottedCount = -1;
 function showTick(value) {
   if (!recording) return;
   const run = recording.line;
   tick = Math.max(0, Math.min(run.frames.length - 1, Math.round(value)));
   const f = run.frames[tick];
   state(f);
-  const stage = replayStage(tick);
+  const stage = replayStage(run, tick);
   const i = stage.instruction;
-  const xRegister = i?.xRegister || 1,
-    accRegister = i?.accRegister || 2;
+  const { x: xRegister, height: accRegister } = roleRegisters(run, tick);
   $("#state-register-one").textContent = `R${xRegister} · X`;
   $("#state-register-two").textContent = `R${accRegister} · Q4`;
   $("#state-register-result").textContent = "R4 · Y×16";
@@ -278,29 +232,32 @@ function showTick(value) {
     );
   const points = run.points.filter((p) => p.tick <= tick);
   const latest = points.at(-1);
-  $("#line-output-value").textContent = latest
-    ? `(${latest.x}, ${latest.y}) · ${points.length}/9 pixels`
-    : "Waiting for coordinates";
-  $("#line-output-pixels").replaceChildren(
-    ...points.map((p) => {
-      const cell = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "rect",
-      );
-      cell.setAttribute("x", String(7 + p.x * 15));
-      cell.setAttribute("y", String(7 + (3 - p.y) * 15));
-      cell.setAttribute("width", "11");
-      cell.setAttribute("height", "11");
-      cell.setAttribute("class", p === latest ? "latest" : "");
-      return cell;
-    }),
-  );
-  $("#line-output-plot").setAttribute(
-    "aria-label",
-    points.length
-      ? `Recorded CPU coordinates: ${points.map((p) => `(${p.x}, ${p.y})`).join(", ")}`
-      : "No completed CPU coordinates yet",
-  );
+  if (points.length !== plottedCount) {
+    plottedCount = points.length;
+    $("#line-output-value").textContent = latest
+      ? `(${latest.x}, ${latest.y}) · ${points.length}/9 pixels`
+      : "Waiting for coordinates";
+    $("#line-output-pixels").replaceChildren(
+      ...points.map((p) => {
+        const cell = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "rect",
+        );
+        cell.setAttribute("x", String(7 + p.x * 15));
+        cell.setAttribute("y", String(7 + (3 - p.y) * 15));
+        cell.setAttribute("width", "11");
+        cell.setAttribute("height", "11");
+        cell.setAttribute("class", p === latest ? "latest" : "");
+        return cell;
+      }),
+    );
+    $("#line-output-plot").setAttribute(
+      "aria-label",
+      points.length
+        ? `Recorded CPU coordinates: ${points.map((p) => `(${p.x}, ${p.y})`).join(", ")}`
+        : "No completed CPU coordinates yet",
+    );
+  }
   $("#trace-seek").value = tick;
   $("#trace-tick").textContent = `${tick} / ${run.frames.length - 1}`;
   $("#signal-caption").textContent =
@@ -319,10 +276,13 @@ function stop() {
 }
 function advance(now) {
   if (!playing) return;
-  position +=
-    (Math.min(100, now - lastTime) / 1000) * 20 * Number($("#run-speed").value);
+  position = advancePosition(
+    position,
+    now - lastTime,
+    Number($("#run-speed").value),
+  );
   lastTime = now;
-  if (Math.floor(position) !== tick) showTick(position);
+  if (Math.floor(position) !== tick) showTick(Math.floor(position));
   if (tick >= recording.line.frames.length - 1) {
     stop();
     return;
