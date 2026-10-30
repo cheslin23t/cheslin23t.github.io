@@ -45,8 +45,8 @@ changing content or geometry. Forced colors preserves native controls.
 
 Minecraft wool colors come from the schematic palette with face shading.
 Redstone dust is red physical geometry, connected according to its north/east/
-south/west block properties, including up connections. Only measured probes
-receive bright orange / gray overlays. Blue marks explanatory locations; it is
+south/west block properties, including up connections. Measured dust and component tips receive orange / dark-red power colors;
+wooden torch stems and repeater bases keep their material colors. Blue marks explanatory locations; it is
 not electrical power. Text labels supplement signal colors.
 
 ## Typography
@@ -115,13 +115,12 @@ readable prose if WebGL or JavaScript is unavailable.
 
 Torch meshes have separate wooden stems and red caps. Wall torches tilt away from
 the support indicated by their saved facing. Static cap colors come from the
-schematic; electrical overlays remain limited to recorded probes.
+schematic; electrical overlays use the full per-tick component capture during replay.
 
 X-ray keeps the selected circuit opaque and renders the surrounding build as a
 faint depth-tested silhouette, without hiding internal details behind it.
 Replay camera following is optional and visits PC, ROM, decode, each written
-register, and the ALU at recorded milestones. These are viewing intervals, not
-an invented cycle-accurate simulation of unmeasured wires.
+register, and the ALU at recorded milestones. These are viewing intervals, backed by the matching per-tick physical signal capture.
 
 Replay defaults to 1× and X-ray. One short title and caption live inside the
 model frame; the side column remains static apart from playback controls.
@@ -131,3 +130,18 @@ Flow motion pauses with playback and respects reduced motion.
 
 Controller replay uses the full decoder region for both LDI and ADD. Only the
 opcode landmark changes; it must not crop away neighboring instruction columns.
+
+Full physical replay uses `data/physical-signals.json`: 16,818 sampled positions,
+including every dust wire, repeater, comparator, torch, and all ROM programming
+positions. The 870-tick capture on 29 October 2026 matches every original PC,
+instruction bus, ALU, and R1–R3 sample in both banks. 5,520 positions change.
+Dust retains its 0–15 strength; powered components use 15 and off uses 0.
+The file stores initial values plus per-tick index/value pairs, allowing exact
+backward seeking. Empty ROM positions have no geometry. Within-tick updates
+are not captured, and this recording is not a general-purpose CPU emulator.
+The lab snapshot was restored and observable CPU state matched afterward.
+
+The renderer uploads a compact spatial signal texture rather than scanning a
+large uniform probe list per vertex. Repeater bases and torch stems remain
+neutral; their tips and actual connecting dust carry the power colors.
+No synthetic connecting paths or estimated propagation have been added.

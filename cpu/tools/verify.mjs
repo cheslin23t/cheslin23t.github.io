@@ -103,3 +103,87 @@ assert.deepEqual(
   [0.5, 0.625, 0.5],
 );
 console.log("Verified standing torches and all four wall-torch orientations.");
+
+// Validate the full physical replay against independently recorded CPU probes,
+// including every tick and the inverted storage encoding in both banks.
+const physical = JSON.parse(await read("data/physical-signals.json"));
+assert.equal(physical.changes.length, recording.frames.length);
+assert.equal(physical.positions.length, physical.initial.length);
+assert.equal(
+  new Set(physical.positions.map((p) => p.join(","))).size,
+  physical.positions.length,
+);
+const signalIndex = new Map(physical.positions.map((p, i) => [p.join(","), i]));
+for (const [position, state] of blockMap) {
+  if (
+    /^minecraft:(redstone_wire|repeater|comparator|redstone_torch|redstone_wall_torch)\[/.test(
+      state,
+    )
+  )
+    assert.ok(
+      signalIndex.has(position),
+      `Missing physical component ${position}`,
+    );
+}
+const values = [...physical.initial];
+const changedTypes = new Set();
+const readBits = (positions, inverted = false) =>
+  positions.reduce((n, p, i) => {
+    const power = values[signalIndex.get(p.join(","))];
+    assert.ok(Number.isInteger(power) && power >= 0 && power <= 15);
+    return n + ((inverted ? power === 0 : power > 0) ? 1 << i : 0);
+  }, 0);
+for (let t = 0; t < physical.changes.length; t++) {
+  const delta = physical.changes[t];
+  assert.equal(delta.length % 2, 0);
+  for (let i = 0; i < delta.length; i += 2) {
+    const index = delta[i],
+      power = delta[i + 1];
+    assert.ok(index >= 0 && index < values.length && Number.isInteger(index));
+    assert.ok(Number.isInteger(power) && power >= 0 && power <= 15);
+    values[index] = power;
+    changedTypes.add(
+      blockMap.get(physical.positions[index].join(","))?.split("[")[0],
+    );
+  }
+  const f = recording.frames[t];
+  assert.equal(
+    readBits(Array.from({ length: 6 }, (_, i) => [41, 7 + 2 * i, 15])),
+    f.pc,
+    `PC tick ${t}`,
+  );
+  assert.equal(
+    readBits(Array.from({ length: 8 }, (_, i) => [52, 22 + 2 * i, 18])),
+    f.alu,
+    `ALU tick ${t}`,
+  );
+  assert.equal(
+    readBits(Array.from({ length: 16 }, (_, i) => [36, 14, 34 + 2 * i])),
+    f.word,
+    `ROM tick ${t}`,
+  );
+  for (let r = 1; r <= 3; r++)
+    for (const z of [39, 47])
+      assert.equal(
+        readBits(
+          Array.from({ length: 8 }, (_, i) => [
+            60 + 2 * r,
+            22 + 2 * i + (r % 2 === 0 ? 1 : 0),
+            z,
+          ]),
+          true,
+        ),
+        f.registers[r - 1],
+        `R${r} bank ${z} tick ${t}`,
+      );
+}
+for (const type of [
+  "redstone_wire",
+  "repeater",
+  "comparator",
+  "redstone_wall_torch",
+])
+  assert.ok(changedTypes.has(`minecraft:${type}`));
+console.log(
+  `Verified ${physical.positions.length} physical positions across all ${physical.changes.length} ticks, including both register banks and live repeater/comparator/torch/wire changes.`,
+);

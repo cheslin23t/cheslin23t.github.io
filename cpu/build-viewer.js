@@ -1,4 +1,7 @@
-import { wireBoxes, torchPoint } from "./block-geometry.mjs?v=20261029-replay4";
+import {
+  wireBoxes,
+  torchPoint,
+} from "./block-geometry.mjs?v=20261029-signals1";
 ("use strict");
 // Physical geometry comes exclusively from the parsed Sponge schematic.
 // The simplified shapes show block placement, not a redstone simulation.
@@ -41,14 +44,14 @@ import { wireBoxes, torchPoint } from "./block-geometry.mjs?v=20261029-replay4";
     program,
     shader(
       gl.VERTEX_SHADER,
-      `attribute vec3 position; attribute vec3 color; attribute vec3 blockCoord; attribute float region; attribute float naturalMaterial; uniform vec4 probes[16]; uniform mat4 matrix; uniform float selected; varying vec3 vColor; varying vec3 vPosition; varying float vChosen; varying vec3 vBlock; void main(){ float chosen=1.0-step(0.1,abs(region-selected)); float showAll=1.0-step(0.1,selected); vChosen=chosen; vPosition=position; vBlock=blockCoord; vColor=mix(color*.85,mix(color,vec3(.13,.46,.65),.65),chosen); vColor=mix(vColor,color,showAll); for(int i=0;i<16;i++){if(probes[i].w>=0.0 && all(lessThan(abs(blockCoord-probes[i].xyz),vec3(.1)))){ vChosen=1.0; vColor=probes[i].w>.5 ? vec3(.90,.24,.12) : vec3(.35,.40,.45); }} if(naturalMaterial>.5) vColor=color; gl_Position=matrix*vec4(position,1.0); }`,
+      `attribute vec3 position; attribute vec3 color; attribute vec3 blockCoord; attribute float region; attribute float naturalMaterial; uniform vec4 probes[16]; uniform mat4 matrix; uniform float selected; varying vec3 vColor; varying vec3 vPosition; varying float vChosen; varying vec3 vBlock; varying float vNatural; void main(){ float chosen=1.0-step(0.1,abs(region-selected)); float showAll=1.0-step(0.1,selected); vChosen=chosen; vPosition=position; vBlock=blockCoord; vNatural=naturalMaterial; vColor=mix(color*.85,mix(color,vec3(.13,.46,.65),.65),chosen); vColor=mix(vColor,color,showAll); for(int i=0;i<16;i++){if(probes[i].w>=0.0 && all(lessThan(abs(blockCoord-probes[i].xyz),vec3(.1)))){ vChosen=1.0; vColor=probes[i].w>.5 ? vec3(.90,.24,.12) : vec3(.35,.40,.45); }} if(naturalMaterial>.5) vColor=color; gl_Position=matrix*vec4(position,1.0); }`,
     ),
   );
   gl.attachShader(
     program,
     shader(
       gl.FRAGMENT_SHADER,
-      `precision mediump float; varying vec3 vColor; varying vec3 vPosition; varying float vChosen; varying vec3 vBlock; uniform float highlightPass; uniform float cropped; uniform float ghostPass; uniform vec3 cropMin; uniform vec3 cropMax; void main(){ bool outside=any(lessThan(vBlock,cropMin)) || any(greaterThan(vBlock,cropMax)); if(ghostPass>0.5){ if(!outside) discard; gl_FragColor=vec4(vColor,.075); return; } if(cropped>0.5 && (any(lessThan(vBlock,cropMin)) || any(greaterThan(vBlock,cropMax)))) discard; if(highlightPass>0.5 && vChosen<0.5) discard; gl_FragColor=vec4(vColor,1.0); }`,
+      `precision highp float; uniform sampler2D signalMap; uniform float physicalEnabled; varying float vNatural; varying vec3 vColor; varying vec3 vPosition; varying float vChosen; varying vec3 vBlock; uniform float highlightPass; uniform float cropped; uniform float ghostPass; uniform vec3 cropMin; uniform vec3 cropMax; void main(){ float index=vBlock.x+91.0*(vBlock.z+65.0*vBlock.y); vec4 measured=texture2D(signalMap,vec2((mod(index,512.0)+.5)/512.0,(floor(index/512.0)+.5)/520.0)); vec3 actual=vColor; if(physicalEnabled>.5 && measured.r>0.0 && vNatural<.5){ float power=max(0.0,measured.r*255.0-1.0)/15.0; actual=mix(vec3(.28,.12,.10),vec3(1.0,.25,.06),power); } bool outside=any(lessThan(vBlock,cropMin)) || any(greaterThan(vBlock,cropMax)); if(ghostPass>0.5){ if(!outside) discard; gl_FragColor=vec4(actual,.075); return; } if(cropped>0.5 && (any(lessThan(vBlock,cropMin)) || any(greaterThan(vBlock,cropMax)))) discard; if(highlightPass>0.5 && vChosen<0.5) discard; gl_FragColor=vec4(actual,1.0); }`,
     ),
   );
   gl.linkProgram(program);
@@ -64,9 +67,69 @@ import { wireBoxes, torchPoint } from "./block-geometry.mjs?v=20261029-replay4";
     cropped = gl.getUniformLocation(program, "cropped");
   const ghostPass = gl.getUniformLocation(program, "ghostPass");
   const probeUniform = gl.getUniformLocation(program, "probes[0]");
+  const physicalEnabled = gl.getUniformLocation(program, "physicalEnabled");
+  const signalTexture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, signalTexture);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+  const signalPixels = new Uint8Array(512 * 520);
+  gl.texImage2D(
+    gl.TEXTURE_2D,
+    0,
+    gl.LUMINANCE,
+    512,
+    520,
+    0,
+    gl.LUMINANCE,
+    gl.UNSIGNED_BYTE,
+    signalPixels,
+  );
+  let physicalTick = -1;
+  let physicalData = null;
+  window.setCpuPhysicalTick = (tick) => {
+    if (!physicalData) return;
+    if (tick !== physicalTick) {
+      // Initial values plus deltas support deterministic forward and backward seeking.
+      if (tick < physicalTick || physicalTick < 0) {
+        signalPixels.fill(0);
+        physicalData.positions.forEach(([x, y, z], i) => {
+          signalPixels[x + 91 * (z + 65 * y)] = physicalData.initial[i] + 1;
+        });
+        physicalTick = 0;
+      }
+      for (let t = physicalTick + 1; t <= tick; t++) {
+        const changes = physicalData.changes[t];
+        for (let j = 0; j < changes.length; j += 2) {
+          const [x, y, z] = physicalData.positions[changes[j]];
+          signalPixels[x + 91 * (z + 65 * y)] = changes[j + 1] + 1;
+        }
+      }
+      physicalTick = tick;
+      gl.bindTexture(gl.TEXTURE_2D, signalTexture);
+      gl.texSubImage2D(
+        gl.TEXTURE_2D,
+        0,
+        0,
+        0,
+        512,
+        520,
+        gl.LUMINANCE,
+        gl.UNSIGNED_BYTE,
+        signalPixels,
+      );
+    }
+    gl.uniform1f(physicalEnabled, 1);
+    canvas.dataset.physicalTick = String(tick);
+    requestDraw();
+  };
   let probeValues = new Float32Array(64);
   for (let i = 0; i < 16; i++) probeValues[4 * i + 3] = -1;
   window.setCpuProbes = (probes = []) => {
+    gl.uniform1f(physicalEnabled, 0);
+    delete canvas.dataset.physicalTick;
     probeValues = new Float32Array(64);
     for (let i = 0; i < 16; i++) probeValues[4 * i + 3] = -1;
     probes
@@ -841,6 +904,7 @@ import { wireBoxes, torchPoint } from "./block-geometry.mjs?v=20261029-replay4";
     })
     .then(async (data) => {
       const record = await window.cpuRecording;
+      physicalData = record.physical;
       const sourceCount = data.blocks.length;
       // Program only the documented ROM cells. No routing or supports are changed.
       const isRom = ([x, y, z]) =>
@@ -1068,7 +1132,20 @@ import { wireBoxes, torchPoint } from "./block-geometry.mjs?v=20261029-replay4";
           sy = 0.3;
           ox = oz = 0.3;
         }
-        box(x + ox, y + oy, z + oz, sx, sy, sz, color, region, solid(name));
+        box(
+          x + ox,
+          y + oy,
+          z + oz,
+          sx,
+          sy,
+          sz,
+          color,
+          region,
+          solid(name),
+          null,
+          [x, y, z],
+          /repeater|comparator/.test(name) ? 1 : 0,
+        );
         if (/repeater|comparator/.test(name))
           for (const offset of [0.25, 0.68])
             box(

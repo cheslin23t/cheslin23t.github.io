@@ -29,10 +29,13 @@ let tick = 0,
   position = 0,
   lastTime = 0,
   scrollFrame = 0;
-window.cpuRecording = fetch("./data/recording.json").then((r) => {
-  if (!r.ok) throw Error("Recording unavailable");
-  return r.json();
-});
+window.cpuRecording = Promise.all(
+  ["recording.json", "physical-signals.json"].map(async (name) => {
+    const r = await fetch(`./data/${name}`);
+    if (!r.ok) throw Error("Recording unavailable");
+    return r.json();
+  }),
+).then(([record, physical]) => ({ ...record, physical }));
 function probe(position, on) {
   return { position, on: Boolean(on) };
 }
@@ -132,7 +135,8 @@ function applyScene(index, force = false) {
   } else {
     const f = recording.frames[scene.tick];
     state(f);
-    window.setCpuProbes?.(probes(f, scene.view));
+    window.setCpuProbes?.([]);
+    window.setCpuPhysicalTick?.(scene.tick);
     $("#signal-caption").textContent =
       scene.view === "flags"
         ? "Zero and overflow landmarks · physical wiring"
@@ -222,23 +226,8 @@ function showTick(value) {
     else window.focusCpuBuild?.(stage.view, true);
     replayFocus = key;
   }
-  const held = replayFocus.split(":");
-  const visibleStage = $("#follow-replay").checked
-    ? stage
-    : { view: held[0] || stage.view, register: Number(held[1]) };
-  const signals = visibleStage.register
-    ? Array.from({ length: 8 }, (_, bit) =>
-        probe(
-          [
-            60 + 2 * visibleStage.register,
-            22 + 2 * bit + (visibleStage.register % 2 === 0 ? 1 : 0),
-            39,
-          ],
-          !((f.registers[visibleStage.register - 1] >> bit) & 1),
-        ),
-      )
-    : probes(f, visibleStage.view);
-  window.setCpuProbes?.(signals);
+  window.setCpuProbes?.([]);
+  window.setCpuPhysicalTick?.(tick);
   $("#trace-phase").textContent = stage.label;
   let caption;
   if (tick < 131)
@@ -275,7 +264,7 @@ function showTick(value) {
   $("#trace-seek").value = tick;
   $("#trace-tick").textContent = `${tick} / ${recording.frames.length - 1}`;
   $("#signal-caption").textContent =
-    `Game tick ${tick} · orange = on · gray = off`;
+    `Game tick ${tick} · orange = on · dark red = off`;
 }
 $("#follow-replay").addEventListener("change", () => {
   if ($("#follow-replay").checked) replayFocus = "";

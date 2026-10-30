@@ -17,10 +17,10 @@
       sizes="64x64"
       href="/static/assets/favicon.png?v=2"
     />
-    <link rel="stylesheet" href="./cpu.css?v=20261029-replay4" />
+    <link rel="stylesheet" href="./cpu.css?v=20261029-signals1" />
     <link rel="stylesheet" href="/static/theme.css" />
-    <script src="./cpu.js?v=20261029-replay4" defer></script>
-    <script type="module" src="./build-viewer.js?v=20261029-replay4"></script>
+    <script src="./cpu.js?v=20261029-signals1" defer></script>
+    <script type="module" src="./build-viewer.js?v=20261029-signals1"></script>
     <noscript
       ><style>
         .model-fallback[hidden] {
@@ -672,15 +672,17 @@ ADD R3, R2, R1</code></pre>
         <summary>Build files and implementation notes</summary>
         <p>
           The 3D model uses the physical schematic with simplified block shapes.
-          The ROM is programmed with the example shown here. Bright orange/gray
-          overlays are measured electrical states; blue identifies components.
+          The ROM is programmed with the example shown here. Orange shows
+          powered dust and component tips; dark red shows off. Their states are
+          captured from Minecraft each game tick; blue identifies components.
           Module crops are viewing regions, not complete netlists.
         </p>
         <p>
           R1–R14 are available to the compiler; R0 reads as zero. R15 stores
           data but has faulty operand reads. DEC is faulty, ROM addresses 60/61
-          alias 56/57, and branch/overflow behavior remains unverified. Internal
-          ALU gates beyond the mapped probes have not been individually traced.
+          alias 56/57, and branch/overflow behavior remains unverified.
+          Recording the internal signals does not certify every instruction or
+          input combination.
         </p>
         <p>
           The recording began with registers cleared as test setup. PC reset
@@ -688,6 +690,7 @@ ADD R3, R2, R1</code></pre>
         </p>
         <p>
           <a href="./data/8bCPU-repaired-v1.schem">Download schematic</a> ·
+          <a href="./data/physical-signals.json">Download component states</a> ·
           <a href="./data/recording.json">Measurement data</a> ·
           <a href="./README.md">Technical reference</a>
         </p>

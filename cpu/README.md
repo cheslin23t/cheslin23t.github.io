@@ -121,16 +121,30 @@ schematic overview; regenerate it if the physical source changes.
 
 Torch meshes have separate wooden stems and red caps. Wall torches tilt away from
 the support indicated by their saved facing. Static cap colors come from the
-schematic; electrical overlays remain limited to recorded probes.
+schematic; electrical overlays use the full per-tick component capture during replay.
 
 X-ray keeps the selected circuit opaque and renders the surrounding build as a
 faint depth-tested silhouette, without hiding internal details behind it.
 Replay camera following is optional and visits PC, ROM, decode, each written
-register, and the ALU at recorded milestones. These are viewing intervals, not
-an invented cycle-accurate simulation of unmeasured wires.
+register, and the ALU at recorded milestones. These are viewing intervals, backed by the matching per-tick physical signal capture.
 
 Replay defaults to 1× and X-ray. One short title and caption live inside the
 model frame; the side column remains static apart from playback controls.
 The model's numeric strip shows recorded values. Its compact flow indicator
 illustrates the current transfer stage, not an inferred physical wire route.
 Flow motion pauses with playback and respects reduced motion.
+
+Full physical replay uses `data/physical-signals.json`: 16,818 sampled positions,
+including every dust wire, repeater, comparator, torch, and all ROM programming
+positions. The 870-tick capture on 29 October 2026 matches every original PC,
+instruction bus, ALU, and R1–R3 sample in both banks. 5,520 positions change.
+Dust retains its 0–15 strength; powered components use 15 and off uses 0.
+The file stores initial values plus per-tick index/value pairs, allowing exact
+backward seeking. Empty ROM positions have no geometry. Within-tick updates
+are not captured, and this recording is not a general-purpose CPU emulator.
+The lab snapshot was restored and observable CPU state matched afterward.
+
+The renderer uploads a compact spatial signal texture rather than scanning a
+large uniform probe list per vertex. Repeater bases and torch stems remain
+neutral; their tips and actual connecting dust carry the power colors.
+No synthetic connecting paths or estimated propagation have been added.
