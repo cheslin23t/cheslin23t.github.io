@@ -41,7 +41,8 @@
       if (destination.origin !== 'https://api.ches.dev') throw new Error('Invalid logout destination');
       location.assign(destination.href);
     } catch {
-      busy = false; logout.disabled = false; status.textContent = 'Could not sign out. Try again.';
+      // Central sign-out still runs if the application session is already gone or its API fails.
+      location.assign('https://api.ches.dev/auth/flows/-/cancel/');
     }
   });
   addEventListener('pageshow', update);
