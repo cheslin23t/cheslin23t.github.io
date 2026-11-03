@@ -19,10 +19,12 @@
     <script src="/static/appearance.js"></script>
     <link rel="stylesheet" href="/static/index.css" />
     <script src="/static/index.js" defer></script>
+    <link rel="stylesheet" href="/static/account.css" />
+    <script src="/static/account.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-    <header class="site-header">
+    <header class="site-header" data-account-enabled>
       <a class="wordmark" href="/" aria-label="ches.dev, home"
         >ches<span>.</span>dev</a
       >
@@ -42,6 +44,12 @@
             >
               <path d="M5 19 19 5M5 5h14v14" /></svg></span
         ></a>
+      <span class="site-account" aria-label="Account">
+          <a data-account-login href="https://api.ches.dev/site-auth/login">Sign in</a>
+          <a data-account-dashboard href="https://api.ches.dev/auth/if/admin/" hidden>Dashboard</a>
+          <button data-account-logout type="button" disabled hidden>Sign out</button>
+          <span data-account-status role="status" class="account-status"></span>
+        </span>
       </nav>
     </header>
     <main id="main">

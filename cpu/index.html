@@ -37,14 +37,22 @@
         }
       </style></noscript
     >
+    <link rel="stylesheet" href="/static/account.css" />
+    <script src="/static/account.js" defer></script>
   </head>
   <body>
     <a class="skip" href="#whole">Skip to walkthrough</a>
-    <header>
+    <header data-account-enabled>
       <a class="brand" href="/">ches.dev <span>/ CPU V2</span></a>
       <nav aria-label="CPU sections">
         <a href="#rom">ROM</a><a href="#registers">Registers</a
         ><a href="#alu">ALU</a><a href="#instructions">Instructions</a>
+      <span class="site-account" aria-label="Account">
+          <a data-account-login href="https://api.ches.dev/site-auth/login">Sign in</a>
+          <a data-account-dashboard href="https://api.ches.dev/auth/if/admin/" hidden>Dashboard</a>
+          <button data-account-logout type="button" disabled hidden>Sign out</button>
+          <span data-account-status role="status" class="account-status"></span>
+        </span>
       </nav>
     </header>
     <main>
