@@ -1,0 +1,18 @@
+{
+  "profile": "product-admin",
+  "canonicalMap": "UX-CONTRACT.md",
+  "requiredCapabilities": [
+    "Date",
+    "Select/Listbox",
+    "Form",
+    "CRUD"
+  ],
+  "ownership": {
+    "Date": "native",
+    "Select/Listbox": "native"
+  },
+  "commands": {
+    "test": "node cpu/tools/verify.mjs",
+    "syntax": "node --check static/account.js && node --check calendar/calendar.js"
+  }
+}

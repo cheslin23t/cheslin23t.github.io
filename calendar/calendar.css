@@ -1,0 +1,39 @@
+.calendar-main { padding-top: 40px; padding-bottom: 80px; max-width: 1200px; }
+.calendar-heading,.calendar-toolbar,.calendar-actions,.calendar-dialog-heading,.calendar-dialog-actions,.event-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.calendar-heading,.calendar-dialog-heading { justify-content: space-between; }
+.calendar-heading h1 { font-size: clamp(38px,7vw,72px); }
+.eyebrow { color: var(--muted); font-size: 12px; margin: 0 0 8px; }
+.calendar-toolbar { margin: 24px 0 12px; align-items: end; }
+.calendar-toolbar label { min-width: 180px; flex: 1; }
+.calendar-actions { margin-bottom: 0; }
+.calendar-main label,dialog label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; }
+.calendar-main input, .calendar-main select,dialog input,dialog select,dialog textarea { width: 100%; min-height: 44px; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 5px; padding: 10px; }
+.calendar-note { color: var(--muted); font-size: 12px; font-weight: 400; line-height: 1.6; }
+.calendar-message { border: 1px solid var(--line); border-radius: 14px; padding: 24px; margin-top: 24px; }
+.event-list { min-height: 200px; margin-top: 28px; }
+.event-day { font-size: 14px; margin: 28px 0 12px; }
+.event-card { border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin: 10px 0; display: flex; gap: 20px; justify-content: space-between; flex-wrap: wrap; }
+.event-card h3 { font-size: 17px; margin: 0 0 8px; overflow-wrap: anywhere; }
+.event-card p { margin: 4px 0; overflow-wrap: anywhere; }
+.event-meta { color: var(--muted); font-size: 12px; }
+.event-actions { align-content: center; }
+.event-actions button { font-size: 12px; }
+.calendar-error { color: var(--ink); border-left: 3px solid var(--accent); padding-left: 12px; min-height: 1.5em; }
+.calendar-error:empty { border: 0; }
+.calendar-main [hidden],dialog [hidden] { display: none !important; }
+.calendar-dialog-actions { justify-content: flex-end; margin-top: 24px; }
+dialog { width: min(650px,calc(100vw - 28px)); max-height: calc(100dvh - 30px); overflow: auto; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; padding: 24px; }
+dialog::backdrop { background: rgb(0 0 0 / .4); }
+dialog h2 { font-size: 24px; }
+dialog fieldset { border: 0; padding: 0; display: grid; gap: 16px; min-width: 0; }
+dialog textarea { resize: none; min-height: 120px; }
+.calendar-two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+dialog label.calendar-checkbox { flex-direction: row; align-items: center; min-height: 44px; }
+.calendar-checkbox input { width: 20px; min-height: 20px; }
+#save-event { min-width: 130px; }
+@media (max-width: 600px) { .calendar-main { padding-top: 28px; } .calendar-toolbar label { flex-basis: 100%; } .calendar-two { grid-template-columns: 1fr; } dialog { padding: 18px; } .event-actions { width: 100%; } }
+@media (prefers-reduced-motion: reduce) { dialog button { transition: none; } }
+
+dialog h2, dialog p { overflow-wrap: anywhere; }
+
+.resize-none { resize: none; }

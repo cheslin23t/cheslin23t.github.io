@@ -3,29 +3,36 @@
   const account = document.querySelector('.site-account');
   if (!account) return;
   const login = account.querySelector('[data-account-login]');
+  const calendar = account.querySelector('[data-account-calendar]');
   const dashboard = account.querySelector('[data-account-dashboard]');
   const logout = account.querySelector('[data-account-logout]');
   const status = account.querySelector('[data-account-status]');
   let busy = false;
+  let available = null;
+  let revision = 0;
+  function offline(){revision++;available=false;dashboard.hidden=true;if(calendar)calendar.hidden=true;logout.disabled=true;login.setAttribute('aria-disabled','true');status.textContent='Account offline';}
+  login.addEventListener('click',event=>{if(available===false){event.preventDefault();status.textContent='Sign in is unavailable while the server is offline.';}});
   async function update() {
     if (busy || document.hidden) return;
+    const version=++revision;
     try {
       const response = await fetch(`${endpoint}/session`, { credentials: 'include', cache: 'no-store', signal: AbortSignal.timeout(8000) });
       if (!response.ok) throw new Error('Account unavailable');
       const state = await response.json();
+      if(version!==revision)return;available=true;login.removeAttribute('aria-disabled');
+      if(calendar)calendar.hidden=!(state.authenticated===true&&state.calendarUrl==='https://ches.dev/calendar/');
       login.hidden = state.authenticated === true;
       logout.hidden = state.authenticated !== true;
       logout.disabled = false;
       dashboard.hidden = !(state.authenticated === true && state.dashboardUrl === 'https://api.ches.dev/auth/if/admin/');
       status.textContent = '';
     } catch {
-      dashboard.hidden = true;
-      status.textContent = 'Account unavailable';
+      if(version===revision)offline();
     }
   }
   logout.addEventListener('click', async () => {
     if (busy) return;
-    busy = true; logout.disabled = true; status.textContent = 'Signing out…';
+    revision++;busy = true; logout.disabled = true; status.textContent = 'Signing out…';
     try {
       const response = await fetch(`${endpoint}/logout`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: '{}', signal: AbortSignal.timeout(8000) });
       if (!response.ok) throw new Error('Sign-out failed');
@@ -38,6 +45,8 @@
     }
   });
   addEventListener('pageshow', update);
+  addEventListener('online', update);
+  addEventListener('offline', offline);
   document.addEventListener('visibilitychange', update);
   setInterval(update, 60000);
 })();

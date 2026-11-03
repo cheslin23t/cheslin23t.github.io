@@ -85,3 +85,11 @@ static/availability.js owns one read-only request stream for both surfaces, poll
 ## Central account navigation
 
 The portfolio remains public. static/account.js progressively enhances the account controls in the shared header on all maintained pages. static/account.css reuses theme.css tokens and 44px controls; responsive navigation wraps in normal flow without changing content sections. Sign in works without JavaScript through the central login endpoint. No client secrets or identity tokens are stored in this repository or browser storage. Session and logout calls use the credentialed, origin-restricted api.ches.dev/site-auth backend. Dashboard appears only for a server-confirmed central administrator; project roles do not grant it. During account failures, preserve portfolio navigation and show a small inline status; hide Dashboard until revalidated.
+
+## Private calendar and server-off behavior
+
+/calendar/ is a public static shell whose private data comes only from the session-authenticated API. The server enforces calendar:manage independently of dashboard access. Calendar links appear only with the explicit capability. The page redirects unauthenticated visitors to central login with a fixed calendar return destination; it shows a permission-denied state for signed-in users without access. Backend/network failures show an offline state, never a login loop.
+
+The editor uses styled native dialog elements, app-owned validation, native calendar/time/select controls, and the existing theme tokens. Save preserves form input on errors, uses an idempotency key for new events, and uses ETags for conflict detection. Repeating events have occurrence/series controls. All-day end dates are inclusive in the form and exclusive in iCalendar. Unsaved editor content stays in memory only and is discarded only after confirmation. No private events are persisted to localStorage, IndexedDB or a service worker, and writes are never silently queued offline.
+
+The public portfolio remains functional when the local host is off. Account navigation becomes unavailable with an inline status; the private calendar page remains a useful offline shell. Public service/availability summaries retain their established unavailable/stale states.

@@ -10,3 +10,5 @@ nav .site-account a:hover, nav .site-account button:hover:enabled { border-color
  header[data-account-enabled] > nav { display: flex; flex: 1 1 100%; flex-wrap: wrap; align-items: center; gap: 12px; }
 }
 @media (max-width: 600px) { .site-account { flex-basis: 100%; } }
+
+.site-account a[aria-disabled="true"] { opacity: .55; cursor: not-allowed; }
