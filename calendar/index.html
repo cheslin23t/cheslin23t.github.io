@@ -1,56 +1,267 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="color-scheme" content="light dark"><meta name="referrer" content="no-referrer"><title>Calendar — ches.dev</title><link rel="icon" href="/static/assets/favicon.svg"><script src="/static/appearance.js"></script><link rel="stylesheet" href="/static/index.css"><link rel="stylesheet" href="/static/account.css"><link rel="stylesheet" href="/calendar/calendar.css"><script src="/static/account.js?v=logout-home-20261102" defer></script><script src="/calendar/calendar.js" defer></script></head><body><a class="skip-link" href="#main">Skip to calendar</a>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Calendar — ches.dev</title>
+    <link rel="icon" href="/static/assets/favicon.svg" />
+    <script src="/static/appearance.js"></script>
+    <link rel="stylesheet" href="/static/index.css" />
+    <link rel="stylesheet" href="/static/account.css" />
+    <link rel="stylesheet" href="/calendar/calendar.css" />
+    <script src="/static/account.js?v=logout-home-20261102" defer></script>
+    <script src="/calendar/calendar.js" defer></script>
+  </head>
+  <body class="calendar-page">
+    <a class="skip-link" href="#main">Skip to calendar</a>
     <header class="site-header" data-account-enabled>
       <a class="wordmark" href="/" aria-label="ches.dev, home"
         >ches<span>.</span>dev</a
       >
       <nav aria-label="Main navigation">
-        <a href="/#work">Work</a><a href="/#other-projects">Other projects</a
-        ><a href="/#about">About</a
-        ><a href="mailto:colin@ches.dev"
-          >Contact
-          <span aria-hidden="true"
-            ><svg
-              class="icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
-              aria-hidden="true"
-            >
-              <path d="M5 19 19 5M5 5h14v14" /></svg></span
-        ></a>
-      <span class="site-account" aria-label="Account">
-          <a data-account-login href="https://api.ches.dev/site-auth/login?returnTo=calendar">Sign in</a>
-          <a data-account-calendar href="https://ches.dev/calendar/" hidden>Calendar</a>
-          <a data-account-dashboard href="https://api.ches.dev/auth/if/admin/" hidden>Dashboard</a>
-          <button data-account-logout type="button" disabled hidden>Sign out</button>
+        <a href="/">Portfolio</a>
+        <span class="site-account" aria-label="Account">
+          <a
+            data-account-login
+            href="https://api.ches.dev/site-auth/login?returnTo=calendar"
+            >Sign in</a
+          >
+          <a data-account-calendar href="https://ches.dev/calendar/" hidden
+            >Calendar</a
+          >
+          <a
+            data-account-dashboard
+            href="https://api.ches.dev/auth/if/admin/"
+            hidden
+            >Dashboard</a
+          >
+          <button data-account-logout type="button" disabled hidden>
+            Sign out
+          </button>
           <span data-account-status role="status" class="account-status"></span>
         </span>
       </nav>
     </header>
-<main id="main" class="calendar-main"><noscript><style>#calendar-status{display:none}</style><p>Enable JavaScript to load your private calendar. The public portfolio remains available.</p></noscript>
- <div class="calendar-heading"><div><p class="eyebrow">Your iCloud calendars</p><h1>Calendar<span class="accent">.</span></h1></div><button id="new-event" class="primary" disabled>New event</button></div>
- <p id="calendar-status" role="status" aria-live="polite">Checking your session…</p>
- <section id="access-message" class="calendar-message" hidden><h2 id="access-title"></h2><p id="access-description"></p><button id="retry-access" disabled>Try again</button></section>
- <section id="calendar-app" hidden>
-  <div class="calendar-toolbar"><label for="calendar-select">Calendar<select id="calendar-select"></select></label><label for="month">Month<input type="month" id="month"></label><div class="calendar-actions"><button id="previous-month" disabled aria-label="Previous month">Previous</button><button id="next-month" disabled aria-label="Next month">Next</button><button id="refresh-calendar" disabled>Refresh</button></div></div>
-  <p class="calendar-note">Changes sync with iCloud. Read-only calendars and invitations can be viewed here; invitation changes stay in your calendar app.</p>
-  <div id="event-list" class="event-list" aria-busy="false"></div>
- </section>
-</main>
-<dialog id="event-editor" aria-labelledby="editor-title"><form id="event-form" novalidate><div class="calendar-dialog-heading"><h2 id="editor-title">New event</h2><button type="button" id="close-editor" disabled aria-label="Close event editor">Close</button></div>
- <p id="editor-error" class="calendar-error" role="alert"></p><p id="editor-note" class="calendar-note"></p>
- <fieldset id="event-fields"><label for="event-title">Title<input id="event-title" name="title" maxlength="300" autocomplete="off" required aria-describedby="editor-error"></label>
- <label id="scope-label" for="edit-scope" hidden>Apply changes to<select id="edit-scope"><option value="occurrence">Only this occurrence</option><option value="series">Entire series</option></select></label>
- <label for="event-calendar">Calendar<select id="event-calendar"></select></label>
- <label class="calendar-checkbox" for="event-all-day"><input type="checkbox" id="event-all-day">All day</label>
- <div class="calendar-two"><label for="event-start">Starts<input id="event-start" type="datetime-local" required aria-describedby="editor-error"></label><label for="event-end">Ends<input id="event-end" type="datetime-local" required aria-describedby="editor-error"></label></div>
- <label for="event-timezone">Time zone<input id="event-timezone" list="time-zones" required aria-describedby="editor-error"><datalist id="time-zones"></datalist></label>
- <div id="repeat-fields"><label for="repeat-frequency">Repeats<select id="repeat-frequency"><option value="">Never</option><option value="DAILY">Daily</option><option value="WEEKLY">Weekly</option><option value="MONTHLY">Monthly</option><option value="YEARLY">Yearly</option><option value="custom">Custom rule</option></select></label><label id="custom-rule-label" for="event-recurrence" hidden>Recurrence rule<input id="event-recurrence" placeholder="FREQ=WEEKLY;BYDAY=MO,WE;COUNT=10" aria-describedby="recurrence-help"></label><span id="recurrence-help" class="calendar-note">Use a standard recurrence rule for custom days, intervals, or an end date.</span></div>
- <label for="event-reminders">Reminders, minutes before<input id="event-reminders" inputmode="numeric" placeholder="15, 60" aria-describedby="reminder-help"></label><span id="reminder-help" class="calendar-note">Separate up to five reminders with commas; leave blank for none. Notifications are delivered by your connected calendar apps.</span>
- <label for="event-location">Location<input id="event-location" maxlength="2000"></label><label for="event-description">Notes<textarea class="resize-none" id="event-description" rows="5" maxlength="20000"></textarea></label>
- </fieldset><div class="calendar-dialog-actions"><button type="button" id="cancel-editor" disabled>Cancel</button><button type="submit" id="save-event" class="primary">Save event</button></div>
- </form></dialog>
-<dialog id="confirm-action" aria-labelledby="confirm-title"><h2 id="confirm-title"></h2><p id="confirm-description"></p><div class="calendar-dialog-actions"><button id="confirm-cancel" disabled>Keep editing</button><button id="confirm-accept" disabled class="primary">Continue</button></div></dialog>
-</body></html>
+    <main id="main" class="calendar-main">
+      <noscript
+        ><style>
+          #calendar-status {
+            display: none;
+          }
+        </style>
+        <p>
+          Enable JavaScript to load your private calendar. The public portfolio
+          remains available.
+        </p></noscript
+      >
+      <div class="calendar-heading">
+        <div>
+          <p class="eyebrow">iCloud calendars</p>
+          <h1>Calendar</h1>
+        </div>
+        <button id="new-event" class="primary" disabled>
+          <span aria-hidden="true">＋</span> New event
+        </button>
+      </div>
+      <p id="calendar-status" role="status" aria-live="polite">
+        Checking your session…
+      </p>
+      <section id="access-message" class="calendar-message" hidden>
+        <h2 id="access-title"></h2>
+        <p id="access-description"></p>
+        <button id="retry-access" disabled>Try again</button>
+      </section>
+      <section id="calendar-app" hidden>
+        <div class="calendar-layout">
+          <aside class="calendar-sidebar" aria-label="Calendar options">
+            <label class="jump-label" for="month"
+              >Jump to month<input type="month" id="month"
+            /></label>
+            <div class="calendar-sidebar-heading">
+              <h2>My calendars</h2>
+              <button
+                type="button"
+                id="toggle-calendars"
+                class="text-button"
+                disabled
+              >
+                Hide all
+              </button>
+            </div>
+            <div id="calendar-toggles"></div>
+            <p class="calendar-note">Select calendars to see them together.</p>
+            <div class="calendar-sync">
+              <span aria-hidden="true">↻</span>
+              <div>
+                iCloud sync
+                <p class="calendar-note">
+                  Changes appear in your connected calendar apps.
+                </p>
+              </div>
+            </div>
+          </aside>
+          <div class="calendar-content">
+            <div class="calendar-toolbar">
+              <div class="date-navigation">
+                <button id="previous-month" disabled aria-label="Previous week">
+                  ‹</button
+                ><button id="next-month" disabled aria-label="Next week">
+                  ›</button
+                ><button id="today" disabled>Today</button>
+              </div>
+              <div class="view-switch" role="group" aria-label="Calendar view">
+                <button data-view="day" aria-pressed="false" disabled>
+                  Day</button
+                ><button data-view="week" aria-pressed="true" disabled>
+                  Week</button
+                ><button data-view="month" aria-pressed="false" disabled>
+                  Month
+                </button>
+              </div>
+              <button
+                id="refresh-calendar"
+                disabled
+                aria-label="Refresh calendars"
+              >
+                ↻
+              </button>
+            </div>
+            <div class="calendar-range">
+              <h2 id="range-title"></h2>
+              <span id="calendar-zone" class="calendar-note"></span>
+            </div>
+            <p id="view-message" class="calendar-note" role="status"></p>
+            <div id="event-list" class="event-list" aria-busy="false"></div>
+            <p class="calendar-note calendar-footnote">
+              Select an event to view or edit it. Invitations are managed in
+              your calendar app.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <dialog id="event-editor" aria-labelledby="editor-title">
+      <form id="event-form" novalidate>
+        <div class="calendar-dialog-heading">
+          <h2 id="editor-title">New event</h2>
+          <button
+            type="button"
+            id="close-editor"
+            disabled
+            aria-label="Close event editor"
+          >
+            Close
+          </button>
+        </div>
+        <p id="editor-error" class="calendar-error" role="alert"></p>
+        <p id="editor-note" class="calendar-note"></p>
+        <fieldset id="event-fields">
+          <label for="event-title"
+            >Title<input
+              id="event-title"
+              name="title"
+              maxlength="300"
+              autocomplete="off"
+              required
+              aria-describedby="editor-error"
+          /></label>
+          <label id="scope-label" for="edit-scope" hidden
+            >Apply changes to<select id="edit-scope">
+              <option value="occurrence">Only this occurrence</option>
+              <option value="series">Entire series</option>
+            </select></label
+          >
+          <label for="event-calendar"
+            >Calendar<select id="event-calendar"></select
+          ></label>
+          <label class="calendar-checkbox" for="event-all-day"
+            ><input type="checkbox" id="event-all-day" />All day</label
+          >
+          <div class="calendar-two">
+            <label for="event-start"
+              >Starts<input
+                id="event-start"
+                type="datetime-local"
+                required
+                aria-describedby="editor-error" /></label
+            ><label for="event-end"
+              >Ends<input
+                id="event-end"
+                type="datetime-local"
+                required
+                aria-describedby="editor-error"
+            /></label>
+          </div>
+          <label for="event-timezone"
+            >Time zone<input
+              id="event-timezone"
+              list="time-zones"
+              required
+              aria-describedby="editor-error" /><datalist
+              id="time-zones"
+            ></datalist
+          ></label>
+          <div id="repeat-fields">
+            <label for="repeat-frequency"
+              >Repeats<select id="repeat-frequency">
+                <option value="">Never</option>
+                <option value="DAILY">Daily</option>
+                <option value="WEEKLY">Weekly</option>
+                <option value="MONTHLY">Monthly</option>
+                <option value="YEARLY">Yearly</option>
+                <option value="custom">Custom rule</option>
+              </select></label
+            ><label id="custom-rule-label" for="event-recurrence" hidden
+              >Recurrence rule<input
+                id="event-recurrence"
+                placeholder="FREQ=WEEKLY;BYDAY=MO,WE;COUNT=10"
+                aria-describedby="recurrence-help" /></label
+            ><span id="recurrence-help" class="calendar-note"
+              >Use a standard recurrence rule for custom days, intervals, or an
+              end date.</span
+            >
+          </div>
+          <label for="event-reminders"
+            >Reminders, minutes before<input
+              id="event-reminders"
+              inputmode="numeric"
+              placeholder="15, 60"
+              aria-describedby="reminder-help" /></label
+          ><span id="reminder-help" class="calendar-note"
+            >Separate up to five reminders with commas; leave blank for none.
+            Notifications are delivered by your connected calendar apps.</span
+          >
+          <label for="event-location"
+            >Location<input id="event-location" maxlength="2000" /></label
+          ><label for="event-description"
+            >Notes<textarea
+              class="resize-none"
+              id="event-description"
+              rows="5"
+              maxlength="20000"
+            ></textarea>
+          </label>
+        </fieldset>
+        <div class="calendar-dialog-actions">
+          <button type="button" id="delete-event" disabled hidden>
+            Delete event</button
+          ><button type="button" id="cancel-editor" disabled>Cancel</button
+          ><button type="submit" id="save-event" class="primary">
+            Save event
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="confirm-action" aria-labelledby="confirm-title">
+      <h2 id="confirm-title"></h2>
+      <p id="confirm-description"></p>
+      <div class="calendar-dialog-actions">
+        <button id="confirm-cancel" disabled>Keep editing</button
+        ><button id="confirm-accept" disabled class="primary">Continue</button>
+      </div>
+    </dialog>
+  </body>
+</html>
