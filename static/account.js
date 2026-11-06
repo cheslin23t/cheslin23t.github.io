@@ -22,6 +22,7 @@
   async function update() {
     if (busy || document.hidden) return;
     const version=++revision;
+    admin.hidden = true;
     try {
       const response = await fetch(`${endpoint}/session`, { credentials: 'include', cache: 'no-store', signal: AbortSignal.timeout(8000) });
       if (!response.ok) throw new Error('Account unavailable');
@@ -35,8 +36,19 @@
       const hasAdminAccess = state.dashboardAdminUrl === adminDashboard;
       dashboard.href = libraryDashboard;
       dashboard.hidden = !(signedIn && state.dashboardUrl === libraryDashboard);
-      admin.hidden = !(signedIn && hasAdminAccess);
+      admin.hidden = true;
       status.textContent = '';
+      if (signedIn && hasAdminAccess) {
+        try {
+          const central = await fetch('https://api.ches.dev/auth/ches-admin-access', {
+            credentials: 'include', cache: 'no-store', signal: AbortSignal.timeout(4000),
+          });
+          const state = central.ok ? await central.json() : {};
+          if (version === revision) admin.hidden = state.admin !== true;
+        } catch {
+          // The regular account links still work if the central check is unavailable.
+        }
+      }
     } catch {
       if(version===revision)offline();
     }
@@ -57,8 +69,12 @@
     }
   });
   addEventListener('pageshow', update);
+  addEventListener('focus', update);
   addEventListener('online', update);
   addEventListener('offline', offline);
-  document.addEventListener('visibilitychange', update);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { revision++; admin.hidden = true; }
+    else void update();
+  });
   setInterval(update, 60000);
 })();
