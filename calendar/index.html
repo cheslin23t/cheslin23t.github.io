@@ -11,9 +11,9 @@
     <script src="/static/appearance.js"></script>
     <link rel="stylesheet" href="/static/index.css" />
     <link rel="stylesheet" href="/static/account.css" />
-    <link rel="stylesheet" href="/calendar/calendar.css?v=calendar-views-20261106" />
-    <script src="/static/account.js?v=dashboard-library-20261106" defer></script>
-    <script src="/calendar/calendar.js?v=calendar-views-20261106" defer></script>
+    <link rel="stylesheet" href="/calendar/calendar.css?v=calendar-editor-20261106" />
+    <script src="/static/account.js?v=admin-link-20261106" defer></script>
+    <script src="/calendar/calendar.js?v=calendar-editor-20261106" defer></script>
   </head>
   <body class="calendar-page">
     <a class="skip-link" href="#main">Skip to calendar</a>
@@ -22,15 +22,12 @@
         >ches<span>.</span>dev</a
       >
       <nav aria-label="Main navigation">
-        <a href="/">Portfolio</a>
+        <a class="portfolio-link" href="/">Portfolio</a>
         <span class="site-account" aria-label="Account">
           <a
             data-account-login
             href="https://api.ches.dev/site-auth/login?returnTo=calendar"
             >Sign in</a
-          >
-          <a data-account-calendar href="https://ches.dev/calendar/" hidden
-            >Calendar</a
           >
           <a
             data-account-dashboard
@@ -146,112 +143,109 @@
     <dialog id="event-editor" aria-labelledby="editor-title">
       <form id="event-form" novalidate>
         <div class="calendar-dialog-heading">
-          <h2 id="editor-title">New event</h2>
-          <button
-            type="button"
-            id="close-editor"
-            disabled
-            aria-label="Close event editor"
-          >
-            Close
-          </button>
+          <div>
+            <p class="editor-kicker">Calendar event</p>
+            <h2 id="editor-title">New event</h2>
+          </div>
+          <button type="button" id="close-editor" disabled aria-label="Close event editor">Close</button>
         </div>
-        <p id="editor-error" class="calendar-error" role="alert"></p>
-        <p id="editor-note" class="calendar-note"></p>
-        <fieldset id="event-fields">
-          <label for="event-title"
-            >Title<input
-              id="event-title"
-              name="title"
-              maxlength="300"
-              autocomplete="off"
-              required
-              aria-describedby="editor-error"
-          /></label>
-          <label id="scope-label" for="edit-scope" hidden
-            >Apply changes to<select id="edit-scope">
-              <option value="occurrence">Only this occurrence</option>
-              <option value="series">Entire series</option>
-            </select></label
-          >
-          <label for="event-calendar"
-            >Calendar<select id="event-calendar"></select
-          ></label>
-          <label class="calendar-checkbox" for="event-all-day"
-            ><input type="checkbox" id="event-all-day" />All day</label
-          >
-          <div class="calendar-two">
-            <label for="event-start"
-              >Starts<input
-                id="event-start"
-                type="datetime-local"
-                required
-                aria-describedby="editor-error" /></label
-            ><label for="event-end"
-              >Ends<input
-                id="event-end"
-                type="datetime-local"
-                required
-                aria-describedby="editor-error"
-            /></label>
+        <div class="editor-body">
+          <fieldset id="event-fields" aria-label="Event details">
+            <label class="editor-title-field" for="event-title">Title
+              <input id="event-title" name="title" maxlength="300" autocomplete="off"
+                placeholder="Add a title" required aria-describedby="editor-error" />
+            </label>
+            <div class="editor-section">
+              <div class="editor-section-heading">
+                <h3>When</h3>
+                <label class="calendar-checkbox" for="event-all-day">
+                  <input type="checkbox" id="event-all-day" />All day
+                </label>
+              </div>
+              <div class="calendar-two">
+                <label for="event-start">Starts
+                  <input id="event-start" type="datetime-local" required aria-describedby="editor-error" />
+                </label>
+                <label for="event-end">Ends
+                  <input id="event-end" type="datetime-local" required aria-describedby="editor-error" />
+                </label>
+              </div>
+              <div class="calendar-two">
+                <label for="event-timezone">Time zone
+                  <input id="event-timezone" list="time-zones" required aria-describedby="editor-error" />
+                  <datalist id="time-zones"></datalist>
+                </label>
+                <label id="scope-label" for="edit-scope" hidden>Apply changes to
+                  <select id="edit-scope">
+                    <option value="occurrence">Only this occurrence</option>
+                    <option value="series">Entire series</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+            <div class="editor-section">
+              <h3>Calendar &amp; availability</h3>
+              <div class="calendar-two">
+                <label for="event-calendar">Calendar
+                  <select id="event-calendar"></select>
+                </label>
+                <label for="event-availability">Availability tag
+                  <select id="event-availability" aria-describedby="availability-help">
+                    <option value="">No tag</option>
+                    <option value="private">Private · Busy only</option>
+                    <option value="public">Public · Show title</option>
+                  </select>
+                </label>
+              </div>
+              <p id="availability-help" class="calendar-note">For calendars that use event tags, Private shows only Busy on the portfolio. Public can show the event title and when it ends. Calendar-wide rules take precedence.</p>
+            </div>
+            <div class="editor-section">
+              <h3>Repeats &amp; reminders</h3>
+              <div class="calendar-two">
+                <div id="repeat-fields">
+                  <label for="repeat-frequency">Repeats
+                    <select id="repeat-frequency">
+                      <option value="">Never</option>
+                      <option value="DAILY">Daily</option>
+                      <option value="WEEKLY">Weekly</option>
+                      <option value="MONTHLY">Monthly</option>
+                      <option value="YEARLY">Yearly</option>
+                      <option value="custom">Custom rule</option>
+                    </select>
+                  </label>
+                  <label id="custom-rule-label" for="event-recurrence" hidden>Recurrence rule
+                    <input id="event-recurrence" placeholder="FREQ=WEEKLY;BYDAY=MO,WE;COUNT=10"
+                      aria-describedby="recurrence-help" />
+                    <span id="recurrence-help" class="calendar-note">Use an iCalendar rule for custom days, intervals, or an end date.</span>
+                  </label>
+                </div>
+                <label for="event-reminders">Reminders, minutes before
+                  <input id="event-reminders" inputmode="numeric" placeholder="15, 60"
+                    aria-describedby="reminder-help" />
+                  <span id="reminder-help" class="calendar-note">Up to five, separated by commas. Your calendar apps deliver the alerts.</span>
+                </label>
+              </div>
+              <p id="editor-note" class="calendar-note"></p>
+            </div>
+            <div class="editor-section">
+              <h3>Location &amp; notes</h3>
+              <label for="event-location">Location
+                <input id="event-location" maxlength="2000" placeholder="Add a location" />
+              </label>
+              <label for="event-description">Notes
+                <textarea class="resize-none" id="event-description" rows="3" maxlength="20000"
+                  placeholder="Add any details you want to keep with the event"></textarea>
+              </label>
+            </div>
+          </fieldset>
+        </div>
+        <div class="editor-footer">
+          <p id="editor-error" class="calendar-error" role="alert"></p>
+          <div class="calendar-dialog-actions">
+            <button type="button" id="delete-event" disabled hidden>Delete event</button>
+            <button type="button" id="cancel-editor" disabled>Cancel</button>
+            <button type="submit" id="save-event" class="primary">Save event</button>
           </div>
-          <label for="event-timezone"
-            >Time zone<input
-              id="event-timezone"
-              list="time-zones"
-              required
-              aria-describedby="editor-error" /><datalist
-              id="time-zones"
-            ></datalist
-          ></label>
-          <div id="repeat-fields">
-            <label for="repeat-frequency"
-              >Repeats<select id="repeat-frequency">
-                <option value="">Never</option>
-                <option value="DAILY">Daily</option>
-                <option value="WEEKLY">Weekly</option>
-                <option value="MONTHLY">Monthly</option>
-                <option value="YEARLY">Yearly</option>
-                <option value="custom">Custom rule</option>
-              </select></label
-            ><label id="custom-rule-label" for="event-recurrence" hidden
-              >Recurrence rule<input
-                id="event-recurrence"
-                placeholder="FREQ=WEEKLY;BYDAY=MO,WE;COUNT=10"
-                aria-describedby="recurrence-help" /></label
-            ><span id="recurrence-help" class="calendar-note"
-              >Use a standard recurrence rule for custom days, intervals, or an
-              end date.</span
-            >
-          </div>
-          <label for="event-reminders"
-            >Reminders, minutes before<input
-              id="event-reminders"
-              inputmode="numeric"
-              placeholder="15, 60"
-              aria-describedby="reminder-help" /></label
-          ><span id="reminder-help" class="calendar-note"
-            >Separate up to five reminders with commas; leave blank for none.
-            Notifications are delivered by your connected calendar apps.</span
-          >
-          <label for="event-location"
-            >Location<input id="event-location" maxlength="2000" /></label
-          ><label for="event-description"
-            >Notes<textarea
-              class="resize-none"
-              id="event-description"
-              rows="5"
-              maxlength="20000"
-            ></textarea>
-          </label>
-        </fieldset>
-        <div class="calendar-dialog-actions">
-          <button type="button" id="delete-event" disabled hidden>
-            Delete event</button
-          ><button type="button" id="cancel-editor" disabled>Cancel</button
-          ><button type="submit" id="save-event" class="primary">
-            Save event
-          </button>
         </div>
       </form>
     </dialog>

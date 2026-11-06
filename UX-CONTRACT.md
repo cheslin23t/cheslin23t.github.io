@@ -11,7 +11,7 @@ The public portfolio and its existing project walkthroughs remain public. The pr
 
 ## Session and permissions
 
-Missing session redirects once to central login with fixed calendar returnTo. A signed-in account without calendar access sees permission guidance. Network/service failure shows an offline state, never a login loop or a claim that a write succeeded. Dashboard and Calendar links use separate server capabilities. Account failures leave public content usable.
+Missing session redirects once to central login with fixed calendar returnTo. A signed-in account without calendar access sees permission guidance. Network/service failure shows an offline state, never a login loop or a claim that a write succeeded. Dashboard, Admin, and Calendar links use separate server capabilities. Account failures leave public content usable.
 
 ## Events and editing
 
@@ -24,3 +24,7 @@ Never persist private events to localStorage, IndexedDB, caches or service worke
 ## Calendar views and overlays
 
 `calendar/calendar.js` owns the day/week/month renderer and range navigation. The existing native month input remains the date-entry owner; calendar-grid date buttons navigate rather than edit date fields. Week begins Monday. Day/week show all 24 local wall-clock hours in the API-provided IANA timezone, with all-day events above the timeline. On daylight-saving transition days, positioning follows wall-clock time; the editor's explicit date/time/timezone values remain authoritative. Timed overlaps use separate columns; calendar checkboxes hide/show already-fetched calendars without changing the write destination. New events default to a visible writable calendar and the selected date. Events from all authorized calendars are requested together, and a failure marks the entire refresh unsuccessful rather than implying missing calendars are empty. View/date/visibility are transient in-memory workspace state; private event data is never persisted. Writes retain the existing authenticated API contract. Calendar workspace changes do not modify the public availability API or its disclosure rules.
+
+## Event availability tags
+
+The editor reads the existing case-insensitive `(public)` and `(private)` tags from iCloud Notes, with Private winning when both occur. The Availability tag field owns these markers and the Notes control shows the remaining text. An explicit choice writes the corresponding marker through the existing authenticated event save. No tag removes the marker. The portfolio continues to use its existing disclosure rules, including any calendar-wide overrides.

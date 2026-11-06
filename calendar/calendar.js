@@ -216,6 +216,12 @@
   function filtered() {
     return events.filter((e) => visibleCalendars.has(e.calendarId));
   }
+  // Keep the editor and portfolio availability in sync through iCloud Notes.
+  function availabilityTag(description = "") {
+    if (/\(private\)/i.test(description)) return "private";
+    return /\(public\)/i.test(description) ? "public" : "";
+  }
+
   function eventButton(event, compact = false) {
     const b = button("", () => openEditor(event));
     b.className = "calendar-event" + (compact ? " compact" : "");
@@ -233,12 +239,24 @@
       : timeFormat.format(new Date(event.startsAt)) +
         " – " +
         timeFormat.format(new Date(event.endsAt));
-    b.append(title, meta);
+    const tag = availabilityTag(event.description);
+    const tagLabel = { private: "Private", public: "Public" }[tag];
+    const titleRow = document.createElement("div");
+    titleRow.className = "event-title-row";
+    titleRow.append(title);
+    if (tagLabel) {
+      const badge = document.createElement("small");
+      badge.className = "event-tag";
+      badge.textContent = tagLabel;
+      titleRow.append(badge);
+    }
+    b.append(titleRow, meta);
     b.title = [
       event.title,
       meta.textContent,
       calendars.find((c) => c.id === event.calendarId)?.name,
       event.location,
+      tagLabel,
       event.writable ? "" : "Read-only",
     ]
       .filter(Boolean)
@@ -284,7 +302,8 @@
       days = visibleDays(),
       shown = filtered();
     const oldScroller = target.querySelector(".time-scroll"),
-      scroll = oldScroller?.scrollTop;
+      scroll = oldScroller?.scrollTop,
+      scrollLeft = oldScroller?.scrollLeft ?? 0;
     target.replaceChildren();
     target.dataset.view = view;
     $("range-title").textContent =
@@ -388,7 +407,6 @@
         .forEach((e) => col.append(eventButton(e, true)));
       header.append(col);
     });
-    target.append(header);
     const scroller = document.createElement("div");
     scroller.className = "time-scroll";
     scroller.tabIndex = 0;
@@ -475,9 +493,10 @@
       }
       grid.append(col);
     });
-    scroller.append(grid);
+    scroller.append(header, grid);
     target.append(scroller);
     scroller.scrollTop = scroll ?? 7 * 64 - 12;
+    scroller.scrollLeft = scrollLeft;
   }
   function setNavigationLoading(value) {
     for (const b of document.querySelectorAll(
@@ -636,7 +655,12 @@
   }
   function fill(e) {
     $("event-title").value = e.title ?? "";
-    $("event-description").value = e.description ?? "";
+    const description = e.description ?? "";
+    $("event-availability").value = availabilityTag(description);
+    $("event-description").value = description.replace(
+      /(?:\r?\n\r?\n)?\((?:public|private)\)$|\((?:public|private)\)/gi,
+      "",
+    );
     $("event-location").value = e.location ?? "";
     $("event-all-day").checked = e.allDay === true;
     $("event-start").type = e.allDay ? "date" : "datetime-local";
@@ -703,6 +727,7 @@
     $("delete-event").hidden = !event?.writable;
     $("delete-event").disabled = !online;
     editor.showModal();
+    editor.querySelector(".editor-body").scrollTop = 0;
     $("event-title").focus();
   }
   function confirmAction(title, description, label, action) {
@@ -741,9 +766,20 @@
       $("event-start").focus();
       throw new Error("Choose start and end dates.");
     }
+    const notes = $("event-description").value;
+    if (availabilityTag(notes)) {
+      $("event-description").focus();
+      throw new Error("Remove the marker from Notes and choose Public or Private under Availability tag.");
+    }
+    const tag = $("event-availability").value;
+    const description = tag ? [notes, "(" + tag + ")"].filter(Boolean).join("\n\n") : notes;
+    if (description.length > 20000) {
+      $("event-description").focus();
+      throw new Error("Shorten the notes so they fit with the availability tag.");
+    }
     return {
       title,
-      description: $("event-description").value,
+      description,
       location: $("event-location").value,
       allDay,
       start,

@@ -1,22 +1,23 @@
 (() => {
   const endpoint = 'https://api.ches.dev/site-auth';
   const adminDashboard = 'https://api.ches.dev/auth/if/admin/#/administration/overview';
-  const dashboardDestinations = new Map([
-    ['https://api.ches.dev/auth/if/admin/', adminDashboard],
-    [adminDashboard, adminDashboard],
-    ['https://api.ches.dev/auth/if/user/#/library', 'https://api.ches.dev/auth/if/user/#/library'],
-  ]);
+  const libraryDashboard = 'https://api.ches.dev/auth/if/user/#/library';
   const account = document.querySelector('.site-account');
   if (!account) return;
   const login = account.querySelector('[data-account-login]');
   const calendar = account.querySelector('[data-account-calendar]');
   const dashboard = account.querySelector('[data-account-dashboard]');
+  const admin = document.createElement('a');
+  admin.href = adminDashboard;
+  admin.textContent = 'Admin';
+  admin.hidden = true;
+  dashboard.after(admin);
   const logout = account.querySelector('[data-account-logout]');
   const status = account.querySelector('[data-account-status]');
   let busy = false;
   let available = null;
   let revision = 0;
-  function offline(){revision++;available=false;dashboard.hidden=true;if(calendar)calendar.hidden=true;logout.disabled=true;login.setAttribute('aria-disabled','true');status.textContent='Account offline';}
+  function offline(){revision++;available=false;dashboard.hidden=true;admin.hidden=true;if(calendar)calendar.hidden=true;logout.disabled=true;login.setAttribute('aria-disabled','true');status.textContent='Account offline';}
   login.addEventListener('click',event=>{if(available===false){event.preventDefault();status.textContent='Sign in is unavailable while the server is offline.';}});
   async function update() {
     if (busy || document.hidden) return;
@@ -30,9 +31,11 @@
       login.hidden = state.authenticated === true;
       logout.hidden = state.authenticated !== true;
       logout.disabled = false;
-      const destination = dashboardDestinations.get(state.dashboardUrl);
-      if (destination) dashboard.href = destination;
-      dashboard.hidden = !(state.authenticated === true && destination);
+      const signedIn = state.authenticated === true;
+      const hasAdminAccess = state.dashboardAdminUrl === adminDashboard;
+      dashboard.href = libraryDashboard;
+      dashboard.hidden = !(signedIn && state.dashboardUrl === libraryDashboard);
+      admin.hidden = !(signedIn && hasAdminAccess);
       status.textContent = '';
     } catch {
       if(version===revision)offline();
