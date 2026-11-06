@@ -1,5 +1,11 @@
 (() => {
   const endpoint = 'https://api.ches.dev/site-auth';
+  const adminDashboard = 'https://api.ches.dev/auth/if/admin/#/administration/overview';
+  const dashboardDestinations = new Map([
+    ['https://api.ches.dev/auth/if/admin/', adminDashboard],
+    [adminDashboard, adminDashboard],
+    ['https://api.ches.dev/auth/if/user/#/library', 'https://api.ches.dev/auth/if/user/#/library'],
+  ]);
   const account = document.querySelector('.site-account');
   if (!account) return;
   const login = account.querySelector('[data-account-login]');
@@ -24,7 +30,9 @@
       login.hidden = state.authenticated === true;
       logout.hidden = state.authenticated !== true;
       logout.disabled = false;
-      dashboard.hidden = !(state.authenticated === true && state.dashboardUrl === 'https://api.ches.dev/auth/if/admin/');
+      const destination = dashboardDestinations.get(state.dashboardUrl);
+      if (destination) dashboard.href = destination;
+      dashboard.hidden = !(state.authenticated === true && destination);
       status.textContent = '';
     } catch {
       if(version===revision)offline();
