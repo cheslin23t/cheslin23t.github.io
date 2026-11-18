@@ -46,6 +46,7 @@
   --stage: var(--surface);
   --status-online: #167047;
   --status-warning: #85520a;
+  --status-disabled: #a82332;
   --thumb: var(--muted);
   --thumb-hover: var(--accent);
   --sans: Manrope, system-ui, sans-serif;
@@ -73,6 +74,7 @@
     --glass-shadow: #00000026;
     --status-online: #7bd5aa;
     --status-warning: #efbd70;
+    --status-disabled: #ff8896;
   }
 }
 body {

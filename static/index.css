@@ -1,4 +1,4 @@
-@import url("/static/theme.css");
+@import url("/static/theme.css?v=disabled-red");
 :root {
   scroll-padding-top: 120px;
 }
@@ -818,6 +818,9 @@ a.service-name {
 }
 .service-state[data-tone="transition"] {
   color: var(--status-warning);
+}
+.service-state[data-tone="disabled"] {
+  color: var(--status-disabled);
 }
 .service-row time {
   grid-column: 1 / -1;

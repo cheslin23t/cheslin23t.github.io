@@ -147,13 +147,15 @@
           state.textContent = stale
             ? `Last known: ${label.toLowerCase()}`
             : label;
-          state.dataset.tone = stale
-            ? "neutral"
-            : online
-              ? "online"
-              : ["starting", "stopping", "restarting"].includes(service.state)
-                ? "transition"
-                : "neutral";
+          state.dataset.tone = service.state === "disabled"
+            ? "disabled"
+            : stale
+              ? "neutral"
+              : online
+                ? "online"
+                : ["starting", "stopping", "restarting"].includes(service.state)
+                  ? "transition"
+                  : "neutral";
           const date = new Date(service.checkedAt);
           if (Number.isFinite(date.getTime())) {
             time.dateTime = date.toISOString();
