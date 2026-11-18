@@ -5,8 +5,44 @@
   const account = document.querySelector('.site-account');
   if (!account) return;
   const login = account.querySelector('[data-account-login]');
-  const calendar = account.querySelector('[data-account-calendar]');
   const dashboard = account.querySelector('[data-account-dashboard]');
+  const tools = document.createElement('details');
+  tools.className = 'account-tools';
+  tools.hidden = true;
+  const toggle = document.createElement('summary');
+  toggle.textContent = 'Tools';
+  const toolLinks = document.createElement('div');
+  const destinations = [
+    { claim: 'calendarUrl', label: 'Calendar', url: 'https://ches.dev/calendar/' },
+    { claim: 'serviceStatusUrl', label: 'Service status', url: 'https://ches.dev/service-status/' },
+  ].map(tool => {
+    const link = document.createElement('a');
+    link.href = tool.url;
+    link.textContent = tool.label;
+    link.hidden = true;
+    if (location.pathname === new URL(link.href).pathname) link.setAttribute('aria-current', 'page');
+    toolLinks.append(link);
+    return { ...tool, link };
+  });
+  tools.append(toggle, toolLinks);
+  dashboard.before(tools);
+  document.addEventListener('click', event => {
+    if (!tools.contains(event.target)) tools.open = false;
+  });
+  tools.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && tools.open) {
+      tools.open = false;
+      toggle.focus();
+    }
+  });
+  function updateTools(state) {
+    for (const { claim, url, link } of destinations) {
+      link.hidden = state?.authenticated !== true || state[claim] !== url;
+    }
+    tools.hidden = destinations.every(({ link }) => link.hidden);
+    if (tools.hidden) tools.open = false;
+  }
+
   const admin = document.createElement('a');
   admin.href = adminDashboard;
   admin.textContent = 'Admin';
@@ -17,7 +53,7 @@
   let busy = false;
   let available = null;
   let revision = 0;
-  function offline(){revision++;available=false;dashboard.hidden=true;admin.hidden=true;if(calendar)calendar.hidden=true;logout.disabled=true;login.setAttribute('aria-disabled','true');status.textContent='Account offline';}
+  function offline(){revision++;available=false;dashboard.hidden=true;admin.hidden=true;updateTools(null);logout.disabled=true;login.setAttribute('aria-disabled','true');status.textContent='Account offline';}
   login.addEventListener('click',event=>{if(available===false){event.preventDefault();status.textContent='Sign in is unavailable while the server is offline.';}});
   async function update() {
     if (busy || document.hidden) return;
@@ -28,7 +64,7 @@
       if (!response.ok) throw new Error('Account unavailable');
       const state = await response.json();
       if(version!==revision)return;available=true;login.removeAttribute('aria-disabled');
-      if(calendar)calendar.hidden=!(state.authenticated===true&&state.calendarUrl==='https://ches.dev/calendar/');
+      updateTools(state);
       login.hidden = state.authenticated === true;
       logout.hidden = state.authenticated !== true;
       logout.disabled = false;
@@ -55,7 +91,7 @@
   }
   logout.addEventListener('click', async () => {
     if (busy) return;
-    revision++;busy = true; logout.disabled = true; status.textContent = 'Signing out…';
+    revision++;busy = true; updateTools(null); logout.disabled = true; status.textContent = 'Signing out…';
     try {
       const response = await fetch(`${endpoint}/logout`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: '{}', signal: AbortSignal.timeout(8000) });
       if (!response.ok) throw new Error('Sign-out failed');
@@ -73,7 +109,7 @@
   addEventListener('online', update);
   addEventListener('offline', offline);
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { revision++; admin.hidden = true; }
+    if (document.hidden) { revision++; admin.hidden = true; tools.open = false; }
     else void update();
   });
   setInterval(update, 60000);

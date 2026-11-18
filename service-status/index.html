@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Service status — ches.dev</title>
+    <link rel="icon" href="/static/assets/favicon.svg" />
+    <script src="/static/appearance.js"></script>
+    <link rel="stylesheet" href="/static/index.css" />
+    <link rel="stylesheet" href="/static/account.css?v=tools" />
+    <link rel="stylesheet" href="/service-status/service-status.css" />
+    <script src="/static/account.js?v=tools" defer></script>
+    <script src="/service-status/service-status.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to service status</a>
+    <header class="site-header" data-account-enabled>
+      <a class="wordmark" href="/" aria-label="ches.dev, home">ches<span>.</span>dev</a>
+      <nav aria-label="Main navigation">
+        <a href="/">Portfolio</a>
+        <div class="site-account" aria-label="Account">
+          <a data-account-login href="https://api.ches.dev/site-auth/login?returnTo=service-status">Sign in</a>
+          <a data-account-dashboard href="https://api.ches.dev/auth/if/user/#/library" hidden>Dashboard</a>
+          <button data-account-logout type="button" disabled hidden>Sign out</button>
+          <span data-account-status role="status" class="account-status"></span>
+        </div>
+      </nav>
+    </header>
+    <main id="main" class="service-controls">
+      <h1>Service status</h1>
+      <p>Mark a service Disabled on the <a href="/#services">public status list</a>. Monitoring continues and the service keeps running if it’s already on.</p>
+      <noscript><p>Enable JavaScript to manage service status.</p></noscript>
+      <div class="service-feedback">
+        <p id="service-feedback" role="status"></p>
+        <button type="button" id="service-refresh" hidden>Refresh</button>
+      </div>
+      <div id="service-controls-list" aria-label="Monitored services" role="region"></div>
+    </main>
+  </body>
+</html>

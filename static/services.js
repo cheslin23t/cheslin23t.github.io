@@ -8,6 +8,7 @@
   const states = new Map([
     ["running", "Running"],
     ["offline", "Offline"],
+    ["disabled", "Disabled"],
     ["starting", "Starting"],
     ["stopping", "Stopping"],
     ["restarting", "Restarting"],

@@ -10,9 +10,9 @@
     <link rel="icon" href="/static/assets/favicon.svg" />
     <script src="/static/appearance.js"></script>
     <link rel="stylesheet" href="/static/index.css" />
-    <link rel="stylesheet" href="/static/account.css" />
+    <link rel="stylesheet" href="/static/account.css?v=tools" />
     <link rel="stylesheet" href="/calendar/calendar.css?v=calendar-editor-20261106" />
-    <script src="/static/account.js?v=central-session-20261106" defer></script>
+    <script src="/static/account.js?v=tools" defer></script>
     <script src="/calendar/calendar.js?v=calendar-editor-20261106" defer></script>
   </head>
   <body class="calendar-page">
@@ -23,7 +23,7 @@
       >
       <nav aria-label="Main navigation">
         <a class="portfolio-link" href="/">Portfolio</a>
-        <span class="site-account" aria-label="Account">
+        <div class="site-account" aria-label="Account">
           <a
             data-account-login
             href="https://api.ches.dev/site-auth/login?returnTo=calendar"
@@ -39,7 +39,7 @@
             Sign out
           </button>
           <span data-account-status role="status" class="account-status"></span>
-        </span>
+        </div>
       </nav>
     </header>
     <main id="main" class="calendar-main">
