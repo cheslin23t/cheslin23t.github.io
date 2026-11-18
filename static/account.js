@@ -15,6 +15,7 @@
   const destinations = [
     { claim: 'calendarUrl', label: 'Calendar', url: 'https://ches.dev/calendar/' },
     { claim: 'serviceStatusUrl', label: 'Service status', url: 'https://ches.dev/service-status/' },
+    { claim: 'bookingUrl', label: 'Ches Booking', url: 'https://api.ches.dev/book/' },
   ].map(tool => {
     const link = document.createElement('a');
     link.href = tool.url;
