@@ -667,6 +667,8 @@
     $("event-end").type = e.allDay ? "date" : "datetime-local";
     $("event-start").value = e.start ?? "";
     $("event-end").value = e.allDay ? nextDay(e.end, -1) : (e.end ?? "");
+    delete $("event-start").dataset.time;
+    delete $("event-end").dataset.time;
     $("event-timezone").value = e.timeZone ?? timeZone;
     $("event-reminders").value = (e.reminders ?? []).join(", ");
     const simple = /^FREQ=(DAILY|WEEKLY|MONTHLY|YEARLY)$/.exec(
@@ -766,6 +768,10 @@
       $("event-start").focus();
       throw new Error("Choose start and end dates.");
     }
+    if (allDay ? end < start : end <= start) {
+      $("event-end").focus();
+      throw new Error(allDay ? "Choose a last day on or after the start date." : "Choose an end after the start.");
+    }
     const notes = $("event-description").value;
     if (availabilityTag(notes)) {
       $("event-description").focus();
@@ -817,13 +823,31 @@
       );
     } else apply();
   });
+  function syncEventEnd() {
+    const start = $("event-start").value;
+    const end = $("event-end");
+    if (!start) return;
+    const day = start.slice(0, 10);
+    let value = end.value;
+    if (day > value.slice(0, 10)) value = day + value.slice(10);
+    if (!$("event-all-day").checked && value <= start) {
+      value = new Date(Date.parse(start + "Z") + 60 * 60_000).toISOString().slice(0, 16);
+    }
+    if (value !== end.value) end.value = value;
+  }
+  $("event-start").addEventListener("input", syncEventEnd);
   $("event-all-day").addEventListener("change", () => {
     const allDay = $("event-all-day").checked;
     for (const id of ["event-start", "event-end"]) {
-      const value = $(id).value;
-      $(id).type = allDay ? "date" : "datetime-local";
-      $(id).value = allDay ? value.slice(0, 10) : value + "T09:00";
+      const input = $(id);
+      const value = input.value;
+      if (allDay) input.dataset.time = value.slice(11);
+      input.type = allDay ? "date" : "datetime-local";
+      input.value = value
+        ? allDay ? value.slice(0, 10) : value + "T" + (input.dataset.time || "09:00")
+        : "";
     }
+    syncEventEnd();
   });
   $("repeat-frequency").addEventListener("change", repeatChanged);
   form.addEventListener("submit", async (e) => {
