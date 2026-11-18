@@ -581,6 +581,9 @@
     if (loading || busy) return;
     try {
       const state = await request("/site-auth/session");
+      window.dispatchEvent(new CustomEvent("ches-calendar-authorized", {
+        detail: state.authenticated && state.calendarUrl === "https://ches.dev/calendar/",
+      }));
       if (!state.authenticated) {
         online = false;
         events = [];
