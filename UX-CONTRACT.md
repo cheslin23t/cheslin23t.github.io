@@ -28,3 +28,7 @@ Never persist private events to localStorage, IndexedDB, caches or service worke
 ## Event availability tags
 
 The editor reads the existing case-insensitive `(public)` and `(private)` tags from iCloud Notes, with Private winning when both occur. The Availability tag field owns these markers and the Notes control shows the remaining text. An explicit choice writes the corresponding marker through the existing authenticated event save. No tag removes the marker. The portfolio continues to use its existing disclosure rules, including any calendar-wide overrides.
+
+## Service status controls
+
+The shared account header groups Calendar and Service status under Tools. Each link requires its own session capability. The Service status workspace reads and updates the monitored inventory through the portfolio session API. Every change requires the Authentik `services:manage` permission. The backend stores the override by service ID. Disabled takes precedence over live health for the public status label, and Use live checks removes the override. A failed save requires an explicit refresh before another edit, so a lost response cannot be mistaken for a failed change.
