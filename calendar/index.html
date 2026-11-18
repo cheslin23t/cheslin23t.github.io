@@ -12,10 +12,8 @@
     <link rel="stylesheet" href="/static/index.css" />
     <link rel="stylesheet" href="/static/account.css?v=tools" />
     <link rel="stylesheet" href="/calendar/calendar.css?v=calendar-editor-20261106" />
-    <link rel="stylesheet" href="/calendar/reminders.css?v=20261118" />
     <script src="/static/account.js?v=booking-tools" defer></script>
-    <script src="/calendar/reminders.js?v=reminders" defer></script>
-    <script src="/calendar/calendar.js?v=reminders" defer></script>
+    <script src="/calendar/calendar.js?v=aligned-dates" defer></script>
   </head>
   <body class="calendar-page">
     <a class="skip-link" href="#main">Skip to calendar</a>
@@ -61,20 +59,13 @@
           <p class="eyebrow">iCloud calendars</p>
           <h1>Calendar</h1>
         </div>
-        <div class="calendar-create-actions">
-          <button id="show-reminders" type="button" disabled hidden>Reminders</button>
-          <button id="new-reminder" type="button" disabled hidden>
-            <span aria-hidden="true">＋</span> New reminder
-          </button>
-          <button id="new-event" class="primary" type="button" disabled>
-            <span aria-hidden="true">＋</span> New event
-          </button>
-        </div>
+        <button id="new-event" class="primary" disabled>
+          <span aria-hidden="true">＋</span> New event
+        </button>
       </div>
       <p id="calendar-status" role="status" aria-live="polite">
         Checking your session…
       </p>
-      <p id="reminder-status" class="calendar-note" role="status"></p>
       <section id="access-message" class="calendar-message" hidden>
         <h2 id="access-title"></h2>
         <p id="access-description"></p>
@@ -257,96 +248,6 @@
           </div>
         </div>
       </form>
-    </dialog>
-    <dialog id="reminder-editor" aria-labelledby="reminder-editor-title">
-      <form id="reminder-form" novalidate>
-        <div class="calendar-dialog-heading">
-          <h2 id="reminder-editor-title">New reminder</h2>
-        </div>
-        <div class="editor-body">
-          <fieldset id="reminder-fields" aria-label="Reminder details">
-            <label class="editor-title-field" for="reminder-title">Title
-              <input id="reminder-title" name="title" maxlength="300" autocomplete="off"
-                placeholder="Add a title" required autofocus aria-describedby="reminder-error" />
-            </label>
-            <label id="reminder-list-field" for="reminder-list" hidden>List
-              <select id="reminder-list" name="list" aria-describedby="reminder-error"></select>
-            </label>
-            <div class="calendar-two">
-              <label for="reminder-date">Date (optional)
-                <input id="reminder-date" name="date" type="date" aria-describedby="reminder-error" />
-              </label>
-              <label for="reminder-time">Time (optional)
-                <input id="reminder-time" name="time" type="time" aria-describedby="reminder-error" />
-              </label>
-            </div>
-            <label for="reminder-zone">Time zone
-              <input id="reminder-zone" name="zone" list="time-zones" autocomplete="off"
-                aria-describedby="reminder-error" />
-            </label>
-            <div class="calendar-two">
-              <label for="reminder-priority">Priority
-                <select id="reminder-priority" name="priority">
-                  <option value="0">None</option>
-                  <option value="9">Low</option>
-                  <option value="5">Medium</option>
-                  <option value="1">High</option>
-                </select>
-              </label>
-              <label for="reminder-repeat">Repeat
-                <select id="reminder-repeat" name="repeat">
-                  <option value="">Never</option>
-                  <option value="DAILY">Daily</option>
-                  <option value="WEEKLY">Weekly</option>
-                  <option value="MONTHLY">Monthly</option>
-                  <option value="YEARLY">Yearly</option>
-                </select>
-              </label>
-            </div>
-            <label class="calendar-checkbox" for="reminder-alert">
-              <input type="checkbox" id="reminder-alert" name="alert" />Alert at due time
-            </label>
-            <label for="reminder-notes">Notes (optional)
-              <textarea class="resize-none" id="reminder-notes" name="notes" rows="3" maxlength="20000"></textarea>
-            </label>
-          </fieldset>
-        </div>
-        <div class="editor-footer">
-          <p id="reminder-error" class="calendar-error" role="alert"></p>
-          <p id="reminder-editor-status" class="calendar-note" role="status"></p>
-          <div class="calendar-dialog-actions">
-            <button type="button" id="close-reminder" disabled>Cancel</button>
-            <button type="submit" id="save-reminder" class="primary" disabled>Add reminder</button>
-          </div>
-        </div>
-      </form>
-    </dialog>
-    <dialog id="reminder-browser" aria-labelledby="reminder-browser-title">
-      <div class="reminder-browser-layout">
-        <div class="calendar-dialog-heading">
-          <h2 id="reminder-browser-title">Reminders</h2>
-          <button id="close-reminders-browser" type="button" disabled>Close</button>
-        </div>
-        <div class="editor-body">
-          <div class="reminders-filter-row">
-            <label for="reminders-filter">List
-              <select id="reminders-filter" disabled></select>
-            </label>
-            <button id="refresh-reminders" type="button" disabled>Refresh</button>
-            <button id="new-reminder-from-list" type="button" class="primary" disabled>Add reminder</button>
-          </div>
-          <p id="reminders-browser-status" class="calendar-note" role="status"></p>
-          <ul id="reminders-items" role="list" aria-label="Reminders in this list"></ul>
-        </div>
-      </div>
-    </dialog>
-    <dialog id="reminder-delete-confirm" aria-labelledby="reminder-delete-title" aria-describedby="reminder-delete-description">
-      <h2 id="reminder-delete-title">Delete reminder?</h2>
-      <p id="reminder-delete-description">This removes the reminder from its list.</p>
-      <div class="calendar-dialog-actions">
-        <button id="reminder-delete-cancel" type="button" disabled autofocus>Cancel</button>
-        <button id="reminder-delete-accept" type="button" class="primary" disabled>Delete reminder</button>
-      </div>
     </dialog>
     <dialog id="confirm-action" aria-labelledby="confirm-title">
       <h2 id="confirm-title"></h2>

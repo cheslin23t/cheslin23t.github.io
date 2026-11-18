@@ -105,6 +105,3 @@ The event editor keeps its heading and actions visible around one scrollable for
 ## Service status controls
 
 The Tools disclosure uses the shared account header and 44px targets. Service status follows the portfolio’s theme and typography, with one row per monitored service grouped by category. Each row pairs a text label with the action that changes its public reporting mode. The workspace’s Disabled label uses the existing warning token.
-
-
-The private Calendar page uses its existing native dialog and field styles for creating reminders. A separate Reminders dialog presents the list selector and edit, completion, and deletion actions. The editor keeps its footer accessible as the body scrolls on small screens.

@@ -32,8 +32,3 @@ The editor reads the existing case-insensitive `(public)` and `(private)` tags f
 ## Service status controls
 
 The shared account header groups Calendar, Service status, and Ches Booking under Tools. Ches Booking launches its Authentik app on api.ches.dev. Each link requires its own session capability. The Service status workspace reads and updates the monitored inventory through the portfolio session API. Every change requires the Authentik `services:manage` permission. The backend stores the override by service ID. Disabled takes precedence over live health for the public status label, and Use live checks removes the override. A failed save requires an explicit refresh before another edit, so a lost response cannot be mistaken for a failed change.
-
-
-## Private reminders
-
-The Calendar page exposes reminder actions after Calendar authorization. The same private API accesses the task lists advertised by the existing iCloud CalDAV connection. New reminders can be undated, date-only, or timed. The editor supports notes, priority, repeat, and a regular alert for timed reminders. Creates use idempotency keys. Edits, completion, and deletion require a current revision. Event and reminder data have separate collection scopes.
