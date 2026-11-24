@@ -4,7 +4,7 @@
   const page = document.body.dataset.chesKeyboard;
   if (!page || typeof HTMLDialogElement.prototype.showModal !== 'function') return;
 
-  const isMac = /Mac|iPhone|iPad/.test(navigator.userAgentData?.platform || navigator.platform);
+  const isMac = /mac|iphone|ipad/i.test(navigator.userAgentData?.platform || navigator.platform);
   const openKeys = isMac ? '⌘ K' : 'Ctrl K';
   const shortcutPrefix = isMac ? '⌥ ⇧' : 'Alt Shift';
   const home = 'https://ches.dev/';
@@ -241,12 +241,21 @@
 
   function choose(entry) {
     if (!entry) return;
-    dialog.close('select');
+    dialog.close();
     run(entry);
   }
 
+  function dismiss() {
+    dialog.close();
+    if (shown(focusBefore)) focusBefore.focus();
+  }
+
   trigger.addEventListener('click', open);
-  close.addEventListener('click', () => dialog.close());
+  close.addEventListener('click', dismiss);
+  dialog.addEventListener('cancel', event => {
+    event.preventDefault();
+    dismiss();
+  });
   list.addEventListener('click', event => {
     const row = event.target.closest('[role="option"]');
     if (row) choose(visibleResults[Number(row.id.slice('ches-keys-option-'.length))]);
@@ -259,7 +268,7 @@
     if (event.isComposing || event.defaultPrevented) return;
     if (event.key === 'Escape') {
       event.preventDefault();
-      dialog.close();
+      dismiss();
     } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
       if (visibleResults.length) {
@@ -270,10 +279,6 @@
       event.preventDefault();
       choose(visibleResults[active]);
     }
-  });
-  dialog.addEventListener('close', () => {
-    if (dialog.returnValue !== 'select' && shown(focusBefore)) focusBefore.focus();
-    dialog.returnValue = '';
   });
 
   const letterCodes = {ArrowLeft: 'ArrowLeft', ArrowRight: 'ArrowRight'};
