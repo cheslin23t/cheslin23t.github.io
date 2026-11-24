@@ -247,8 +247,25 @@
 
   function dismiss() {
     dialog.close();
-    if (shown(focusBefore)) focusBefore.focus();
+    if (shown(focusBefore)) focusBefore.focus({preventScroll: true});
   }
+
+  function isBackdrop(event) {
+    if (event.target !== dialog) return false;
+    const {left, top, right, bottom} = dialog.getBoundingClientRect();
+    return event.clientX < left || event.clientX > right ||
+      event.clientY < top || event.clientY > bottom;
+  }
+
+  let pressedBackdrop = false;
+  dialog.addEventListener('pointerdown', event => {
+    pressedBackdrop = event.isPrimary && event.button === 0 && isBackdrop(event);
+  });
+  dialog.addEventListener('click', event => {
+    const dismissBackdrop = pressedBackdrop && isBackdrop(event);
+    pressedBackdrop = false;
+    if (dismissBackdrop) dismiss();
+  });
 
   trigger.addEventListener('click', open);
   close.addEventListener('click', dismiss);

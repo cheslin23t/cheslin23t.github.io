@@ -173,6 +173,31 @@
 
 .ches-keys-hint { margin-inline-start: .4rem; }
 
+@media (max-width: 1000px) {
+  body[data-ches-keyboard="portfolio"] .site-header:has(> .ches-keys-trigger) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "brand search" "navigation navigation";
+    gap: 4px 12px;
+    padding-block: 8px;
+  }
+
+  body[data-ches-keyboard="portfolio"] .site-header > .wordmark { grid-area: brand; }
+  body[data-ches-keyboard="portfolio"] .site-header > .ches-keys-trigger { grid-area: search; }
+  body[data-ches-keyboard="portfolio"] .site-header > nav { grid-area: navigation; }
+}
+
+@media (max-width: 600px) {
+  body[data-ches-keyboard="portfolio"] .site-header:has(> .ches-keys-trigger) > nav {
+    justify-content: space-between;
+    gap: 0 8px;
+  }
+
+  body[data-ches-keyboard="portfolio"] .site-header:has(> .ches-keys-trigger) .site-account {
+    gap: 6px;
+  }
+}
+
 @media (max-width: 36rem) {
   .ches-keys-dialog { margin-top: max(1rem, env(safe-area-inset-top)); }
   .ches-keys-trigger { min-height: 2.75rem; }
