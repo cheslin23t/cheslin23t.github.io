@@ -9,8 +9,7 @@
   const shortcutPrefix = isMac ? '⌥ ⇧' : 'Alt Shift';
   const home = 'https://ches.dev/';
   const destinations = [
-    ['Portfolio', home], ['Calendar', home + 'calendar/'],
-    ['Service status', home + 'service-status/'], ['CPU walkthrough', home + 'cpu/'],
+    ['Portfolio', home], ['CPU walkthrough', home + 'cpu/'],
     ['Printed storefront', home + '3D-Printing-Order-Management/index.html'],
     ['Troop 55 RSVP demo', home + 'BSA2/'],
   ];
@@ -100,22 +99,7 @@
     const actions = pageActions();
     const seen = new Set();
     const result = [...actions];
-    const library = 'https://api.ches.dev/auth/if/user/#/library';
-    if (['drop', 'convert', 'links', 'bookings', 'cockpit'].includes(page) ||
-        shown(document.querySelector('[data-account-dashboard]'))) {
-      for (const [label, href] of [
-        ['App library', library],
-        ['Ches Booking', 'https://api.ches.dev/book/'],
-        ['Ches Links', 'https://api.ches.dev/go/'],
-        ['Ches Convert', 'https://convert.ches.dev/'],
-        ['Ches Drop', 'https://images.ches.dev/admin'],
-        ['Ches Dashboard (server console)', 'https://dash.ches.dev/'],
-      ]) {
-        seen.add(href);
-        result.push({label, href, group: 'Ches apps'});
-      }
-    }
-    for (const link of document.querySelectorAll('header nav a[href], [data-ches-command-link][href], header [data-account-login], header [data-account-dashboard], .account-tools a[href], #services-list a[href]')) {
+    for (const link of document.querySelectorAll('header nav a[href], [data-ches-command-link][href], header [data-account-login], header [data-account-dashboard], .account-tools a[href]')) {
       const accountLink = link.closest('.account-tools');
       if (!shown(link) && !(accountLink && !link.hidden && !accountLink.hidden)) continue;
       if (link.matches('[aria-disabled="true"]')) continue;
@@ -123,7 +107,7 @@
       const label = link.textContent.trim().replace(/\s+/g, ' ');
       if (!label || !/^(https?:|mailto:)/.test(href) || seen.has(href)) continue;
       seen.add(href);
-      result.push({label, target: link, href, group: 'Navigation'});
+      result.push({label, target: link, href, group: accountLink ? 'Your tools' : 'Navigation'});
     }
     for (const [label, href] of destinations) {
       if (seen.has(href)) continue;
@@ -224,6 +208,8 @@
   }
 
   function run(entry) {
+    if (entry.group === 'Your tools' &&
+        (entry.target.hidden || entry.target.closest('.account-tools').hidden)) return;
     if (entry.operation === 'focus') {
       if (!shown(entry.target)) return;
       entry.target.scrollIntoView({block: 'center'});
@@ -281,6 +267,12 @@
     if (!event.isComposing) render();
   });
   input.addEventListener('compositionend', render);
+  document.addEventListener('ches:tools-updated', () => {
+    if (dialog.open) {
+      workingEntries = entries();
+      render();
+    }
+  });
   input.addEventListener('keydown', event => {
     if (event.isComposing || event.defaultPrevented) return;
     if (event.key === 'Escape') {

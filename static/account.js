@@ -13,9 +13,13 @@
   toggle.textContent = 'Tools';
   const toolLinks = document.createElement('div');
   const destinations = [
-    { claim: 'calendarUrl', label: 'Calendar', url: 'https://ches.dev/calendar/' },
-    { claim: 'serviceStatusUrl', label: 'Service status', url: 'https://ches.dev/service-status/' },
-    { claim: 'bookingUrl', label: 'Ches Booking', url: 'https://api.ches.dev/book/' },
+    { label: 'Calendar', url: 'https://ches.dev/calendar/' },
+    { label: 'Service status', url: 'https://ches.dev/service-status/' },
+    { label: 'Ches Booking', url: 'https://api.ches.dev/book/' },
+    { label: 'Ches Links', url: 'https://api.ches.dev/go/' },
+    { label: 'Ches Convert', url: 'https://convert.ches.dev/' },
+    { label: 'Ches Drop', url: 'https://images.ches.dev/admin' },
+    { label: 'Server console', url: 'https://dash.ches.dev/' },
   ].map(tool => {
     const link = document.createElement('a');
     link.href = tool.url;
@@ -25,6 +29,10 @@
     toolLinks.append(link);
     return { ...tool, link };
   });
+  const emptyTools = document.createElement('p');
+  emptyTools.textContent = 'No tools are available for this account.';
+  emptyTools.hidden = true;
+  toolLinks.append(emptyTools);
   tools.append(toggle, toolLinks);
   dashboard.before(tools);
   document.addEventListener('click', event => {
@@ -37,11 +45,15 @@
     }
   });
   function updateTools(state) {
-    for (const { claim, url, link } of destinations) {
-      link.hidden = state?.authenticated !== true || state[claim] !== url;
+    const signedIn = state?.authenticated === true;
+    const allowed = new Set(signedIn && Array.isArray(state.toolUrls) ? state.toolUrls : []);
+    for (const { url, link } of destinations) {
+      link.hidden = !allowed.has(url);
     }
-    tools.hidden = destinations.every(({ link }) => link.hidden);
-    if (tools.hidden) tools.open = false;
+    emptyTools.hidden = !signedIn || destinations.some(({ link }) => !link.hidden);
+    tools.hidden = !signedIn;
+    if (!signedIn) tools.open = false;
+    document.dispatchEvent(new Event('ches:tools-updated'));
   }
 
   const admin = document.createElement('a');

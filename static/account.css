@@ -61,3 +61,10 @@ nav .account-tools a[aria-current="page"] { color: var(--accent); }
 @media (max-width: 600px) {
   header.site-header[data-account-enabled] .site-account { grid-column: 1 / -1; }
 }
+
+.account-tools > div p {
+  max-width: min(15rem, 65vw);
+  margin: 0;
+  padding: 9px 12px;
+  color: var(--muted);
+}
