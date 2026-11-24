@@ -160,6 +160,7 @@
     publicTrigger.setAttribute('aria-haspopup', 'dialog');
     publicTrigger.setAttribute('aria-controls', dialog.id);
     publicTrigger.addEventListener('click', open);
+    publicTrigger.disabled = false;
     publicTrigger.hidden = false;
   }
 
