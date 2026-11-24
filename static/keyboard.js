@@ -4,7 +4,25 @@
   const page = document.body.dataset.chesKeyboard;
   if (!page || typeof HTMLDialogElement.prototype.showModal !== 'function') return;
 
-  const isMac = /mac|iphone|ipad/i.test(navigator.userAgentData?.platform || navigator.platform);
+  const platform = navigator.userAgentData?.platform || navigator.platform;
+  const apple = /mac|iphone|ipad|ipod|ios/i.test(platform);
+  const handheld = navigator.userAgentData?.mobile ||
+    /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ||
+    (/mac/i.test(platform) && navigator.maxTouchPoints > 1);
+  const isMac = apple;
+  const root = document.documentElement;
+  root.classList.toggle('ches-no-key-hints', Boolean(handheld));
+  if (getComputedStyle(root).colorScheme === 'dark') root.classList.add('ches-chrome-dark');
+  if (handheld) {
+    function detectKeyboard(event) {
+      if (!event.isTrusted || event.isComposing ||
+          !(event.ctrlKey || event.metaKey || event.altKey ||
+            /^(Tab|Escape|Arrow(Up|Down|Left|Right)|F[1-9][0-2]?)$/.test(event.key))) return;
+      root.classList.remove('ches-no-key-hints');
+      document.removeEventListener('keydown', detectKeyboard, true);
+    }
+    document.addEventListener('keydown', detectKeyboard, true);
+  }
   const openKeys = isMac ? '⌘ K' : 'Ctrl K';
   const shortcutPrefix = isMac ? '⌥ ⇧' : 'Alt Shift';
   const home = 'https://ches.dev/';
@@ -81,6 +99,10 @@
     return node;
   }
 
+  function icon(name) {
+    return element('span', {class: 'ches-icon ches-icon-' + name, 'aria-hidden': 'true'});
+  }
+
   function keyLabel(key) {
     return shortcutPrefix + ' ' + ({ArrowLeft: '←', ArrowRight: '→'}[key] || key);
   }
@@ -110,7 +132,7 @@
       const label = link.textContent.trim().replace(/\s+/g, ' ');
       if (!label || !/^(https?:|mailto:)/.test(href) || seen.has(href)) continue;
       seen.add(href);
-      result.push({label, target: link, href, group: accountLink ? 'Your tools' : 'Navigation'});
+      result.push({label, target: link, href, group: accountLink ? 'Your tools' : 'Navigation', restricted: Boolean(accountLink || /\/auth\/if\/(admin|user)\//.test(href))});
     }
     for (const [label, href] of destinations) {
       if (seen.has(href)) continue;
@@ -124,10 +146,11 @@
     'aria-controls': 'ches-keys-dialog', 'aria-keyshortcuts': (isMac ? 'Meta' : 'Control') + '+K',
   }, 'Quick search');
   const triggerHint = element('kbd', {'aria-hidden': 'true'}, openKeys);
+  trigger.prepend(icon('search'));
   trigger.append(triggerHint);
 
   const dialog = element('dialog', {class: 'ches-keys-dialog', id: 'ches-keys-dialog', 'aria-labelledby': 'ches-keys-title'});
-  const title = element('h2', {id: 'ches-keys-title'}, 'Quick search');
+  const title = element('h2', {id: 'ches-keys-title', class: 'ches-visually-hidden'}, 'Quick search');
   const input = element('input', {
     type: 'search', role: 'combobox', 'aria-label': 'Search pages and actions',
     'aria-autocomplete': 'list', 'aria-expanded': 'true', 'aria-controls': 'ches-keys-results',
@@ -135,9 +158,9 @@
     autofocus: '',
   });
   const close = element('button', {type: 'button', class: 'ches-keys-close', 'aria-label': 'Close quick search'});
-  close.append(element('kbd', {'aria-hidden': 'true'}, 'Esc'));
+  close.append(icon('close'));
   const header = element('div', {class: 'ches-keys-search'});
-  header.append(input, close);
+  header.append(icon('search'), input, close);
   const list = element('div', {id: 'ches-keys-results', role: 'listbox', 'aria-label': 'Search results'});
   const status = element('p', {class: 'ches-keys-status', role: 'status'});
   const guide = element('footer', {class: 'ches-keys-guide'});
@@ -147,11 +170,25 @@
     guide.append(hint);
   }
   dialog.append(title, header, list, status, guide);
-  const mount = document.querySelector('header.site-header, header.topbar, [data-ches-keyboard-mount]');
-  if (mount) mount.append(trigger);
-  else {
+  function mountTrigger() {
+    const toolbar = document.querySelector('header[data-account-enabled], header.site-header, header.topbar, header.bar, [data-ches-keyboard-mount]');
+    if (!shown(toolbar)) return false;
+    toolbar.classList.add('ches-command-bar');
+    trigger.classList.remove('ches-keys-docked');
+    toolbar.append(trigger);
+    return true;
+  }
+
+  if (!mountTrigger()) {
     trigger.classList.add('ches-keys-docked');
     document.body.append(trigger);
+    const app = page === 'drop' && document.querySelector('#app');
+    if (app) {
+      const observer = new MutationObserver(() => {
+        if (mountTrigger()) observer.disconnect();
+      });
+      observer.observe(app, {childList: true, subtree: true});
+    }
   }
   document.body.append(dialog);
 
@@ -169,25 +206,50 @@
   let active = -1;
   let workingEntries = [];
 
+  let rows = [];
+  let pointerPosition;
+
   function activate(index, scroll = true) {
+    rows[active]?.setAttribute('aria-selected', 'false');
     active = index;
-    for (const [position, row] of [...list.querySelectorAll('[role="option"]')].entries()) {
-      const selected = position === active;
-      row.setAttribute('aria-selected', selected);
-      if (selected) {
-        input.setAttribute('aria-activedescendant', row.id);
-        if (scroll) row.scrollIntoView({block: 'nearest', inline: 'nearest'});
-      }
+    const row = rows[active];
+    if (!row) {
+      input.removeAttribute('aria-activedescendant');
+      return;
     }
-    if (active === -1) input.removeAttribute('aria-activedescendant');
+    row.setAttribute('aria-selected', 'true');
+    input.setAttribute('aria-activedescendant', row.id);
+    if (scroll) row.scrollIntoView({block: 'nearest', inline: 'nearest', behavior: 'instant'});
+  }
+
+  function updatePointerSelection() {
+    if (!pointerPosition) return;
+    const [x, y] = pointerPosition;
+    const row = document.elementFromPoint(x, y)?.closest('[role="option"]');
+    const index = rows.indexOf(row);
+    if (index !== active) activate(index, false);
+  }
+
+  function trackPointer(event) {
+    if (event.pointerType === 'touch') return;
+    pointerPosition = [event.clientX, event.clientY];
+    updatePointerSelection();
   }
 
   function render() {
     const words = input.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
-    visibleResults = workingEntries.filter(({label, group}) => words.every(word =>
+    const matches = workingEntries.filter(({label, group}) => words.every(word =>
       (label + ' ' + group).toLowerCase().includes(word)));
+    const groupedEntries = new Map();
+    for (const entry of matches) {
+      if (!groupedEntries.has(entry.group)) groupedEntries.set(entry.group, []);
+      groupedEntries.get(entry.group).push(entry);
+    }
+    visibleResults = [...groupedEntries.values()].flat();
     const groups = new Map();
     list.replaceChildren();
+    rows = [];
+    active = -1;
     for (const [index, entry] of visibleResults.entries()) {
       if (!groups.has(entry.group)) {
         const group = element('div', {role: 'group', 'aria-label': entry.group, class: 'ches-keys-group'});
@@ -195,18 +257,28 @@
         list.append(group);
         groups.set(entry.group, group);
       }
-      const row = element('div', {role: 'option', id: 'ches-keys-option-' + index, 'aria-selected': 'false'}, entry.label);
+      const restricted = entry.restricted || entry.group === 'Your tools';
+      const isPublic = ['Try it now', 'Ches sites'].includes(entry.group);
+      const row = element('div', {
+        role: 'option', id: 'ches-keys-option-' + index, 'aria-selected': 'false',
+        class: restricted ? 'ches-option-access' : isPublic ? 'ches-option-public' : 'ches-option-standard',
+      });
+      const tile = element('span', {class: 'ches-option-tile'});
+      tile.append(icon(restricted ? 'lock' : isPublic ? 'spark' : entry.href ? 'arrow' : 'action'));
+      row.append(tile, element('span', {class: 'ches-option-label'}, entry.label));
       if (entry.key) {
         row.setAttribute('aria-keyshortcuts', 'Alt+Shift+' + entry.key);
         row.append(element('kbd', {'aria-hidden': 'true'}, keyLabel(entry.key)));
       }
-      row.addEventListener('pointermove', () => activate(index, false));
+      row.append(element('span', {class: 'ches-option-enter', 'aria-hidden': 'true'}, '↵'));
+      rows.push(row);
       groups.get(entry.group).append(row);
     }
     status.textContent = visibleResults.length ? '' : 'No matching pages or actions.';
     status.hidden = visibleResults.length > 0;
     list.scrollTop = 0;
     activate(visibleResults.length ? 0 : -1, false);
+    updatePointerSelection();
   }
 
   function open(event) {
@@ -214,6 +286,7 @@
     focusBefore = event?.currentTarget ||
       (document.activeElement === document.body ? trigger : document.activeElement);
     workingEntries = entries();
+    pointerPosition = undefined;
     input.value = '';
     dialog.showModal();
     render();
@@ -275,11 +348,20 @@
     event.preventDefault();
     dismiss();
   });
+  list.addEventListener('pointermove', trackPointer, {passive: true});
+  list.addEventListener('wheel', trackPointer, {passive: true});
+  list.addEventListener('scroll', updatePointerSelection, {passive: true});
+  list.addEventListener('pointerleave', () => {
+    if (!pointerPosition) return;
+    pointerPosition = undefined;
+    activate(-1, false);
+  });
   list.addEventListener('click', event => {
     const row = event.target.closest('[role="option"]');
     if (row) choose(visibleResults[Number(row.id.slice('ches-keys-option-'.length))]);
   });
   input.addEventListener('input', event => {
+    pointerPosition = undefined;
     if (!event.isComposing) render();
   });
   input.addEventListener('compositionend', render);
@@ -297,8 +379,10 @@
     } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
       if (visibleResults.length) {
+        pointerPosition = undefined;
         const delta = event.key === 'ArrowDown' ? 1 : -1;
-        activate((active + delta + visibleResults.length) % visibleResults.length);
+        const start = active < 0 && delta < 0 ? 0 : active;
+        activate((start + delta + visibleResults.length) % visibleResults.length);
       }
     } else if (event.key === 'Enter') {
       event.preventDefault();
@@ -342,7 +426,7 @@
       else {
         const label = target.labels?.[0];
         if (label) label.append(hint);
-        else target.title ||= keyLabel(key);
+
       }
       return true;
     };
