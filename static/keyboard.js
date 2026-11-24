@@ -15,12 +15,15 @@
   ];
   const actionSets = {
     portfolio: [
+      ['Run the CPU demo', '#cpu-run', null, 'run-and-focus', 'Try it now'],
+      ['Try a JB-X command', '#command', null, 'focus', 'Try it now'],
+      ['Live services', '#services', 'L', 'focus', 'Try it now'],
+      ['Calendar availability', '#availability', null, 'focus', 'Try it now'],
       ['Featured work', '#work', null, 'focus'], ['Other projects', '#other-projects', null, 'focus'],
-      ['Live services', '#services', 'L', 'focus'], ['Calendar availability', '#availability', null, 'focus'],
       ['About', '#about', null, 'focus'], ['BadAvo', '#project-badavo', null, 'focus'],
       ['Printed project', '#project-printed', null, 'focus'], ['JB-X project', '#project-jbx', null, 'focus'],
       ['CPU project', '#project-cpu', null, 'focus'], ['Step CPU example', '#cpu-step'],
-      ['Reset CPU example', '#cpu-reset'], ['Try a JB-X command', '#project-jbx input', null, 'focus'],
+      ['Reset CPU example', '#cpu-reset'],
     ],
     calendar: [
       ['New event', '#new-event', 'N'], ['Go to today', '#today', 'T'],
@@ -89,9 +92,9 @@
   }
 
   function pageActions() {
-    return (actionSets[page] || []).flatMap(([label, selector, key, operation]) => {
+    return (actionSets[page] || []).flatMap(([label, selector, key, operation, group = 'On this page']) => {
       const target = document.querySelector(selector);
-      return shown(target) ? [{label, target, key, operation, group: 'On this page'}] : [];
+      return shown(target) ? [{label, target, key, operation, group}] : [];
     });
   }
 
@@ -152,6 +155,14 @@
   }
   document.body.append(dialog);
 
+  const publicTrigger = document.querySelector('[data-public-quick-search]');
+  if (publicTrigger) {
+    publicTrigger.setAttribute('aria-haspopup', 'dialog');
+    publicTrigger.setAttribute('aria-controls', dialog.id);
+    publicTrigger.addEventListener('click', open);
+    publicTrigger.hidden = false;
+  }
+
   let focusBefore;
   let visibleResults = [];
   let active = -1;
@@ -197,9 +208,10 @@
     activate(visibleResults.length ? 0 : -1, false);
   }
 
-  function open() {
+  function open(event) {
     if (dialog.open || document.querySelector('dialog[open], .modal.show')) return;
-    focusBefore = document.activeElement === document.body ? trigger : document.activeElement;
+    focusBefore = event?.currentTarget ||
+      (document.activeElement === document.body ? trigger : document.activeElement);
     workingEntries = entries();
     input.value = '';
     dialog.showModal();
@@ -210,7 +222,7 @@
   function run(entry) {
     if (entry.group === 'Your tools' &&
         (entry.target.hidden || entry.target.closest('.account-tools').hidden)) return;
-    if (entry.operation === 'focus') {
+    if (entry.operation === 'focus' || entry.operation === 'run-and-focus') {
       if (!shown(entry.target)) return;
       entry.target.scrollIntoView({block: 'center'});
       if (entry.target.tabIndex < 0 && !entry.target.hasAttribute('tabindex')) {
@@ -218,6 +230,9 @@
         entry.target.addEventListener('blur', () => entry.target.removeAttribute('tabindex'), {once: true});
       }
       entry.target.focus({preventScroll: true});
+      if (entry.operation === 'run-and-focus' && entry.target.getAttribute('aria-pressed') !== 'true') {
+        entry.target.click();
+      }
     } else if (entry.href && !shown(entry.target)) {
       location.assign(entry.href);
     } else if (shown(entry.target)) {

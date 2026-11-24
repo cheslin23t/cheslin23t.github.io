@@ -17,7 +17,7 @@
       href="/static/assets/favicon.png?v=2"
     />
     <script src="/static/appearance.js"></script>
-    <link rel="stylesheet" href="/static/index.css?v=disabled-red" />
+    <link rel="stylesheet" href="/static/index.css?v=public-features" />
     <link
       rel="preload"
       as="image"
@@ -35,10 +35,10 @@
     <script src="/static/index.js" defer></script>
     <script src="/static/services.js?v=disabled-red" defer></script>
     <script src="/static/availability.js" defer></script>
-    <link rel="stylesheet" href="/static/account.css?v=tools" />
+    <link rel="stylesheet" href="/static/account.css?v=public-features" />
     <script src="/static/account.js?v=booking-tools" defer></script>
-    <link rel="stylesheet" href="/static/keyboard.css" />
-    <script src="/static/keyboard.js" defer></script>
+    <link rel="stylesheet" href="/static/keyboard.css?v=public-features" />
+    <script src="/static/keyboard.js?v=public-features" defer></script>
   </head>
   <body data-ches-keyboard="portfolio">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -154,6 +154,32 @@
               >
                 <path d="M5 5 19 19M5 19h14V5" /></svg></span
           ></a>
+        </div>
+      </section>
+      <section class="featured-tools" id="featured-tools" aria-labelledby="featured-tools-title">
+        <div class="featured-tools-heading">
+          <h2 id="featured-tools-title">Explore ches.dev</h2>
+          <button type="button" data-public-quick-search hidden>
+            Explore public features
+          </button>
+        </div>
+        <div class="featured-tools-grid">
+          <div>
+            <h3>Open to everyone</h3>
+            <ul>
+              <li><a href="#cpu-run">CPU simulator</a><span>Run or step through a small program.</span></li>
+              <li><a href="#command">JB-X terminal demo</a><span>Try the command registry in your browser.</span></li>
+              <li><a href="#services">Live services</a><span>Check which services are running.</span></li>
+            </ul>
+          </div>
+          <div>
+            <h3>Requires account access</h3>
+            <ul>
+              <li><strong>Calendar</strong><span>Requires calendar management access.</span></li>
+              <li><strong>Ches Booking</strong><span>Requires Booking membership.</span></li>
+              <li><strong>Ches Drop</strong><span>Requires a file library role. Uploads require member or admin access.</span></li>
+            </ul>
+          </div>
         </div>
       </section>
       <div class="section-line" id="work">
