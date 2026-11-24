@@ -14,8 +14,10 @@
     <link rel="stylesheet" href="/service-status/service-status.css" />
     <script src="/static/account.js?v=booking-tools" defer></script>
     <script src="/service-status/service-status.js" defer></script>
+    <link rel="stylesheet" href="/static/keyboard.css" />
+    <script src="/static/keyboard.js" defer></script>
   </head>
-  <body>
+  <body data-ches-keyboard="status">
     <a class="skip-link" href="#main">Skip to service status</a>
     <header class="site-header" data-account-enabled>
       <a class="wordmark" href="/" aria-label="ches.dev, home">ches<span>.</span>dev</a>
@@ -35,7 +37,7 @@
       <noscript><p>Enable JavaScript to manage service status.</p></noscript>
       <div class="service-feedback">
         <p id="service-feedback" role="status"></p>
-        <button type="button" id="service-refresh" hidden>Refresh</button>
+        <button type="button" id="service-refresh" hidden disabled>Refresh</button>
       </div>
       <div id="service-controls-list" aria-label="Monitored services" role="region"></div>
     </main>

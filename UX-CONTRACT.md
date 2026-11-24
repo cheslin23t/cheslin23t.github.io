@@ -32,3 +32,7 @@ The editor reads the existing case-insensitive `(public)` and `(private)` tags f
 ## Service status controls
 
 The shared account header groups Calendar, Service status, and Ches Booking under Tools. Ches Booking launches its Authentik app on api.ches.dev. Each link requires its own session capability. The Service status workspace reads and updates the monitored inventory through the portfolio session API. Every change requires the Authentik `services:manage` permission. The backend stores the override by service ID. Disabled takes precedence over live health for the public status label, and Use live checks removes the override. A failed save requires an explicit refresh before another edit, so a lost response cannot be mistaken for a failed change.
+
+## Quick search and keyboard shortcuts
+
+`static/keyboard.js` and `static/keyboard.css` own the shared quick search and key hints. The button and platform shortcut open the same modal. The search input keeps focus while Arrow Up and Arrow Down select results, Enter opens the selection, and Escape closes the modal and restores focus. Page shortcuts use Option+Shift on macOS or Alt+Shift elsewhere, and yield to editable fields and open app dialogs. Commands use existing navigation or controls, including their enabled state. Saving, deletion and service-state changes follow their original controls and confirmation paths. Search uses in-memory labels only and keeps no history or private record data.
