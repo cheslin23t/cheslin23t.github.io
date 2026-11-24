@@ -31,6 +31,18 @@
     ['Printed storefront', home + '3D-Printing-Order-Management/index.html'],
     ['Troop 55 RSVP demo', home + 'BSA2/'],
   ];
+  const adminBase = 'https://api.ches.dev/auth/if/admin/#';
+  const adminOverview = '/administration/overview';
+  const adminLinks = 'header .site-account > a[href], header nav a[href], #dashboard-admin[href]';
+  const adminActions = [
+    ['Invitations', 'Create or manage invitations', '/flow/stages/invitations', 'invite people onboarding enrollment new user'],
+    ['Invitations', 'Review Ches enrollment flow', '/flow/flows/ches-invite-enrollment', 'invite invitation standard account signup'],
+    ['Invitations', 'Review Images viewer flow', '/flow/flows/ches-invite-images-viewer', 'invite invitation read only ches drop'],
+    ['Invitations', 'Review Images member flow', '/flow/flows/ches-invite-images-member', 'invite invitation upload ches drop'],
+    ['People and permissions', 'Manage users', '/identity/users', 'people accounts user access memberships'],
+    ['People and permissions', 'Manage groups and memberships', '/identity/groups', 'people user access add remove members'],
+    ['People and permissions', 'Manage roles and permissions', '/identity/roles', 'role grants access rights group'],
+  ];
   const actionSets = {
     portfolio: [
       ['Run the CPU demo', '#cpu-run', null, 'run-and-focus', 'Try it now'],
@@ -99,8 +111,27 @@
     return node;
   }
 
+  const iconPaths = {
+    search: 'M16.8 10.5a6.3 6.3 0 1 1-12.6 0 6.3 6.3 0 0 1 12.6 0ZM15 15l5 5',
+    close: 'm6 6 12 12M18 6 6 18',
+    lock: 'M8 10V7a4 4 0 0 1 8 0v3m-4 4v2M8 10h8a2.5 2.5 0 0 1 2.5 2.5v5A2.5 2.5 0 0 1 16 20H8a2.5 2.5 0 0 1-2.5-2.5v-5A2.5 2.5 0 0 1 8 10Z',
+    spark: 'M12 2.5 14.6 9.4 21.5 12 14.6 14.6 12 21.5 9.4 14.6 2.5 12 9.4 9.4Z',
+    arrow: 'M6 18 18 6M8 6h10v10',
+    action: 'm8.5 6 9 6-9 6z',
+  };
+
   function icon(name) {
-    return element('span', {class: 'ches-icon ches-icon-' + name, 'aria-hidden': 'true'});
+    const namespace = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(namespace, 'svg');
+    const path = document.createElementNS(namespace, 'path');
+    for (const [key, value] of Object.entries({
+      class: 'ches-icon-vector', viewBox: '0 0 24 24', width: '16', height: '16',
+      'aria-hidden': 'true', focusable: 'false', fill: 'none', stroke: 'currentColor',
+      'stroke-width': '1.8', 'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+    })) svg.setAttribute(key, value);
+    path.setAttribute('d', iconPaths[name]);
+    svg.append(path);
+    return svg;
   }
 
   function keyLabel(key) {
@@ -120,10 +151,21 @@
     });
   }
 
+  function adminLink() {
+    return Array.from(document.querySelectorAll(adminLinks)).find(link =>
+      link.href === adminBase + adminOverview && shown(link));
+  }
+
   function entries() {
     const actions = pageActions();
     const seen = new Set();
     const result = [...actions];
+    const admin = adminLink();
+    if (admin) {
+      for (const [group, label, path, keywords] of adminActions) {
+        result.push({label, href: adminBase + path, group, keywords, restricted: true, adminAction: true});
+      }
+    }
     for (const link of document.querySelectorAll('header nav a[href], [data-ches-command-link][href], header [data-account-login], header [data-account-dashboard], .account-tools a[href]')) {
       const accountLink = link.closest('.account-tools');
       if (!shown(link) && !(accountLink && !link.hidden && !accountLink.hidden)) continue;
@@ -238,8 +280,10 @@
 
   function render() {
     const words = input.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
-    const matches = workingEntries.filter(({label, group}) => words.every(word =>
-      (label + ' ' + group).toLowerCase().includes(word)));
+    const matches = workingEntries.filter(({label, group, keywords = ''}) => {
+      const searchable = `${label} ${group} ${keywords}`.toLowerCase();
+      return words.every(word => searchable.includes(word));
+    });
     const groupedEntries = new Map();
     for (const entry of matches) {
       if (!groupedEntries.has(entry.group)) groupedEntries.set(entry.group, []);
@@ -281,19 +325,41 @@
     updatePointerSelection();
   }
 
+  const adminObserver = new MutationObserver(refreshAdminActions);
+  let adminAvailable = false;
+
+  function refreshAdminActions() {
+    if (!dialog.open || adminAvailable === Boolean(adminLink())) return;
+    refreshEntries();
+  }
+
+  function refreshEntries() {
+    adminAvailable = Boolean(adminLink());
+    workingEntries = entries();
+    render();
+  }
+
   function open(event) {
     if (dialog.open || document.querySelector('dialog[open], .modal.show')) return;
     focusBefore = event?.currentTarget ||
       (document.activeElement === document.body ? trigger : document.activeElement);
-    workingEntries = entries();
     pointerPosition = undefined;
     input.value = '';
     dialog.showModal();
-    render();
+    refreshEntries();
+    const toolbar = trigger.closest('.ches-command-bar') || (page === 'drop' && document.querySelector('#app'));
+    if (toolbar) adminObserver.observe(toolbar, {
+      subtree: true, childList: true, attributes: true,
+      attributeFilter: ['hidden', 'href', 'aria-hidden', 'aria-disabled', 'inert'],
+    });
     input.focus();
   }
 
   function run(entry) {
+    if (entry.adminAction) {
+      if (adminLink()) location.assign(entry.href);
+      return;
+    }
     if (entry.group === 'Your tools' &&
         (entry.target.hidden || entry.target.closest('.account-tools').hidden)) return;
     if (entry.operation === 'focus' || entry.operation === 'run-and-focus') {
@@ -344,6 +410,9 @@
 
   trigger.addEventListener('click', open);
   close.addEventListener('click', dismiss);
+  dialog.addEventListener('close', () => {
+    if (!dialog.open) adminObserver.disconnect();
+  });
   dialog.addEventListener('cancel', event => {
     event.preventDefault();
     dismiss();
@@ -366,10 +435,7 @@
   });
   input.addEventListener('compositionend', render);
   document.addEventListener('ches:tools-updated', () => {
-    if (dialog.open) {
-      workingEntries = entries();
-      render();
-    }
+    if (dialog.open) refreshEntries();
   });
   input.addEventListener('keydown', event => {
     if (event.isComposing || event.defaultPrevented) return;

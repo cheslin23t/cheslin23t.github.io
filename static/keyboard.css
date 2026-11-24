@@ -194,7 +194,7 @@ body[data-ches-keyboard="cockpit"] .ches-command-bar {
   padding: .6rem .75rem .6rem 1rem;
   border-bottom: 1px solid var(--ches-chrome-line);
 }
-.ches-keys-search > .ches-icon { width: 1.35rem; height: 1.35rem; }
+.ches-keys-search > .ches-icon-vector { width: 1.35rem; height: 1.35rem; }
 .ches-keys-search input {
   flex: 1;
   min-width: 0;
@@ -316,21 +316,12 @@ body[data-ches-keyboard="cockpit"] .ches-command-bar {
 .ches-no-key-hints :is(.ches-keys-trigger kbd, .ches-keys-hint, .ches-keys-dialog kbd, .ches-keys-guide, .ches-option-enter) {
   display: none;
 }
-.ches-icon {
+.ches-icon-vector {
   display: inline-block;
   flex: none;
   width: 1rem;
   height: 1rem;
-  background: currentColor;
-  -webkit-mask: var(--ches-icon) center / contain no-repeat;
-  mask: var(--ches-icon) center / contain no-repeat;
 }
-.ches-icon-search { --ches-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.3'/%3E%3Cpath d='m15 15 5 5'/%3E%3C/svg%3E"); }
-.ches-icon-close { --ches-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round'%3E%3Cpath d='m6 6 12 12M18 6 6 18'/%3E%3C/svg%3E"); }
-.ches-icon-lock { --ches-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round'%3E%3Crect x='5.5' y='10' width='13' height='10' rx='2.5'/%3E%3Cpath d='M8 10V7a4 4 0 0 1 8 0v3m-4 4v2'/%3E%3C/svg%3E"); }
-.ches-icon-spark { --ches-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linejoin='round'%3E%3Cpath d='M12 2.5 14.6 9.4 21.5 12 14.6 14.6 12 21.5 9.4 14.6 2.5 12 9.4 9.4Z'/%3E%3C/svg%3E"); }
-.ches-icon-arrow { --ches-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 18 18 6M8 6h10v10'/%3E%3C/svg%3E"); }
-.ches-icon-action { --ches-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m8.5 6 9 6-9 6z'/%3E%3C/svg%3E"); }
 
 .featured-tools-grid > div:last-child h3 { color: var(--ches-chrome-access); }
 .featured-tools-grid > div:first-child h3 { color: var(--ches-chrome-public); }
@@ -392,5 +383,4 @@ body[data-ches-keyboard="cockpit"] .ches-command-bar {
 }
 @media (forced-colors: active) {
   .ches-keys-group [aria-selected="true"] { outline: 2px solid Highlight; outline-offset: -2px; }
-  .ches-icon { forced-color-adjust: none; background: CanvasText; }
 }
