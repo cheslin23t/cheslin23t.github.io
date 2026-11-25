@@ -79,19 +79,23 @@
   ];
   const actionSets = {
     portfolio: [
-      ['Run the CPU demo', '#cpu-run', null, 'run-and-focus', 'Try it now'],
-      ['Try a JB-X command', '#command', null, 'focus', 'Try it now'],
-      ['Live services', '#services', 'L', 'focus', 'Try it now'],
-      ['Calendar availability', '#availability', null, 'focus', 'Try it now'],
-      ['Featured work', '#work', null, 'focus'], ['Other projects', '#other-projects', null, 'focus'],
-      ['About', '#about', null, 'focus'], ['BadAvo', '#project-badavo', null, 'focus'],
-      ['Printed project', '#project-printed', null, 'focus'], ['JB-X project', '#project-jbx', null, 'focus'],
-      ['CPU project', '#project-cpu', null, 'focus'], ['Step CPU example', '#cpu-step'],
-      ['Reset CPU example', '#cpu-reset'],
+      ['Run the CPU demo', '#cpu-run', null, 'run-and-focus', 'Demos'],
+      ['Try a JB-X command', '#command', null, 'focus', 'Demos'],
+      ['Live services', '#services', 'L', 'focus', 'Public resources'],
+      ['Calendar availability', '#availability', null, 'focus', 'Public resources'],
+      ['Featured work', '#work', null, 'focus', 'Portfolio pages'],
+      ['Other projects', '#other-projects', null, 'focus', 'Portfolio pages'],
+      ['About', '#about', null, 'focus', 'Portfolio pages'],
+      ['BadAvo', '#project-badavo', null, 'focus', 'Projects'],
+      ['Printed project', '#project-printed', null, 'focus', 'Projects'],
+      ['JB-X project', '#project-jbx', null, 'focus', 'Projects'],
+      ['CPU project', '#project-cpu', null, 'focus', 'Projects'],
+      ['Step CPU example', '#cpu-step', null, null, 'Demos'],
+      ['Reset CPU example', '#cpu-reset', null, null, 'Demos'],
     ],
     calendar: [
-      ['New event', '#new-event', 'N'], ['Go to today', '#today', 'T'],
-      ['Find the next free 30 minutes', '#find-free-time'],
+      ['New event', '#new-event', 'N', null, 'Scheduling'], ['Go to today', '#today', 'T'],
+      ['Find the next free 30 minutes', '#find-free-time', null, null, 'Scheduling'],
       ['Previous period', '#previous-month', 'ArrowLeft'], ['Next period', '#next-month', 'ArrowRight'],
       ['Day view', '[data-view="day"]', 'D'], ['Week view', '[data-view="week"]', 'W'],
       ['Month view', '[data-view="month"]', 'M'], ['Jump to month', '#month', 'J', 'focus'],
@@ -102,14 +106,15 @@
       ['Play or pause CPU replay', '#run-play', 'P'], ['Focus replay speed', '#run-speed', null, 'focus'],
     ],
     drop: [
-      ['Choose files', '#choose-files', 'U'], ['Refresh files', '#refresh', 'R'],
+      ['Choose files', '#choose-files', 'U', null, 'File actions'], ['Refresh files', '#refresh', 'R'],
       ['Go to files', '#files-heading', 'F', 'focus'], ['Go to collections', '#groups-heading', 'G', 'focus'],
-      ['Select visible files', '#select-all'], ['Clear file selection', '#clear-selection'],
-      ['Load more files', '#load-more'],
+      ['Select visible files', '#select-all', null, null, 'File actions'],
+      ['Clear file selection', '#clear-selection', null, null, 'File actions'], ['Load more files', '#load-more'],
     ],
     convert: [
       ['Choose files to convert', '#file', 'U'], ['Choose the batch output format', '#batch-target', 'F', 'focus'],
-      ['Focus Convert button', '#submit', null, 'focus'], ['Download converted files as ZIP', '#download-zip'],
+      ['Focus Convert button', '#submit', null, 'focus'],
+      ['Download converted files as ZIP', '#download-zip', null, null, 'Downloads'],
     ],
     links: [
       ['Enter a destination URL', '#destination', 'N', 'focus'], ['Enter a short-link alias', '#alias', 'A', 'focus'],
@@ -156,6 +161,12 @@
     '#destination': 'new create shorten link', '#booking-label': 'new create booking',
     '#find-free-time': 'schedule availability gap', '#run-play': 'run simulate playback',
   };
+  const sectionOrder = [
+    'Your tools', 'On this page', 'Scheduling', 'File actions', 'Downloads',
+    'Demos', 'Projects', 'Portfolio pages', 'Public resources', 'Ches sites',
+    'Operations', 'Invitations', 'People and permissions', 'Navigation',
+  ];
+  const sectionRanks = new Map(sectionOrder.map((group, index) => [group, index]));
 
   function element(tag, attrs = {}, text = '') {
     const node = document.createElement(tag);
@@ -173,6 +184,7 @@
     action: 'm8.5 6 9 6-9 6z',
     star: 'm12 3 2.8 5.8 6.4.9-4.6 4.5 1.1 6.4-5.7-3-5.7 3 1.1-6.4L2.8 9.7l6.4-.9Z',
     menu: 'M4 8h16M4 16h16',
+    settings: 'M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM10 3h4l.5 2.4 1.7 1 2.4-.8 2 3.5-1.8 1.7v2.4l1.8 1.7-2 3.5-2.4-.8-1.7 1L14 21h-4l-.5-2.4-1.7-1-2.4.8-2-3.5 1.8-1.7v-2.4L3.4 9.1l2-3.5 2.4.8 1.7-1L10 3Z',
   };
 
   function icon(name) {
@@ -226,10 +238,10 @@
     const localSections = new Set(actions.filter(entry => entry.operation === 'focus' && entry.target.id)
       .map(entry => `#${entry.target.id}`));
     const result = [...actions];
-    if (page === 'portfolio') result.unshift({label: 'Start the portfolio tour', operation: 'tour', group: 'Try it now', local: true});
+    if (page === 'portfolio') result.unshift({label: 'Start the portfolio tour', operation: 'tour', group: 'Demos', local: true});
     if (page === 'drop' && shown(document.querySelector('#files'))) {
       result.push({id: 'page:drop:files', label: 'Find a file', keywords: 'search files name library',
-        operation: 'files', group: 'On this page', local: true});
+        operation: 'files', group: 'File actions', local: true});
     }
     const admin = adminLink();
     if (admin) {
@@ -247,9 +259,10 @@
       seen.add(href);
       const app = appUrls.has(href);
       const restricted = Boolean(accountLink || /\/auth\/if\/(admin|user)\//.test(href));
+      const consoleLink = page === 'cockpit' && link.hasAttribute('data-ches-command-link');
       result.push({id: app ? `app:${href}` : null, label, target: link, href, app,
-        accessTarget: restricted ? link : null, local: page === 'cockpit' && link.hasAttribute('data-ches-command-link'),
-        group: accountLink ? 'Your tools' : 'Navigation', restricted});
+        accessTarget: restricted ? link : null, local: consoleLink,
+        group: accountLink ? 'Your tools' : consoleLink ? 'Operations' : 'Navigation', restricted});
       if (accountLink && href === 'https://dash.ches.dev/') {
         result.push({label: 'Open server logs', href: 'https://dash.ches.dev/system/logs',
           accessTarget: link, group: 'Operations', restricted: true});
@@ -259,7 +272,7 @@
       if (seen.has(href)) continue;
       result.push({id: `app:${href}`, label, href, group: 'Ches sites', app: true});
     }
-    if (page !== 'portfolio') result.push({label: 'Open live service health', href: home + '#services', group: 'Ches sites'});
+    if (page !== 'portfolio') result.push({label: 'Open live service health', href: home + '#services', group: 'Public resources'});
     return result;
   }
 
@@ -295,9 +308,14 @@
     scopeButtons.set(value, button);
     scopes.append(button);
   }
-  const settingsButton = element('button', {type: 'button', 'aria-expanded': 'false',
-    'aria-controls': 'ches-keys-settings'}, 'Settings');
-  controls.append(scopes, settingsButton);
+  const settingsButton = element('button', {type: 'button', class: 'ches-keys-settings-button',
+    'aria-label': 'Settings', 'aria-expanded': 'false', 'aria-controls': 'ches-keys-settings'});
+  settingsButton.append(icon('settings'), element('span', {}, 'Settings'));
+  const sectionFilter = element('select', {class: 'ches-keys-section-filter',
+    'aria-label': 'Filter by section', 'aria-controls': 'ches-keys-results'});
+  const filterActions = element('div', {class: 'ches-keys-filter-actions'});
+  filterActions.append(sectionFilter, settingsButton);
+  controls.append(scopes, filterActions);
   const settings = element('div', {class: 'ches-keys-settings', id: 'ches-keys-settings', hidden: ''});
   const storageNote = element('p', {}, 'Favorites, history, and shortcuts are saved for this site in your browser.');
   const shortcutField = element('div', {class: 'ches-keys-shortcut-field'});
@@ -386,6 +404,7 @@
   let active = -1;
   let workingEntries = [];
   let scope = 'all';
+  let selectedSection = '';
   let editingPins = false;
   let fileTimer;
   let fileRequest;
@@ -437,10 +456,14 @@
     const byId = new Map(matches.filter(entry => entry.id).map(entry => [entry.id, entry]));
     const used = new Set();
     function collect(entries, group, limit = Infinity) {
-      return entries.filter(entry => entry && !used.has(entry)).slice(0, limit).map(entry => {
+      const collected = [];
+      for (const entry of entries) {
+        if (!entry || used.has(entry)) continue;
         used.add(entry);
-        return {...entry, group};
-      });
+        collected.push({...entry, section: entry.group, group});
+        if (collected.length === limit) break;
+      }
+      return collected;
     }
     const fromIds = ids => ids.map(id => byId.get(id));
     const favorites = collect(fromIds(preferences.favorites), 'Favorites');
@@ -449,14 +472,35 @@
     const primary = page === 'portfolio' && tools.length ? collect(tools, 'Your tools') :
       collect(local.some(Boolean) ? local : matches.filter(entry => entry.local), 'Quick actions', 4);
     const recent = collect(fromIds(preferences.recent), 'Recent', 3);
-    if (favorites.length || primary.length || recent.length) return [...favorites, ...primary, ...recent];
-    return collect(matches.filter(entry => entry.app || entry.target?.matches('[data-account-login]')), 'Useful links', 4);
+    const rest = matches.filter(entry => !used.has(entry)).sort((a, b) => compareSections(a.group, b.group));
+    return [...favorites, ...primary, ...recent, ...rest];
+  }
+
+  function compareSections(first, second) {
+    return (sectionRanks.get(first) ?? sectionOrder.length) - (sectionRanks.get(second) ?? sectionOrder.length);
+  }
+
+  function updateSectionFilter(entries) {
+    const groups = [...new Set(entries.map(entry => entry.group))].sort(compareSections);
+    if (selectedSection && !groups.includes(selectedSection)) selectedSection = '';
+    sectionFilter.hidden = scope !== 'all' || editingPins || !settings.hidden || groups.length < 2;
+    const options = ['', ...groups];
+    if (options.length === sectionFilter.options.length &&
+        options.every((value, index) => value === sectionFilter.options[index].value)) {
+      sectionFilter.value = selectedSection;
+      return;
+    }
+    sectionFilter.replaceChildren(...options.map(group => new Option(group || 'All sections', group)));
+    sectionFilter.value = selectedSection;
   }
 
   function render() {
     const query = input.value.toLowerCase().trim();
     const words = query.split(/\s+/).filter(Boolean);
-    const matches = scopedEntries().filter(({label, group, keywords = ''}) => {
+    const entries = scopedEntries();
+    updateSectionFilter(entries);
+    const matches = entries.filter(({label, group, keywords = ''}) => {
+      if (scope === 'all' && selectedSection && group !== selectedSection) return false;
       if (scope === 'files') return true;
       const searchable = `${label} ${group} ${keywords}`.toLowerCase();
       return words.every(word => searchable.includes(word));
@@ -469,7 +513,7 @@
       return words.every(word => name.includes(word)) ? 2 : 3;
     }
     let sorted = matches;
-    if (scope === 'all' && !editingPins && !query) sorted = prioritized(matches);
+    if (scope === 'all' && !editingPins && !query && !selectedSection) sorted = prioritized(matches);
     else if (query && scope !== 'files') sorted = matches.sort((a, b) => rank(a) - rank(b));
     else if (scope === 'apps') sorted = [...matches.filter(entry => entry.restricted), ...matches.filter(entry => !entry.restricted)];
     for (const entry of sorted) {
@@ -490,7 +534,7 @@
         groups.set(entry.group, group);
       }
       const restricted = entry.restricted || entry.group === 'Your tools';
-      const isPublic = ['Try it now', 'Ches sites'].includes(entry.group);
+      const isPublic = ['Demos', 'Public resources', 'Ches sites'].includes(entry.section || entry.group);
       const row = element('div', {
         role: 'option', id: 'ches-keys-option-' + index, 'aria-selected': 'false',
         class: restricted ? 'ches-option-access' : isPublic ? 'ches-option-public' : 'ches-option-standard',
@@ -536,6 +580,7 @@
     input.hidden = searchIcon.hidden = list.hidden = guide.hidden = open;
     settingsTitle.hidden = !open;
     if (open) {
+      sectionFilter.hidden = true;
       clearHistory.disabled = !preferences.recent.length;
       status.hidden = true;
       (root.classList.contains('ches-no-key-hints') ? editPins : shortcutSelect).focus();
@@ -547,6 +592,7 @@
 
   function setScope(value, focus = true) {
     scope = value;
+    selectedSection = '';
     editingPins = editingPins && value !== 'tour' && value !== 'files';
     pinControls.hidden = !editingPins;
     for (const [name, button] of scopeButtons) button.setAttribute('aria-pressed', String(name === value));
@@ -748,6 +794,11 @@
 
   trigger.addEventListener('click', open);
   close.addEventListener('click', dismiss);
+  sectionFilter.addEventListener('change', () => {
+    selectedSection = sectionFilter.value;
+    pointerPosition = undefined;
+    render();
+  });
   settingsButton.addEventListener('click', () => showSettings(settings.hidden));
   shortcutSelect.addEventListener('change', () => {
     preferences.shortcut = shortcutSelect.value;

@@ -274,11 +274,24 @@ body[data-ches-keyboard="cockpit"] .ches-command-bar {
   padding: .25rem .7rem;
   border-bottom: 1px solid var(--ches-chrome-line);
 }
-.ches-keys-scopes, .ches-keys-settings-actions {
+.ches-keys-scopes, .ches-keys-settings-actions, .ches-keys-filter-actions {
   display: flex;
   flex-wrap: wrap;
   gap: .2rem;
 }
+.ches-keys-filter-actions { align-items: center; margin-inline-start: auto; }
+.ches-keys-settings-button { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; }
+.ches-keys-section-filter {
+  min-height: 44px;
+  max-width: min(9.5rem, 29vw);
+  padding-inline: .35rem;
+  border: 1px solid var(--ches-chrome-line);
+  border-radius: .65rem;
+  background: var(--ches-chrome-solid);
+  color: var(--ches-chrome-ink);
+  font: 600 .81rem/1.25 system-ui, sans-serif;
+}
+.ches-keys-section-filter:focus-visible { outline: 2px solid var(--ches-chrome-focus); outline-offset: 1px; }
 .ches-keys-controls button, .ches-keys-settings button, .ches-keys-pin-controls button {
   min-height: 44px;
   margin: 0;
@@ -456,7 +469,9 @@ body[data-ches-keyboard="cockpit"] .ches-command-bar {
   .ches-command-bar.topbar .ches-keys-trigger-label { display: none; }
   .ches-command-bar.topbar > .ches-keys-trigger { min-width: 44px; }
 }
-@media (max-width: 380px) {
+@media (max-width: 460px) {
+  .ches-keys-settings-button { min-width: 44px; }
+  .ches-keys-settings-button span { display: none; }
   .ches-keys-controls { gap: .15rem; padding-inline: .4rem; }
   .ches-keys-scopes { gap: .12rem; }
   .ches-keys-controls button { padding-inline: .38rem; font-size: .75rem; }
