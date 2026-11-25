@@ -50,7 +50,7 @@
 body[data-ches-keyboard="cockpit"] .ches-command-bar {
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: .4rem clamp(.55rem, 2vw, 1.35rem);
   height: auto;
@@ -65,49 +65,103 @@ body[data-ches-keyboard="cockpit"] .ches-command-bar {
 .ches-command-bar:is(.topbar, [data-account-enabled]:not(.site-header)) {
   margin-bottom: 1rem;
 }
-.ches-command-bar:is(.site-header, .topbar, [data-account-enabled]) > nav {
+.ches-command-bar.ches-command-bar-menu {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  column-gap: .45rem;
+}
+.ches-command-bar > .ches-keys-trigger { grid-column: 2; grid-row: 1; }
+.ches-command-bar > :is(.wordmark, .brand, h1) { grid-column: 1; min-width: 0; }
+.ches-nav-menu {
+  position: relative;
+  grid-column: 3;
+  grid-row: 1;
+  z-index: 2;
+}
+.ches-nav-menu > summary {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1fr;
+  place-items: center;
+  gap: 0;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  list-style: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: .85rem;
+  color: var(--ches-chrome-ink);
+}
+.ches-nav-menu > summary::-webkit-details-marker { display: none; }
+.ches-nav-menu > summary .ches-icon-vector { width: 1.25rem; height: 1.25rem; }
+.ches-nav-menu > summary:hover, .ches-nav-menu[open] > summary {
+  background: var(--ches-chrome-control);
+  border-color: var(--ches-chrome-line);
+}
+.ches-nav-menu > summary:focus-visible { outline: 2px solid var(--ches-chrome-focus); outline-offset: 2px; }
+.ches-command-bar .ches-nav-menu > nav {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(100% + .6rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: min(16.5rem, calc(100vw - 3rem));
+  max-height: min(28rem, 65vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  gap: 0;
+  padding: .35rem;
+  border: 1px solid var(--ches-chrome-line);
+  border-radius: 1rem;
+  background: var(--ches-chrome-solid);
+  box-shadow: 0 12px 28px #06111e38;
+  font: 550 .85rem/1.3 system-ui, sans-serif;
+}
+.ches-command-bar .ches-nav-menu:not([open]) > nav { display: none; }
+.ches-command-bar .ches-nav-menu nav :is(a, button, .account-tools > summary) {
+  box-sizing: border-box;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  min-width: 0;
-  gap: .2rem .5rem;
-  font: 550 .83rem/1.25 system-ui, sans-serif;
-}
-.ches-command-bar:is(.site-header, .topbar, [data-account-enabled]) :is(nav > a, nav > button, .site-account > a, .site-account > button, .account-tools > summary) {
-  display: inline-flex;
-  align-items: center;
-  gap: .32rem;
+  justify-content: flex-start;
+  gap: .4rem;
+  width: 100%;
   min-height: 44px;
   padding: .45rem .65rem;
+  margin: 0;
   border: 1px solid transparent;
-  border-radius: .75rem;
+  border-radius: .65rem;
   background: transparent;
   color: var(--ches-chrome-ink);
   font: inherit;
   text-decoration: none;
+  text-align: start;
 }
-.ches-command-bar:is(.site-header, .topbar, [data-account-enabled]) :is(nav > a, nav > button, .site-account > a, .site-account > button, .account-tools > summary):hover {
+.ches-command-bar .ches-nav-menu nav :is(a, button, summary):hover {
   background: var(--ches-chrome-control);
   border-color: var(--ches-chrome-line);
 }
-.ches-command-bar:is(.site-header, .topbar, [data-account-enabled]) .site-account {
-  flex-basis: auto;
-  gap: .2rem;
+.ches-command-bar .ches-nav-menu nav [hidden] { display: none !important; }
+.ches-command-bar .ches-nav-menu .site-account {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  margin: .3rem 0 0;
+  padding-top: .3rem;
+  border-top: 1px solid var(--ches-chrome-line);
 }
-.ches-command-bar .account-tools > div {
-  background: var(--ches-chrome-solid);
-  border-color: var(--ches-chrome-line);
-  color: var(--ches-chrome-ink);
-  border-radius: .85rem;
-  box-shadow: 0 12px 28px #06111e38;
+.ches-nav-menu .account-status:empty { display: none; }
+.ches-nav-menu .account-status { padding: .25rem .65rem; }
+.ches-command-bar .ches-nav-menu .account-tools > div {
+  position: static;
+  min-width: 0;
+  max-height: none;
+  overflow: visible;
+  padding: 0 0 0 .6rem;
+  border: 0;
+  background: transparent;
 }
-.ches-command-bar .account-tools > div a { color: inherit; }
-.ches-command-bar .ches-keys-trigger { grid-column: 3; }
-.ches-command-bar > :is(.wordmark, .brand, h1) { grid-column: 1; }
-.ches-command-bar > nav { grid-column: 2; }
-.ches-command-bar.topbar > nav { justify-content: flex-start; }
-.ches-command-bar.topbar > nav #logout { margin-inline-start: auto; }
+.ches-nav-menu[open] > nav { animation: ches-search-open 140ms ease-out both; }
 
 .ches-keys-trigger, .ches-keys-dialog {
   font-family: system-ui, -apple-system, sans-serif;
@@ -209,7 +263,7 @@ body[data-ches-keyboard="cockpit"] .ches-command-bar {
 }
 .ches-keys-search input::placeholder { color: var(--ches-chrome-muted); opacity: 1; }
 .ches-keys-search input:focus-visible { outline-offset: 1px; }
-.ches-keys-dialog [hidden], .ches-command-bar .ches-apps-trigger[hidden] { display: none; }
+.ches-keys-dialog [hidden] { display: none; }
 .ches-keys-controls, .ches-keys-pin-controls {
   display: flex;
   flex: none;
@@ -225,8 +279,7 @@ body[data-ches-keyboard="cockpit"] .ches-command-bar {
   flex-wrap: wrap;
   gap: .2rem;
 }
-.ches-keys-controls button, .ches-keys-settings button, .ches-keys-pin-controls button,
-.ches-command-bar .ches-apps-trigger {
+.ches-keys-controls button, .ches-keys-settings button, .ches-keys-pin-controls button {
   min-height: 44px;
   margin: 0;
   padding: .3rem .55rem;
@@ -239,8 +292,7 @@ body[data-ches-keyboard="cockpit"] .ches-command-bar {
   font-weight: 650;
   cursor: pointer;
 }
-.ches-keys-controls button:hover, .ches-keys-settings button:hover, .ches-keys-pin-controls button:hover,
-.ches-command-bar .ches-apps-trigger:hover {
+.ches-keys-controls button:hover, .ches-keys-settings button:hover, .ches-keys-pin-controls button:hover {
   background: var(--ches-chrome-control);
 }
 .ches-keys-controls button[aria-pressed="true"], .ches-keys-controls button[aria-expanded="true"] {
@@ -267,7 +319,7 @@ body[data-ches-keyboard="cockpit"] .ches-command-bar {
   color: inherit;
   font: inherit;
 }
-.ches-keys-settings button, .ches-keys-pin-controls button, .ches-command-bar .ches-apps-trigger {
+.ches-keys-settings button, .ches-keys-pin-controls button {
   border-color: var(--ches-chrome-line);
   background: var(--ches-chrome-control);
 }
@@ -396,36 +448,13 @@ body[data-ches-keyboard="cockpit"] .ches-command-bar {
   padding-inline-start: .4rem;
 }
 
-@media (max-width: 1150px) {
-  .ches-command-bar:is(.site-header, .topbar, [data-account-enabled]) {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-  .ches-command-bar:is(.site-header, .topbar, [data-account-enabled]) > nav {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    justify-content: flex-start;
-  }
-  .ches-command-bar:is(.site-header, .topbar, [data-account-enabled]) > .ches-keys-trigger {
-    grid-column: 2;
-    grid-row: 1;
-  }
-}
 @media (max-width: 600px) {
-  .ches-command-bar:is(.site-header, .topbar, [data-account-enabled]) > nav {
-    gap: .15rem .2rem;
-    font-size: .76rem;
-  }
-  .ches-command-bar:is(.site-header, .topbar, [data-account-enabled]) nav > a { padding-inline: .36rem; }
-  .ches-command-bar .site-account { margin-inline-start: 0; justify-content: flex-start; }
-  .ches-command-bar:is(.site-header, [data-account-enabled]) .site-account > :is(a, button),
-  .ches-command-bar:is(.site-header, [data-account-enabled]) .account-tools > summary {
-    padding-inline: .42rem;
-  }
-  .ches-command-bar .account-tools > div {
-    left: 0;
-    right: auto;
-  }
   .ches-keys-dialog { --ches-panel-top: max(.75rem, env(safe-area-inset-top)); }
+}
+@media (max-width: 400px) {
+  .ches-command-bar > .ches-keys-trigger kbd { display: none; }
+  .ches-command-bar.topbar .ches-keys-trigger-label { display: none; }
+  .ches-command-bar.topbar > .ches-keys-trigger { min-width: 44px; }
 }
 @media (max-width: 380px) {
   .ches-keys-controls { gap: .15rem; padding-inline: .4rem; }
@@ -448,7 +477,7 @@ body[data-ches-keyboard="cockpit"] .ches-command-bar {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ches-keys-dialog[open], .ches-keys-dialog::backdrop { animation: none; }
+  .ches-keys-dialog[open], .ches-keys-dialog::backdrop, .ches-nav-menu[open] > nav { animation: none; }
   .ches-keys-trigger { transition: none; }
   .ches-keys-trigger:active { transform: none; }
 }
