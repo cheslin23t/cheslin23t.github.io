@@ -14,6 +14,7 @@
     dirty = false,
     pendingConfirm = null,
     requestId = null,
+    checkingFreeTime = false,
     loadVersion = 0;
   const errors = {
     calendar_permission_required:
@@ -91,6 +92,7 @@
   function unavailable(error) {
     online = false;
     $("new-event").disabled = true;
+    $("find-free-time").disabled = true;
     $("delete-event").disabled = true;
     $("save-event").disabled = true;
     $("calendar-status").textContent = "Calendar offline";
@@ -109,9 +111,9 @@
     d.setUTCDate(d.getUTCDate() + amount);
     return d.toISOString().slice(0, 10);
   }
-  function midnight(date) {
+  function localInstant(date, hour = 0) {
     const [y, m, d] = date.split("-").map(Number),
-      wanted = Date.UTC(y, m - 1, d);
+      wanted = Date.UTC(y, m - 1, d, hour);
     let guess = wanted;
     const fmt = new Intl.DateTimeFormat("en-CA", {
       timeZone,
@@ -186,7 +188,61 @@
   }
   function range() {
     const days = visibleDays();
-    return { from: midnight(days[0]), to: midnight(nextDay(days.at(-1))) };
+    return { from: localInstant(days[0]), to: localInstant(nextDay(days.at(-1))) };
+  }
+
+  async function findFreeTime() {
+    if (!online || checkingFreeTime) return;
+    const control = $("find-free-time"), result = $("free-time-result");
+    const checked = calendars.filter(calendar => visibleCalendars.has(calendar.id));
+    if (!checked.length) {
+      result.textContent = "Select at least one calendar to check for free time.";
+      return;
+    }
+    const now = Date.now(), today = localToday(), zone = timeZone;
+    const days = Array.from({length: 14}, (_, offset) => nextDay(today, offset));
+    const from = localInstant(today), to = localInstant(nextDay(days.at(-1)));
+    const quarter = 15 * 60 * 1000, duration = 2 * quarter;
+    checkingFreeTime = true;
+    control.disabled = true;
+    result.textContent = "Checking the selected calendars for the next two weeks…";
+    try {
+      const responses = await Promise.all(checked.map(calendar => request(
+        "/calendar/v1/calendars/" + encodeURIComponent(calendar.id) + "/events?" + new URLSearchParams({from, to}),
+      )));
+      if (zone !== timeZone || visibleCalendars.size !== checked.length ||
+          checked.some(calendar => !visibleCalendars.has(calendar.id))) {
+        result.textContent = "The selected calendars changed. Check again.";
+        return;
+      }
+      const busyTimes = responses.flatMap(response => response.events.map(event => {
+        const start = Date.parse(event.allDay ? localInstant(event.start.slice(0, 10)) : event.startsAt);
+        const end = Date.parse(event.allDay ? localInstant(event.end.slice(0, 10)) : event.endsAt);
+        if (!Number.isFinite(start) || !Number.isFinite(end)) throw new Error("Invalid event dates");
+        return {start, end};
+      }));
+      const dateFormat = new Intl.DateTimeFormat(undefined, {weekday: "short", month: "short", day: "numeric", timeZone});
+      const timeFormat = new Intl.DateTimeFormat(undefined, {hour: "numeric", minute: "2-digit", timeZone});
+      for (const day of days) {
+        const weekday = new Date(day + "T12:00:00Z").getUTCDay();
+        if (weekday === 0 || weekday === 6) continue;
+        const opening = Date.parse(localInstant(day, 9));
+        const closing = Date.parse(localInstant(day, 17));
+        const first = opening + Math.max(0, Math.ceil((now - opening) / quarter)) * quarter;
+        for (let start = first; start + duration <= closing; start += quarter) {
+          const end = start + duration;
+          if (busyTimes.some(event => event.start < end && event.end > start)) continue;
+          result.textContent = `${dateFormat.format(start)}, ${timeFormat.formatRange(start, end)} (${zone}) is free on the selected calendars.`;
+          return;
+        }
+      }
+      result.textContent = "No free half-hour found on the selected calendars over the next two weeks, weekdays from 9 AM to 5 PM.";
+    } catch {
+      result.textContent = "Could not check every selected calendar. Try again.";
+    } finally {
+      checkingFreeTime = false;
+      control.disabled = !online;
+    }
   }
   function color(event) {
     return palette[
@@ -553,6 +609,7 @@
           minute: "2-digit",
         });
       $("new-event").disabled = !calendars.some((c) => c.writable);
+      $("find-free-time").disabled = checkingFreeTime;
       render();
     } catch (e) {
       if (generation !== loadVersion) return;
@@ -564,6 +621,7 @@
       else {
         online = false;
         $("new-event").disabled = true;
+        $("find-free-time").disabled = true;
         $("save-event").disabled = true;
         $("delete-event").disabled = true;
         $("calendar-status").textContent = "Could not sync calendars";
@@ -983,6 +1041,7 @@
   });
   $("retry-access").addEventListener("click", start);
   $("refresh-calendar").addEventListener("click", load);
+  $("find-free-time").addEventListener("click", findFreeTime);
   $("month").addEventListener("change", () => {
     if (/^\d{4}-\d{2}$/.test($("month").value))
       changeView(view, $("month").value + "-01");

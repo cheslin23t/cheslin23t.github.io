@@ -209,6 +209,70 @@ body[data-ches-keyboard="cockpit"] .ches-command-bar {
 }
 .ches-keys-search input::placeholder { color: var(--ches-chrome-muted); opacity: 1; }
 .ches-keys-search input:focus-visible { outline-offset: 1px; }
+.ches-keys-dialog [hidden], .ches-command-bar .ches-apps-trigger[hidden] { display: none; }
+.ches-keys-controls, .ches-keys-pin-controls {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .2rem .55rem;
+  padding: .25rem .7rem;
+  border-bottom: 1px solid var(--ches-chrome-line);
+}
+.ches-keys-scopes, .ches-keys-settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .2rem;
+}
+.ches-keys-controls button, .ches-keys-settings button, .ches-keys-pin-controls button,
+.ches-command-bar .ches-apps-trigger {
+  min-height: 44px;
+  margin: 0;
+  padding: .3rem .55rem;
+  border: 1px solid transparent;
+  border-radius: .65rem;
+  background: transparent;
+  color: var(--ches-chrome-ink);
+  font: inherit;
+  font-size: .81rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+.ches-keys-controls button:hover, .ches-keys-settings button:hover, .ches-keys-pin-controls button:hover,
+.ches-command-bar .ches-apps-trigger:hover {
+  background: var(--ches-chrome-control);
+}
+.ches-keys-controls button[aria-pressed="true"], .ches-keys-controls button[aria-expanded="true"] {
+  border-color: var(--ches-chrome-line);
+  background: var(--ches-chrome-selection);
+}
+.ches-keys-settings {
+  display: grid;
+  gap: .65rem;
+  min-height: 0;
+  padding: .85rem;
+  overflow: auto;
+}
+.ches-keys-settings-title { flex: 1; margin: 0; font-size: 1rem; }
+.ches-keys-settings p, .ches-keys-pin-controls p { margin: 0; color: var(--ches-chrome-muted); font-size: .83rem; }
+.ches-keys-shortcut-field { display: grid; justify-items: start; gap: .3rem; }
+.ches-keys-shortcut-field select {
+  min-height: 44px;
+  max-width: 100%;
+  padding-inline: .5rem;
+  border: 1px solid var(--ches-chrome-line);
+  border-radius: .65rem;
+  background: var(--ches-chrome-solid);
+  color: inherit;
+  font: inherit;
+}
+.ches-keys-settings button, .ches-keys-pin-controls button, .ches-command-bar .ches-apps-trigger {
+  border-color: var(--ches-chrome-line);
+  background: var(--ches-chrome-control);
+}
+.ches-keys-settings button:disabled { opacity: .55; cursor: default; }
+.ches-no-key-hints .ches-keys-shortcut-field { display: none; }
 .ches-keys-close {
   display: grid;
   place-items: center;
@@ -265,6 +329,8 @@ body[data-ches-keyboard="cockpit"] .ches-command-bar {
   -webkit-tap-highlight-color: transparent;
 }
 .ches-option-label { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.ches-option-detail { display: block; margin-top: .18rem; color: var(--ches-chrome-muted); }
+.ches-option-pin { flex: none; display: inline-flex; color: var(--ches-chrome-muted); font-size: .75rem; }
 .ches-option-tile {
   display: grid;
   flex: none;
@@ -360,6 +426,11 @@ body[data-ches-keyboard="cockpit"] .ches-command-bar {
     right: auto;
   }
   .ches-keys-dialog { --ches-panel-top: max(.75rem, env(safe-area-inset-top)); }
+}
+@media (max-width: 380px) {
+  .ches-keys-controls { gap: .15rem; padding-inline: .4rem; }
+  .ches-keys-scopes { gap: .12rem; }
+  .ches-keys-controls button { padding-inline: .38rem; font-size: .75rem; }
 }
 @supports ((backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px))) {
   @media (prefers-reduced-transparency: no-preference) and (prefers-reduced-motion: no-preference) {

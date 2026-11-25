@@ -26,10 +26,44 @@
   const openKeys = isMac ? '⌘ K' : 'Ctrl K';
   const shortcutPrefix = isMac ? '⌥ ⇧' : 'Alt Shift';
   const home = 'https://ches.dev/';
+  const settingsKey = 'ches.quick-search.v1';
+  const alternateKeys = {KeyK: `${shortcutPrefix} K`, Space: `${shortcutPrefix} Space`};
+  const defaultPreferences = {favorites: [], recent: [], shortcut: 'default'};
+  let preferences = readPreferences();
+
+  function readPreferences() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(settingsKey));
+      const ids = (values, limit) => Array.isArray(values) ? values.filter(value =>
+        typeof value === 'string' && value.length <= 150).slice(0, limit) : [];
+      return {
+        favorites: ids(saved?.favorites, 40), recent: ids(saved?.recent, 8),
+        shortcut: Object.hasOwn(alternateKeys, saved?.shortcut) ? saved.shortcut : 'default',
+      };
+    } catch {
+      return {...defaultPreferences};
+    }
+  }
+
+  function savePreferences() {
+    try { localStorage.setItem(settingsKey, JSON.stringify(preferences)); } catch {}
+  }
+
   const destinations = [
     ['Portfolio', home], ['CPU walkthrough', home + 'cpu/'],
     ['Printed storefront', home + '3D-Printing-Order-Management/index.html'],
     ['Troop 55 RSVP demo', home + 'BSA2/'],
+  ];
+  const appUrls = new Set([
+    ...destinations.map(([, url]) => url), home + 'calendar/', home + 'service-status/',
+    'https://api.ches.dev/book/', 'https://api.ches.dev/go/', 'https://convert.ches.dev/',
+    'https://images.ches.dev/admin', 'https://dash.ches.dev/',
+    'https://api.ches.dev/auth/if/user/#/library',
+  ]);
+  const tourStops = [
+    ['#cpu-run', 'Simulate a CPU program', 'Watch three recorded instructions update the registers.'],
+    ['#command', 'Try the JB-X command system', 'Start with help value to see a command and its arguments.'],
+    ['#project-printed', 'Explore the Printed storefront', 'Try the sample ordering flow and review its steps.'],
   ];
   const adminBase = 'https://api.ches.dev/auth/if/admin/#';
   const adminOverview = '/administration/overview';
@@ -57,6 +91,7 @@
     ],
     calendar: [
       ['New event', '#new-event', 'N'], ['Go to today', '#today', 'T'],
+      ['Find the next free 30 minutes', '#find-free-time'],
       ['Previous period', '#previous-month', 'ArrowLeft'], ['Next period', '#next-month', 'ArrowRight'],
       ['Day view', '[data-view="day"]', 'D'], ['Week view', '[data-view="week"]', 'W'],
       ['Month view', '[data-view="month"]', 'M'], ['Jump to month', '#month', 'J', 'focus'],
@@ -118,6 +153,7 @@
     spark: 'M12 2.5 14.6 9.4 21.5 12 14.6 14.6 12 21.5 9.4 14.6 2.5 12 9.4 9.4Z',
     arrow: 'M6 18 18 6M8 6h10v10',
     action: 'm8.5 6 9 6-9 6z',
+    star: 'm12 3 2.8 5.8 6.4.9-4.6 4.5 1.1 6.4-5.7-3-5.7 3 1.1-6.4L2.8 9.7l6.4-.9Z',
   };
 
   function icon(name) {
@@ -147,7 +183,7 @@
   function pageActions() {
     return (actionSets[page] || []).flatMap(([label, selector, key, operation, group = 'On this page']) => {
       const target = document.querySelector(selector);
-      return shown(target) ? [{label, target, key, operation, group}] : [];
+      return shown(target) ? [{id: `page:${page}:${selector}`, label, target, key, operation, group, local: true}] : [];
     });
   }
 
@@ -160,6 +196,7 @@
     const actions = pageActions();
     const seen = new Set();
     const result = [...actions];
+    if (page === 'portfolio') result.unshift({label: 'Start the portfolio tour', operation: 'tour', group: 'Try it now', local: true});
     const admin = adminLink();
     if (admin) {
       for (const [group, label, path, keywords] of adminActions) {
@@ -174,12 +211,21 @@
       const label = link.textContent.trim().replace(/\s+/g, ' ');
       if (!label || !/^(https?:|mailto:)/.test(href) || seen.has(href)) continue;
       seen.add(href);
-      result.push({label, target: link, href, group: accountLink ? 'Your tools' : 'Navigation', restricted: Boolean(accountLink || /\/auth\/if\/(admin|user)\//.test(href))});
+      const app = appUrls.has(href);
+      const restricted = Boolean(accountLink || /\/auth\/if\/(admin|user)\//.test(href));
+      result.push({id: app ? `app:${href}` : null, label, target: link, href, app,
+        accessTarget: accountLink ? link : null,
+        group: accountLink ? 'Your tools' : 'Navigation', restricted});
+      if (accountLink && href === 'https://dash.ches.dev/') {
+        result.push({label: 'Open server logs', href: 'https://dash.ches.dev/system/logs',
+          accessTarget: link, group: 'Operations', restricted: true});
+      }
     }
     for (const [label, href] of destinations) {
       if (seen.has(href)) continue;
-      result.push({label, href, group: 'Ches sites'});
+      result.push({id: `app:${href}`, label, href, group: 'Ches sites', app: true});
     }
+    if (page !== 'portfolio') result.push({label: 'Open live service health', href: home + '#services', group: 'Ches sites'});
     return result;
   }
 
@@ -202,7 +248,40 @@
   const close = element('button', {type: 'button', class: 'ches-keys-close', 'aria-label': 'Close quick search'});
   close.append(icon('close'));
   const header = element('div', {class: 'ches-keys-search'});
-  header.append(icon('search'), input, close);
+  const searchIcon = icon('search');
+  const settingsTitle = element('h3', {class: 'ches-keys-settings-title', hidden: ''}, 'Quick Search settings');
+  header.append(searchIcon, input, settingsTitle, close);
+  const controls = element('div', {class: 'ches-keys-controls'});
+  const scopes = element('div', {class: 'ches-keys-scopes', role: 'group', 'aria-label': 'Search scope'});
+  const scopeButtons = new Map();
+  for (const [value, label] of [['all', 'All'], ['app', 'This app'], ['apps', 'Apps'], ['files', 'My files'], ['tour', 'Portfolio tour']]) {
+    const button = element('button', {type: 'button', 'aria-pressed': String(value === 'all')}, label);
+    button.hidden = value === 'files' || value === 'tour';
+    button.addEventListener('click', () => setScope(value));
+    scopeButtons.set(value, button);
+    scopes.append(button);
+  }
+  const settingsButton = element('button', {type: 'button', 'aria-expanded': 'false',
+    'aria-controls': 'ches-keys-settings'}, 'Settings');
+  controls.append(scopes, settingsButton);
+  const settings = element('div', {class: 'ches-keys-settings', id: 'ches-keys-settings', hidden: ''});
+  const storageNote = element('p', {}, 'Favorites, history, and shortcuts are saved for this site in your browser.');
+  const shortcutField = element('div', {class: 'ches-keys-shortcut-field'});
+  const shortcutLabel = element('label', {for: 'ches-keys-shortcut'}, 'Open Quick Search with');
+  const shortcutSelect = element('select', {id: 'ches-keys-shortcut'});
+  shortcutSelect.append(new Option(openKeys, 'default'));
+  for (const [code, label] of Object.entries(alternateKeys)) shortcutSelect.append(new Option(label, code));
+  shortcutField.append(shortcutLabel, shortcutSelect);
+  const settingsActions = element('div', {class: 'ches-keys-settings-actions'});
+  const editPins = element('button', {type: 'button'}, 'Edit favorites');
+  const clearHistory = element('button', {type: 'button'}, 'Clear recent commands');
+  settingsActions.append(editPins, clearHistory);
+  settings.append(storageNote, shortcutField, settingsActions);
+  const pinControls = element('div', {class: 'ches-keys-pin-controls', hidden: ''});
+  const pinHelp = element('p', {}, 'Choose a result to pin or unpin it.');
+  const finishPins = element('button', {type: 'button'}, 'Done');
+  pinControls.append(pinHelp, finishPins);
+  const announcement = element('p', {role: 'status', class: 'ches-visually-hidden'});
   const list = element('div', {id: 'ches-keys-results', role: 'listbox', 'aria-label': 'Search results'});
   const status = element('p', {class: 'ches-keys-status', role: 'status'});
   const guide = element('footer', {class: 'ches-keys-guide'});
@@ -211,13 +290,17 @@
     hint.append(element('kbd', {'aria-hidden': 'true'}, keys), document.createTextNode(label));
     guide.append(hint);
   }
-  dialog.append(title, header, list, status, guide);
+  dialog.append(title, header, controls, settings, pinControls, list, status, announcement, guide);
+  const switcher = element('button', {type: 'button', class: 'ches-apps-trigger', 'aria-haspopup': 'dialog',
+    'aria-controls': dialog.id, 'aria-label': 'Switch apps'}, 'Apps');
+  switcher.addEventListener('click', event => open(event, 'apps'));
   function mountTrigger() {
     const toolbar = document.querySelector('header[data-account-enabled], header.site-header, header.topbar, header.bar, [data-ches-keyboard-mount]');
     if (!shown(toolbar)) return false;
     toolbar.classList.add('ches-command-bar');
     trigger.classList.remove('ches-keys-docked');
     toolbar.append(trigger);
+    toolbar.querySelector('nav')?.append(switcher);
     return true;
   }
 
@@ -227,7 +310,10 @@
     const app = page === 'drop' && document.querySelector('#app');
     if (app) {
       const observer = new MutationObserver(() => {
-        if (mountTrigger()) observer.disconnect();
+        if (mountTrigger()) {
+          observer.disconnect();
+          if (dialog.open) refreshEntries();
+        }
       });
       observer.observe(app, {childList: true, subtree: true});
     }
@@ -247,6 +333,12 @@
   let visibleResults = [];
   let active = -1;
   let workingEntries = [];
+  let scope = 'all';
+  let editingPins = false;
+  let fileTimer;
+  let fileRequest;
+  let fileResults = [];
+  let fileMessage = '';
 
   let rows = [];
   let pointerPosition;
@@ -278,14 +370,42 @@
     updatePointerSelection();
   }
 
+  function scopedEntries() {
+    if (scope === 'app') return workingEntries.filter(entry => entry.local);
+    if (scope === 'apps') return workingEntries.filter(entry => entry.app);
+    if (scope === 'files') return fileResults;
+    if (scope === 'tour') return tourStops.flatMap(([selector, label, detail]) => {
+      const entry = workingEntries.find(item => item.id === `page:${page}:${selector}`);
+      return entry ? [{...entry, label, detail, group: 'Portfolio tour'}] : [];
+    });
+    return workingEntries;
+  }
+
+  function prioritized(matches) {
+    const byId = new Map(matches.filter(entry => entry.id).map(entry => [entry.id, entry]));
+    const top = [];
+    for (const [group, ids] of [['Favorites', preferences.favorites], ['Recent', preferences.recent]]) {
+      for (const id of ids) {
+        const entry = byId.get(id);
+        if (!entry) continue;
+        byId.delete(id);
+        top.push({...entry, group});
+      }
+    }
+    return [...top, ...matches.filter(entry => !entry.id || byId.has(entry.id))];
+  }
+
   function render() {
     const words = input.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
-    const matches = workingEntries.filter(({label, group, keywords = ''}) => {
+    const matches = scopedEntries().filter(({label, group, keywords = ''}) => {
+      if (scope === 'files') return true;
       const searchable = `${label} ${group} ${keywords}`.toLowerCase();
       return words.every(word => searchable.includes(word));
     });
     const groupedEntries = new Map();
-    for (const entry of matches) {
+    const sorted = scope === 'all' && !words.length && !editingPins ? prioritized(matches) : matches;
+    for (const entry of sorted) {
+      if (editingPins && !entry.id) continue;
       if (!groupedEntries.has(entry.group)) groupedEntries.set(entry.group, []);
       groupedEntries.get(entry.group).push(entry);
     }
@@ -309,8 +429,17 @@
       });
       const tile = element('span', {class: 'ches-option-tile'});
       tile.append(icon(restricted ? 'lock' : isPublic ? 'spark' : entry.href ? 'arrow' : 'action'));
-      row.append(tile, element('span', {class: 'ches-option-label'}, entry.label));
-      if (entry.key) {
+      const caption = element('span', {class: 'ches-option-label'}, entry.label);
+      if (entry.detail) caption.append(element('small', {class: 'ches-option-detail'}, entry.detail));
+      row.append(tile, caption);
+      const pinned = preferences.favorites.includes(entry.id);
+      if (pinned || editingPins) {
+        if (pinned) row.setAttribute('aria-label', `${entry.label} (favorite)`);
+        row.append(element('span', {class: 'ches-option-pin', 'aria-hidden': 'true'},
+          editingPins ? (pinned ? 'Unpin' : 'Pin') : ''));
+        if (pinned && !editingPins) row.lastElementChild.append(icon('star'));
+      }
+      if (entry.key && !editingPins) {
         row.setAttribute('aria-keyshortcuts', 'Alt+Shift+' + entry.key);
         row.append(element('kbd', {'aria-hidden': 'true'}, keyLabel(entry.key)));
       }
@@ -318,11 +447,110 @@
       rows.push(row);
       groups.get(entry.group).append(row);
     }
-    status.textContent = visibleResults.length ? '' : 'No matching pages or actions.';
-    status.hidden = visibleResults.length > 0;
+    status.textContent = scope === 'files' ? fileMessage : visibleResults.length ? '' : 'No matching pages or actions.';
+    status.hidden = !settings.hidden || !status.textContent;
     list.scrollTop = 0;
     activate(visibleResults.length ? 0 : -1, false);
     updatePointerSelection();
+  }
+
+  function updateShortcut() {
+    const selected = preferences.shortcut;
+    triggerHint.textContent = alternateKeys[selected] || openKeys;
+    trigger.setAttribute('aria-keyshortcuts', selected === 'default' ?
+      (isMac ? 'Meta' : 'Control') + '+K' : 'Alt+Shift+' + (selected === 'KeyK' ? 'K' : 'Space'));
+    shortcutSelect.value = selected;
+  }
+
+  function showSettings(open) {
+    settings.hidden = !open;
+    settingsButton.setAttribute('aria-expanded', String(open));
+    input.hidden = searchIcon.hidden = list.hidden = guide.hidden = open;
+    settingsTitle.hidden = !open;
+    if (open) {
+      clearHistory.disabled = !preferences.recent.length;
+      status.hidden = true;
+      (root.classList.contains('ches-no-key-hints') ? editPins : shortcutSelect).focus();
+    } else {
+      render();
+      input.focus();
+    }
+  }
+
+  function setScope(value, focus = true) {
+    scope = value;
+    editingPins = editingPins && value !== 'tour' && value !== 'files';
+    pinControls.hidden = !editingPins;
+    for (const [name, button] of scopeButtons) button.setAttribute('aria-pressed', String(name === value));
+    scopeButtons.get('tour').hidden = value !== 'tour';
+    updateFilesScope();
+    input.placeholder = value === 'files' ? 'Search your file names…' : 'Search pages and actions…';
+    input.setAttribute('aria-label', value === 'files' ? 'Search your file names' : 'Search pages and actions');
+    input.value = '';
+    pointerPosition = undefined;
+    resetFileSearch();
+    list.removeAttribute('aria-busy');
+    if (value === 'files') fileMessage = 'Enter at least two characters to find a file.';
+    if (!settings.hidden) showSettings(false);
+    else render();
+    if (focus) input.focus();
+  }
+
+  function updateFilesScope() {
+    scopeButtons.get('files').hidden = page !== 'drop' || !shown(document.querySelector('#files'));
+  }
+
+  function resetFileSearch() {
+    clearTimeout(fileTimer);
+    fileRequest?.abort();
+    fileRequest = undefined;
+    fileResults = [];
+  }
+
+  function searchFiles() {
+    resetFileSearch();
+    const q = input.value.trim().slice(0, 100);
+    fileMessage = q.length < 2 ? 'Enter at least two characters to find a file.' : 'Searching your files…';
+    list.setAttribute('aria-busy', String(q.length >= 2));
+    render();
+    if (q.length >= 2) fileTimer = setTimeout(() => loadFileResults(q), 250);
+  }
+
+  async function loadFileResults(q) {
+    const controller = new AbortController();
+    fileRequest = controller;
+    const timeout = setTimeout(() => controller.abort(), 7500);
+    const options = {signal: controller.signal, cache: 'no-store'};
+    try {
+      const stateResponse = await fetch('/admin/api/state', options);
+      if (!stateResponse.ok) throw new Error();
+      const state = await stateResponse.json();
+      if (fileRequest !== controller) return;
+      if (state.authenticated !== true || (state.role === 'admin' && !state.subject)) {
+        fileMessage = 'Sign in to search your files.';
+        return;
+      }
+      const params = new URLSearchParams({q});
+      if (state.role === 'admin') params.set('owner', state.subject);
+      const response = await fetch(`/admin/api/files?${params}`, options);
+      if (!response.ok) throw new Error();
+      const data = await response.json();
+      if (fileRequest !== controller) return;
+      fileResults = data.files.slice(0, 100).flatMap(file =>
+        typeof file.name === 'string' && /^[0-9a-f-]{36}$/i.test(file.id) ? [{
+          label: file.name, href: `/admin/api/preview/${file.id}`, restricted: true, group: 'Files in your library',
+        }] : []);
+      fileMessage = fileResults.length ? (data.nextCursor ? 'Showing the first 100 files. Narrow your search for more specific results.' : '') :
+        'No files match this name.';
+    } catch {
+      if (fileRequest === controller) fileMessage = 'Could not search your files. Edit the search to try again.';
+    } finally {
+      clearTimeout(timeout);
+      if (fileRequest === controller && dialog.open && scope === 'files') {
+        list.removeAttribute('aria-busy');
+        render();
+      }
+    }
   }
 
   const adminObserver = new MutationObserver(refreshAdminActions);
@@ -336,17 +564,21 @@
   function refreshEntries() {
     adminAvailable = Boolean(adminLink());
     workingEntries = entries();
+    updateFilesScope();
     render();
   }
 
-  function open(event) {
+  function open(event, initialScope = 'all') {
     if (dialog.open || document.querySelector('dialog[open], .modal.show')) return;
     focusBefore = event?.currentTarget ||
       (document.activeElement === document.body ? trigger : document.activeElement);
     pointerPosition = undefined;
     input.value = '';
     dialog.showModal();
-    refreshEntries();
+    editingPins = false;
+    adminAvailable = Boolean(adminLink());
+    workingEntries = entries();
+    setScope(initialScope);
     const toolbar = trigger.closest('.ches-command-bar') || (page === 'drop' && document.querySelector('#app'));
     if (toolbar) adminObserver.observe(toolbar, {
       subtree: true, childList: true, attributes: true,
@@ -360,8 +592,7 @@
       if (adminLink()) location.assign(entry.href);
       return;
     }
-    if (entry.group === 'Your tools' &&
-        (entry.target.hidden || entry.target.closest('.account-tools').hidden)) return;
+    if (entry.accessTarget && (entry.accessTarget.hidden || entry.accessTarget.closest('.account-tools').hidden)) return;
     if (entry.operation === 'focus' || entry.operation === 'run-and-focus') {
       if (!shown(entry.target)) return;
       entry.target.scrollIntoView({block: 'center'});
@@ -382,6 +613,31 @@
 
   function choose(entry) {
     if (!entry) return;
+    if (entry.operation === 'tour') {
+      setScope('tour');
+      return;
+    }
+    if (editingPins) {
+      const pinned = preferences.favorites.includes(entry.id);
+      if (!pinned && preferences.favorites.length >= 40) {
+        announcement.textContent = 'Unpin a favorite before adding another.';
+        return;
+      }
+      preferences.favorites = pinned ? preferences.favorites.filter(id => id !== entry.id) :
+        [...preferences.favorites, entry.id];
+      savePreferences();
+      announcement.textContent = `${entry.label} ${pinned ? 'unpinned' : 'pinned'}.`;
+      const scroll = list.scrollTop;
+      render();
+      list.scrollTop = scroll;
+      activate(visibleResults.findIndex(item => item.id === entry.id), false);
+      input.focus({preventScroll: true});
+      return;
+    }
+    if (entry.id) {
+      preferences.recent = [entry.id, ...preferences.recent.filter(id => id !== entry.id)].slice(0, 8);
+      savePreferences();
+    }
     dialog.close();
     run(entry);
   }
@@ -410,8 +666,41 @@
 
   trigger.addEventListener('click', open);
   close.addEventListener('click', dismiss);
+  settingsButton.addEventListener('click', () => showSettings(settings.hidden));
+  shortcutSelect.addEventListener('change', () => {
+    preferences.shortcut = shortcutSelect.value;
+    savePreferences();
+    updateShortcut();
+  });
+  clearHistory.addEventListener('click', () => {
+    preferences.recent = [];
+    savePreferences();
+    clearHistory.disabled = true;
+    announcement.textContent = 'Recent commands cleared.';
+    editPins.focus();
+  });
+  editPins.addEventListener('click', () => {
+    editingPins = true;
+    setScope('all');
+  });
+  finishPins.addEventListener('click', () => {
+    editingPins = false;
+    pinControls.hidden = true;
+    render();
+    input.focus();
+  });
+  addEventListener('storage', event => {
+    if (event.key !== settingsKey) return;
+    preferences = readPreferences();
+    updateShortcut();
+    if (dialog.open && settings.hidden) render();
+  });
+  updateShortcut();
   dialog.addEventListener('close', () => {
-    if (!dialog.open) adminObserver.disconnect();
+    if (!dialog.open) {
+      adminObserver.disconnect();
+      resetFileSearch();
+    }
   });
   dialog.addEventListener('cancel', event => {
     event.preventDefault();
@@ -431,9 +720,14 @@
   });
   input.addEventListener('input', event => {
     pointerPosition = undefined;
-    if (!event.isComposing) render();
+    if (event.isComposing) return;
+    if (scope === 'files') searchFiles();
+    else render();
   });
-  input.addEventListener('compositionend', render);
+  input.addEventListener('compositionend', () => {
+    if (scope === 'files') searchFiles();
+    else render();
+  });
   document.addEventListener('ches:tools-updated', () => {
     if (dialog.open) refreshEntries();
   });
@@ -460,10 +754,14 @@
   document.addEventListener('keydown', event => {
     if (event.defaultPrevented || event.isComposing || event.repeat) return;
     const primary = isMac ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey;
-    if (primary && !event.altKey && !event.shiftKey && event.code === 'KeyK') {
+    const matchesOpen = preferences.shortcut === 'default' ?
+      primary && !event.altKey && !event.shiftKey && event.code === 'KeyK' :
+      !event.metaKey && !event.ctrlKey && event.altKey && event.shiftKey && event.code === preferences.shortcut;
+    if (matchesOpen) {
       if (dialog.open) {
         event.preventDefault();
-        input.focus();
+        if (settings.hidden) input.focus();
+        else showSettings(false);
       } else if (!document.querySelector('dialog[open], .modal.show')) {
         event.preventDefault();
         open();
