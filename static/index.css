@@ -220,65 +220,8 @@ main,
 .intro-copy .text-link {
   border: 0;
 }
-.featured-tools {
-  margin-block: clamp(32px, 5vw, 64px);
-  padding-block: clamp(18px, 3vw, 32px);
-  border-block: 1px solid var(--line);
-  scroll-margin-top: 13rem;
-}
-.featured-tools-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px 20px;
-}
-.featured-tools-heading h2 {
-  font-size: clamp(24px, 3vw, 35px);
-  letter-spacing: -.04em;
-}
-.featured-tools-heading [hidden] {
-  display: none;
-}
-.featured-tools-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px clamp(24px, 6vw, 80px);
-  margin-top: 20px;
-}
-.featured-tools h3 {
-  margin: 0 0 8px;
-  font-size: .8rem;
-  color: var(--muted);
-}
-.featured-tools ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.featured-tools li {
-  display: grid;
-  gap: 3px;
-  padding-block: 9px;
-  border-top: 1px solid var(--line);
-  line-height: 1.4;
-}
-.featured-tools li a {
-  justify-self: start;
-  color: var(--accent);
-  font-weight: 650;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.featured-tools li span {
-  color: var(--muted);
-  font-size: .875rem;
-}
 #cpu-run, #command {
   scroll-margin-top: 14rem;
-}
-@media (max-width: 520px) {
-  .featured-tools-grid { grid-template-columns: 1fr; }
 }
 .availability-link {
   display: flex;
