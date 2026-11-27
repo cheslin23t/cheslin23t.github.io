@@ -2,7 +2,8 @@
   'use strict';
 
   const page = document.body.dataset.chesKeyboard;
-  if (!page || ['cpu', 'printed', 'scouts'].includes(page) ||
+  const demo = ['cpu', 'printed', 'scouts'].includes(page);
+  if (!page || (demo && page !== 'cpu') ||
       typeof HTMLDialogElement.prototype.showModal !== 'function') return;
 
   const platform = navigator.userAgentData?.platform || navigator.platform;
@@ -14,7 +15,7 @@
   const root = document.documentElement;
   root.classList.toggle('ches-no-key-hints', Boolean(handheld));
   if (getComputedStyle(root).colorScheme === 'dark') root.classList.add('ches-chrome-dark');
-  if (handheld) {
+  if (handheld && !demo) {
     function detectKeyboard(event) {
       if (!event.isTrusted || event.isComposing ||
           !(event.ctrlKey || event.metaKey || event.altKey ||
@@ -346,10 +347,27 @@
     if (!shown(toolbar)) return false;
     toolbar.classList.add('ches-command-bar');
     trigger.classList.remove('ches-keys-docked');
-    toolbar.append(trigger);
+    if (!demo) toolbar.append(trigger);
+    if (page === 'portfolio') {
+      const signIn = toolbar.querySelector('[data-account-login]');
+      if (signIn) {
+        signIn.classList.add('ches-direct-login');
+        toolbar.append(signIn);
+      }
+    }
+    if (toolbar.classList.contains('site-header')) {
+      const updateHeader = () => toolbar.toggleAttribute('data-scrolled', scrollY > 24);
+      updateHeader();
+      addEventListener('scroll', updateHeader, {passive: true});
+    }
     const navigation = toolbar.querySelector('nav');
     if (navigation) mountMenu(toolbar, navigation);
     return true;
+  }
+
+  if (demo) {
+    mountTrigger();
+    return;
   }
 
   if (!mountTrigger()) {
