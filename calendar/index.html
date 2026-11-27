@@ -11,9 +11,9 @@
     <script src="/static/appearance.js"></script>
     <link rel="stylesheet" href="/static/index.css" />
     <link rel="stylesheet" href="/static/account.css?v=tools" />
-    <link rel="stylesheet" href="/calendar/calendar.css?v=calendar-editor-20261106" />
+    <link rel="stylesheet" href="/calendar/calendar.css?v=quick-times" />
     <script src="/static/account.js?v=booking-tools" defer></script>
-    <script src="/calendar/calendar.js?v=find-free-time" defer></script>
+    <script src="/calendar/calendar.js?v=quick-times" defer></script>
     <link rel="stylesheet" href="/static/keyboard.css" />
     <script src="/static/keyboard.js" defer></script>
   </head>
@@ -167,6 +167,32 @@
                 <label class="calendar-checkbox" for="event-all-day">
                   <input type="checkbox" id="event-all-day" />All day
                 </label>
+              </div>
+              <div id="event-quick-times" class="event-quick-times">
+                <div class="event-durations" role="group" aria-label="Event duration">
+                  <button type="button" data-duration="15">15 min</button>
+                  <button type="button" data-duration="30">30 min</button>
+                  <button type="button" data-duration="60">1 hour</button>
+                  <button type="button" data-duration="90">90 min</button>
+                </div>
+                <details id="event-schedules">
+                  <summary>Use a schedule</summary>
+                  <div class="calendar-two">
+                    <label for="schedule-date">Date <input id="schedule-date" type="date" /></label>
+                    <label for="schedule-list">Schedule <select id="schedule-list"></select></label>
+                  </div>
+                  <div id="schedule-blocks" class="event-durations" role="group" aria-label="Schedule time blocks"></div>
+                  <div class="calendar-two">
+                    <label for="schedule-name">Schedule name
+                      <input id="schedule-name" maxlength="48" placeholder="e.g. Work or school" />
+                    </label>
+                    <label for="schedule-block-name">Time block name
+                      <input id="schedule-block-name" maxlength="48" placeholder="Optional" />
+                    </label>
+                  </div>
+                  <button type="button" id="save-schedule-block">Save manual times to schedule</button>
+                  <p id="schedule-message" class="calendar-note" role="status"></p>
+                </details>
               </div>
               <div class="calendar-two">
                 <label for="event-start">Starts

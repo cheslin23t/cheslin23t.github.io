@@ -897,3 +897,45 @@ dialog p {
   width: 100%;
   text-align: left;
 }
+
+.event-quick-times {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.event-quick-times[hidden] { display: none; }
+.event-durations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.event-quick-times button { min-height: 44px; }
+#event-schedules {
+  border-block: 1px solid var(--line);
+  padding-bottom: 5px;
+}
+#event-schedules > summary {
+  display: list-item;
+  cursor: pointer;
+  min-height: 44px;
+  padding: 10px 0;
+  font-weight: 600;
+}
+#event-schedules[open] > :not(summary) { margin-bottom: 9px; }
+#schedule-message:empty, #schedule-blocks:empty { display: none; }
+.event-time-block {
+  display: inline-flex;
+  max-width: 100%;
+}
+.event-time-block > button:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+.event-time-block > button:last-child {
+  min-width: 44px;
+  border-inline-start: 0;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}

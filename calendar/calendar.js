@@ -16,6 +16,109 @@
     requestId = null,
     checkingFreeTime = false,
     loadVersion = 0;
+  const scheduleKey = "ches.calendar.time-blocks.v1";
+  const clockTime = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+  let schedules = loadSchedules();
+
+  function loadSchedules() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(scheduleKey));
+      if (!Array.isArray(saved)) return [];
+      return saved.filter(schedule => typeof schedule?.name === "string" && schedule.name.trim() &&
+        schedule.name.length <= 48 && Array.isArray(schedule.blocks)).slice(0, 20).map(schedule => ({
+        name: schedule.name,
+        blocks: schedule.blocks.filter(block => typeof block?.label === "string" && block.label.length <= 48 &&
+          clockTime.test(block.start) && clockTime.test(block.end) && block.start < block.end).slice(0, 30),
+      }));
+    } catch { return []; }
+  }
+
+  function persistSchedules(message) {
+    try {
+      localStorage.setItem(scheduleKey, JSON.stringify(schedules));
+      $("schedule-message").textContent = message;
+    } catch {
+      $("schedule-message").textContent = "Browser storage is unavailable. These changes last until you leave this page.";
+    }
+  }
+
+  function renderSchedules(name) {
+    const select = $("schedule-list");
+    select.replaceChildren(new Option(schedules.length ? "Choose a schedule" : "No saved schedules", ""),
+      ...schedules.map(schedule => new Option(schedule.name, schedule.name)));
+    select.value = schedules.some(schedule => schedule.name === name) ? name : (schedules[0]?.name ?? "");
+    renderScheduleBlocks();
+  }
+
+  function renderScheduleBlocks() {
+    const select = $("schedule-list");
+    const schedule = schedules.find(item => item.name === select.value);
+    const blocks = $("schedule-blocks");
+    blocks.replaceChildren();
+    $("schedule-name").value = schedule?.name ?? "";
+    if (!schedule) return;
+    for (const block of schedule.blocks) {
+      const label = [block.label, `${block.start}–${block.end}`].filter(Boolean).join(" · ");
+      const group = document.createElement("span");
+      group.className = "event-time-block";
+      const apply = button(label, () => {
+        const date = $("schedule-date");
+        if (!date.value) {
+          $("schedule-message").textContent = "Choose a date for the event.";
+          date.focus();
+          return;
+        }
+        $("event-start").value = `${date.value}T${block.start}`;
+        $("event-end").value = `${date.value}T${block.end}`;
+        dirty = true;
+        $("schedule-message").textContent = `Applied ${label}.`;
+      });
+      const remove = button("×", () => {
+        schedule.blocks = schedule.blocks.filter(item => item !== block);
+        if (!schedule.blocks.length) schedules = schedules.filter(item => item !== schedule);
+        renderSchedules(schedule.name);
+        persistSchedules("Time block removed.");
+        select.focus();
+      });
+      remove.setAttribute("aria-label", `Remove ${label}`);
+      group.append(apply, remove);
+      blocks.append(group);
+    }
+  }
+
+  function saveScheduleBlock() {
+    const name = $("schedule-name").value.trim();
+    const label = $("schedule-block-name").value.trim();
+    const [startDate, startValue] = $("event-start").value.split("T");
+    const [endDate, endValue] = $("event-end").value.split("T");
+    const start = startValue?.slice(0, 5), end = endValue?.slice(0, 5);
+    const message = $("schedule-message");
+    if (!name) {
+      message.textContent = "Enter a name for the schedule.";
+      $("schedule-name").focus();
+      return;
+    }
+    if (startDate !== endDate || !clockTime.test(start) || !clockTime.test(end) || start >= end) {
+      message.textContent = "Set a start and end time on the same day before saving a block.";
+      return;
+    }
+    let schedule = schedules.find(item => item.name === name);
+    if (!schedule && schedules.length >= 20) {
+      message.textContent = "Remove a schedule before saving another.";
+      return;
+    }
+    if (!schedule) schedules.push(schedule = {name, blocks: []});
+    const same = schedule.blocks.find(block => block.start === start && block.end === end && block.label === label);
+    if (!same && schedule.blocks.length >= 30) {
+      message.textContent = "Remove a time block before adding another to this schedule.";
+      return;
+    }
+    if (!same) schedule.blocks.push({label, start, end});
+    schedule.blocks.sort((a, b) => a.start.localeCompare(b.start));
+    $("schedule-block-name").value = "";
+    renderSchedules(name);
+    persistSchedules(same ? "This time block is already saved." : "Time block saved.");
+  }
   const errors = {
     calendar_permission_required:
       "Your account does not have calendar access. Ask the owner to enable calendar access for you.",
@@ -786,6 +889,13 @@
     );
     $("delete-event").hidden = !event?.writable;
     $("delete-event").disabled = !online;
+    $("event-quick-times").hidden = Boolean(event) || $("event-all-day").checked;
+    $("event-schedules").open = false;
+    $("schedule-date").value = $("event-start").value.slice(0, 10);
+    $("schedule-block-name").value = "";
+    $("schedule-message").textContent = schedules.length ? "" :
+      "Set Starts and Ends below, then save those times to a named schedule.";
+    renderSchedules($("schedule-list").value);
     editor.showModal();
     editor.querySelector(".editor-body").scrollTop = 0;
     $("event-title").focus();
@@ -860,6 +970,7 @@
     };
   }
   form.addEventListener("input", (e) => {
+    if (e.target.closest("#event-quick-times")) return;
     if (e.target !== $("edit-scope")) dirty = true;
     if (e.target === $("event-reminders"))
       $("event-reminders").dataset.changed = "true";
@@ -893,9 +1004,33 @@
     }
     if (value !== end.value) end.value = value;
   }
-  $("event-start").addEventListener("input", syncEventEnd);
+  $("event-start").addEventListener("input", () => {
+    syncEventEnd();
+    $("schedule-date").value = $("event-start").value.slice(0, 10);
+  });
+  $("event-quick-times").addEventListener("click", event => {
+    const duration = Number(event.target.closest("[data-duration]")?.dataset.duration);
+    const start = Date.parse($("event-start").value + "Z");
+    if (!duration || !Number.isFinite(start)) return;
+    $("event-end").value = new Date(start + duration * 60_000).toISOString().slice(0, 16);
+    dirty = true;
+  });
+  $("schedule-list").addEventListener("change", renderScheduleBlocks);
+  $("event-schedules").addEventListener("keydown", event => {
+    if (event.key === "Enter" && event.target.matches('input:not([type="date"])')) {
+      event.preventDefault();
+      saveScheduleBlock();
+    }
+  });
+  addEventListener("storage", event => {
+    if (event.key !== scheduleKey) return;
+    schedules = loadSchedules();
+    if (!editor.open) renderSchedules();
+  });
+  $("save-schedule-block").addEventListener("click", saveScheduleBlock);
   $("event-all-day").addEventListener("change", () => {
     const allDay = $("event-all-day").checked;
+    $("event-quick-times").hidden = Boolean(selected) || allDay;
     for (const id of ["event-start", "event-end"]) {
       const input = $(id);
       const value = input.value;
