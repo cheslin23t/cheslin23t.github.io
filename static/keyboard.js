@@ -2,7 +2,8 @@
   'use strict';
 
   const page = document.body.dataset.chesKeyboard;
-  if (!page || typeof HTMLDialogElement.prototype.showModal !== 'function') return;
+  if (!page || ['cpu', 'printed', 'scouts'].includes(page) ||
+      typeof HTMLDialogElement.prototype.showModal !== 'function') return;
 
   const platform = navigator.userAgentData?.platform || navigator.platform;
   const apple = /mac|iphone|ipad|ipod|ios/i.test(platform);
@@ -25,6 +26,7 @@
   }
   const openKeys = isMac ? '⌘ K' : 'Ctrl K';
   const shortcutPrefix = isMac ? '⌥ ⇧' : 'Alt Shift';
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const home = 'https://ches.dev/';
   const settingsKey = 'ches.quick-search.v1';
   const alternateKeys = {KeyK: `${shortcutPrefix} K`, Space: `${shortcutPrefix} Space`};
@@ -49,124 +51,108 @@
     try { localStorage.setItem(settingsKey, JSON.stringify(preferences)); } catch {}
   }
 
-  const destinations = [
-    ['Portfolio', home], ['CPU walkthrough', home + 'cpu/'],
-    ['Printed storefront', home + '3D-Printing-Order-Management/index.html'],
-    ['Troop 55 RSVP demo', home + 'BSA2/'],
-  ];
+  const destinations = [['Portfolio', home]];
   const appUrls = new Set([
     home + 'calendar/', 'https://images.ches.dev/admin', 'https://convert.ches.dev/',
     'https://api.ches.dev/book/', 'https://api.ches.dev/go/', home + 'service-status/', 'https://dash.ches.dev/',
     'https://api.ches.dev/auth/if/user/#/library',
     ...destinations.map(([, url]) => url),
   ]);
-  const tourStops = [
-    ['#cpu-run', 'Simulate a CPU program', 'Watch three recorded instructions update the registers.'],
-    ['#command', 'Try the JB-X command system', 'Start with help value to see a command and its arguments.'],
-    ['#project-printed', 'Explore the Printed storefront', 'Try the sample ordering flow and review its steps.'],
-  ];
   const adminBase = 'https://api.ches.dev/auth/if/admin/#';
   const adminOverview = '/administration/overview';
   const adminLinks = 'header .site-account > a[href], header nav a[href], #dashboard-admin[href]';
   const adminActions = [
-    ['Invitations', 'Create or manage invitations', '/flow/stages/invitations', 'invite people onboarding enrollment new user'],
-    ['Invitations', 'Review Ches enrollment flow', '/flow/flows/ches-invite-enrollment', 'invite invitation standard account signup'],
-    ['Invitations', 'Review Images viewer flow', '/flow/flows/ches-invite-images-viewer', 'invite invitation read only ches drop'],
-    ['Invitations', 'Review Images member flow', '/flow/flows/ches-invite-images-member', 'invite invitation upload ches drop'],
+    ['Invitations', 'Manage invitations', '/flow/stages/invitations', 'invite people create onboarding enrollment new user'],
+    ['Invitations', 'Review account enrollment', '/flow/flows/ches-invite-enrollment', 'invite invitation standard account signup flow'],
+    ['Invitations', 'Review Images viewer enrollment', '/flow/flows/ches-invite-images-viewer', 'invite invitation read only ches drop flow'],
+    ['Invitations', 'Review Images member enrollment', '/flow/flows/ches-invite-images-member', 'invite invitation upload ches drop flow'],
     ['People and permissions', 'Manage users', '/identity/users', 'people accounts user access memberships'],
-    ['People and permissions', 'Manage groups and memberships', '/identity/groups', 'people user access add remove members'],
+    ['People and permissions', 'Manage group membership', '/identity/groups', 'people groups user access add remove members'],
     ['People and permissions', 'Manage roles and permissions', '/identity/roles', 'role grants access rights group'],
   ];
   const actionSets = {
     portfolio: [
-      ['Run the CPU demo', '#cpu-run', null, 'run-and-focus', 'Demos'],
-      ['Try a JB-X command', '#command', null, 'focus', 'Demos'],
-      ['Live services', '#services', 'L', 'focus', 'Public resources'],
-      ['Calendar availability', '#availability', null, 'focus', 'Public resources'],
-      ['Featured work', '#work', null, 'focus', 'Portfolio pages'],
+      ['View live services', '#services', 'L', 'focus', 'Public resources'],
+      ['Check calendar availability', '#availability', null, 'focus', 'Public resources'],
+      ['Selected work', '#work', null, 'focus', 'Portfolio pages'],
       ['Other projects', '#other-projects', null, 'focus', 'Portfolio pages'],
-      ['About', '#about', null, 'focus', 'Portfolio pages'],
+      ['About Colin', '#about', null, 'focus', 'Portfolio pages'],
       ['BadAvo', '#project-badavo', null, 'focus', 'Projects'],
-      ['Printed project', '#project-printed', null, 'focus', 'Projects'],
-      ['JB-X project', '#project-jbx', null, 'focus', 'Projects'],
-      ['CPU project', '#project-cpu', null, 'focus', 'Projects'],
-      ['Step CPU example', '#cpu-step', null, null, 'Demos'],
-      ['Reset CPU example', '#cpu-reset', null, null, 'Demos'],
+      ['Printed', '#project-printed', null, 'focus', 'Projects'],
+      ['JB-X', '#project-jbx', null, 'focus', 'Projects'],
+      ['CPU V2', '#project-cpu', null, 'focus', 'Projects'],
     ],
     calendar: [
-      ['New event', '#new-event', 'N', null, 'Scheduling'], ['Go to today', '#today', 'T'],
-      ['Find the next free 30 minutes', '#find-free-time', null, null, 'Scheduling'],
-      ['Previous period', '#previous-month', 'ArrowLeft'], ['Next period', '#next-month', 'ArrowRight'],
-      ['Day view', '[data-view="day"]', 'D'], ['Week view', '[data-view="week"]', 'W'],
-      ['Month view', '[data-view="month"]', 'M'], ['Jump to month', '#month', 'J', 'focus'],
+      ['Create an event', '#new-event', 'N', null, 'Scheduling'],
+      ['Find 30 free minutes', '#find-free-time', null, null, 'Scheduling'],
+      ['Go to today', '#today', 'T', null, 'Calendar navigation'],
+      ['Previous dates', '#previous-month', 'ArrowLeft', null, 'Calendar navigation'],
+      ['Next dates', '#next-month', 'ArrowRight', null, 'Calendar navigation'],
+      ['Show day view', '[data-view="day"]', 'D', null, 'Calendar navigation'],
+      ['Show week view', '[data-view="week"]', 'W', null, 'Calendar navigation'],
+      ['Show month view', '[data-view="month"]', 'M', null, 'Calendar navigation'],
+      ['Jump to a month', '#month', 'J', 'focus', 'Calendar navigation'],
     ],
-    status: [['Refresh service status', '#service-refresh', 'R']],
-    cpu: [
-      ['Focus 3D CPU viewer', '#build-canvas', 'V', 'focus'], ['Restore 3D view', '#restore-view', 'R'],
-      ['Play or pause CPU replay', '#run-play', 'P'], ['Focus replay speed', '#run-speed', null, 'focus'],
-    ],
+    status: [['Refresh service status', '#service-refresh', 'R', null, 'Operations']],
     drop: [
-      ['Choose files', '#choose-files', 'U', null, 'File actions'], ['Refresh files', '#refresh', 'R'],
-      ['Go to files', '#files-heading', 'F', 'focus'], ['Go to collections', '#groups-heading', 'G', 'focus'],
+      ['Choose files to upload', '#choose-files', 'U', null, 'File actions'],
+      ['Refresh files', '#refresh', 'R', null, 'File actions'],
+      ['View files', '#files-heading', 'F', 'focus', 'File actions'],
+      ['View collections', '#groups-heading', 'G', 'focus', 'File actions'],
       ['Select visible files', '#select-all', null, null, 'File actions'],
-      ['Clear file selection', '#clear-selection', null, null, 'File actions'], ['Load more files', '#load-more'],
+      ['Clear file selection', '#clear-selection', null, null, 'File actions'],
     ],
     convert: [
-      ['Choose files to convert', '#file', 'U'], ['Choose the batch output format', '#batch-target', 'F', 'focus'],
-      ['Focus Convert button', '#submit', null, 'focus'],
-      ['Download converted files as ZIP', '#download-zip', null, null, 'Downloads'],
+      ['Choose files to convert', '#file', 'U', null, 'File conversion'],
+      ['Set batch output format', '#batch-target', 'F', 'focus', 'File conversion'],
+      ['Download converted files as ZIP', '#download-zip', null, null, 'File conversion'],
     ],
     links: [
-      ['Enter a destination URL', '#destination', 'N', 'focus'], ['Enter a short-link alias', '#alias', 'A', 'focus'],
-      ['Copy new short link', '#copy-new'], ['Load more links', '#load-more'],
+      ['Start a short link', '#destination', 'N', 'focus', 'Short links'],
+      ['Set a custom alias', '#alias', 'A', 'focus', 'Short links'],
+      ['Copy the new short link', '#copy-new', null, null, 'Short links'],
     ],
     bookings: [
-      ['Name a booking link', '#booking-label', 'N', 'focus'], ['Open week picker', '#open-week-picker', 'W'],
-      ['Add a time slot', '#add-slot', 'A'], ['Refresh booking links', '#refresh-links', 'R'],
-      ['Copy created booking link', '#copy-created'], ['Load more booking links', '#load-links'],
+      ['Start a booking link', '#booking-label', 'N', 'focus', 'Booking links'],
+      ['Pick times on the calendar', '#open-week-picker', 'W', null, 'Booking links'],
+      ['Add a time slot', '#add-slot', 'A', null, 'Booking links'],
+      ['Copy the new booking link', '#copy-created', null, null, 'Booking links'],
+      ['Refresh booking links', '#refresh-links', 'R', null, 'Booking links'],
     ],
     bookingGuest: [
-      ['Previous month with available times', '#guest-prev', 'ArrowLeft'],
-      ['Next month with available times', '#guest-next', 'ArrowRight'],
-      ['Enter your name', '#guest-name', null, 'focus'], ['Retry loading availability', '#guest-retry'],
-    ],
-    printed: [
-      ['Open order form', '#open-order-form', 'N'],
-      ['Focus order form', '#order-form', null, 'focus'],
-      ['Focus model size', '#modelSize', null, 'focus'],
-      ['Open Printed admin sign-in', '[data-bs-target="#loginModal"]'],
-    ],
-    scouts: [
-      ['Go to trip calendar', '#calendar', 'T', 'focus'], ['Go to next trip', '#next-trip', 'N', 'focus'],
-      ['Start RSVP form', '#demo-rsvp-form input:not([type="hidden"])', 'N', 'focus'],
-      ['Go to going responses', '#going-heading', null, 'focus'],
-      ['Go to not going responses', '#not-going-heading', null, 'focus'],
+      ['Previous month with openings', '#guest-prev', 'ArrowLeft', null, 'Reservations'],
+      ['Next month with openings', '#guest-next', 'ArrowRight', null, 'Reservations'],
+      ['Enter the guest name', '#guest-name', null, 'focus', 'Reservations'],
+      ['Reload available times', '#guest-retry', null, null, 'Reservations'],
     ],
   };
   const primaryActions = {
     portfolio: ['#work', '#services', '#availability'],
     calendar: ['#new-event', '#find-free-time', '#today'],
     status: ['#service-refresh'],
-    cpu: ['#run-play', '#restore-view'],
     drop: ['#choose-files', 'files', '#groups-heading'],
     convert: ['#file', '#batch-target', '#download-zip'],
     links: ['#destination', '#copy-new'],
     bookings: ['#booking-label', '#open-week-picker', '#copy-created'],
     bookingGuest: ['#guest-name', '#guest-next', '#guest-retry'],
-    printed: ['#open-order-form', '#modelSize'],
-    scouts: ['#demo-rsvp-form input:not([type="hidden"])', '#next-trip', '#calendar'],
   };
   const actionKeywords = {
-    '#work': 'projects portfolio', '#choose-files': 'upload add', '#file': 'upload convert',
-    '#destination': 'new create shorten link', '#booking-label': 'new create booking',
-    '#find-free-time': 'schedule availability gap', '#run-play': 'run simulate playback',
+    '#work': 'featured projects portfolio', '#services': 'status uptime health',
+    '#availability': 'schedule free busy',
+    '#project-badavo': 'project app', '#project-printed': 'project printing',
+    '#project-jbx': 'project terminal', '#project-cpu': 'project processor',
+    '#choose-files': 'add file', '#file': 'upload', '#batch-target': 'conversion type',
+    '#new-event': 'add new appointment', '#destination': 'new create shorten url',
+    '#booking-label': 'new create booking', '#open-week-picker': 'schedule week time slot',
+    '#find-free-time': 'schedule availability gap',
   };
   const sectionOrder = [
-    'Your tools', 'On this page', 'Scheduling', 'File actions', 'Downloads',
-    'Demos', 'Projects', 'Portfolio pages', 'Public resources', 'Ches sites',
+    'Your tools', 'Scheduling', 'Calendar navigation', 'File actions', 'File conversion',
+    'Short links', 'Booking links', 'Reservations', 'Projects', 'Portfolio pages', 'Public resources', 'Ches sites',
     'Operations', 'Invitations', 'People and permissions', 'Navigation',
   ];
   const sectionRanks = new Map(sectionOrder.map((group, index) => [group, index]));
+  const navigationLabels = new Map([['Admin', 'Admin console'], ['Dashboard', 'App dashboard'], ['Contact', 'Contact Colin']]);
 
   function element(tag, attrs = {}, text = '') {
     const node = document.createElement(tag);
@@ -179,11 +165,12 @@
     search: 'M16.8 10.5a6.3 6.3 0 1 1-12.6 0 6.3 6.3 0 0 1 12.6 0ZM15 15l5 5',
     close: 'm6 6 12 12M18 6 6 18',
     lock: 'M8 10V7a4 4 0 0 1 8 0v3m-4 4v2M8 10h8a2.5 2.5 0 0 1 2.5 2.5v5A2.5 2.5 0 0 1 16 20H8a2.5 2.5 0 0 1-2.5-2.5v-5A2.5 2.5 0 0 1 8 10Z',
-    spark: 'M12 2.5 14.6 9.4 21.5 12 14.6 14.6 12 21.5 9.4 14.6 2.5 12 9.4 9.4Z',
     arrow: 'M6 18 18 6M8 6h10v10',
+    jump: 'M5 12h14m-6-6 6 6-6 6',
     action: 'm8.5 6 9 6-9 6z',
     star: 'm12 3 2.8 5.8 6.4.9-4.6 4.5 1.1 6.4-5.7-3-5.7 3 1.1-6.4L2.8 9.7l6.4-.9Z',
     menu: 'M4 8h16M4 16h16',
+    back: 'M13 6 7 12l6 6M7 12h12',
     settings: 'M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM10 3h4l.5 2.4 1.7 1 2.4-.8 2 3.5-1.8 1.7v2.4l1.8 1.7-2 3.5-2.4-.8-1.7 1L14 21h-4l-.5-2.4-1.7-1-2.4.8-2-3.5 1.8-1.7v-2.4L3.4 9.1l2-3.5 2.4.8 1.7-1L10 3Z',
   };
 
@@ -238,7 +225,6 @@
     const localSections = new Set(actions.filter(entry => entry.operation === 'focus' && entry.target.id)
       .map(entry => `#${entry.target.id}`));
     const result = [...actions];
-    if (page === 'portfolio') result.unshift({label: 'Start the portfolio tour', operation: 'tour', group: 'Demos', local: true});
     if (page === 'drop' && shown(document.querySelector('#files'))) {
       result.push({id: 'page:drop:files', label: 'Find a file', keywords: 'search files name library',
         operation: 'files', group: 'File actions', local: true});
@@ -260,7 +246,8 @@
       const app = appUrls.has(href);
       const restricted = Boolean(accountLink || /\/auth\/if\/(admin|user)\//.test(href));
       const consoleLink = page === 'cockpit' && link.hasAttribute('data-ches-command-link');
-      result.push({id: app ? `app:${href}` : null, label, target: link, href, app,
+      const linkLabel = navigationLabels.get(label) || label;
+      result.push({id: app ? `app:${href}` : null, label: linkLabel, target: link, href, app,
         accessTarget: restricted ? link : null, local: consoleLink,
         group: accountLink ? 'Your tools' : consoleLink ? 'Operations' : 'Navigation', restricted});
       if (accountLink && href === 'https://dash.ches.dev/') {
@@ -269,7 +256,7 @@
       }
     }
     for (const [label, href] of destinations) {
-      if (seen.has(href)) continue;
+      if (seen.has(href) || (page === 'portfolio' && href === home)) continue;
       result.push({id: `app:${href}`, label, href, group: 'Ches sites', app: true});
     }
     if (page !== 'portfolio') result.push({label: 'Open live service health', href: home + '#services', group: 'Public resources'});
@@ -287,35 +274,26 @@
   const dialog = element('dialog', {class: 'ches-keys-dialog', id: 'ches-keys-dialog', 'aria-labelledby': 'ches-keys-title'});
   const title = element('h2', {id: 'ches-keys-title', class: 'ches-visually-hidden'}, 'Quick search');
   const input = element('input', {
-    type: 'search', role: 'combobox', 'aria-label': 'Search pages and actions',
+    type: 'search', role: 'combobox', 'aria-label': 'Search commands',
     'aria-autocomplete': 'list', 'aria-expanded': 'true', 'aria-controls': 'ches-keys-results',
-    placeholder: 'Search pages and actions…', autocomplete: 'off', spellcheck: 'false',
+    placeholder: 'Search commands…', autocomplete: 'off', spellcheck: 'false',
     autofocus: '',
   });
   const close = element('button', {type: 'button', class: 'ches-keys-close', 'aria-label': 'Close quick search'});
   close.append(icon('close'));
   const header = element('div', {class: 'ches-keys-search'});
   const searchIcon = icon('search');
-  const settingsTitle = element('h3', {class: 'ches-keys-settings-title', hidden: ''}, 'Quick Search settings');
+  const settingsTitle = element('h3', {class: 'ches-keys-settings-title', hidden: ''}, 'Search settings');
   header.append(searchIcon, input, settingsTitle, close);
   const controls = element('div', {class: 'ches-keys-controls'});
-  const scopes = element('div', {class: 'ches-keys-scopes', role: 'group', 'aria-label': 'Search scope'});
-  const scopeButtons = new Map();
-  for (const [value, label] of [['all', 'All'], ['app', 'This app'], ['apps', 'Apps'], ['files', 'My files'], ['tour', 'Portfolio tour']]) {
-    const button = element('button', {type: 'button', 'aria-pressed': String(value === 'all')}, label);
-    button.hidden = value === 'files' || value === 'tour';
-    button.addEventListener('click', () => setScope(value));
-    scopeButtons.set(value, button);
-    scopes.append(button);
-  }
   const settingsButton = element('button', {type: 'button', class: 'ches-keys-settings-button',
-    'aria-label': 'Settings', 'aria-expanded': 'false', 'aria-controls': 'ches-keys-settings'});
-  settingsButton.append(icon('settings'), element('span', {}, 'Settings'));
+    'aria-label': 'Settings', 'aria-expanded': 'false', 'aria-controls': 'ches-keys-settings', title: 'Settings'});
+  settingsButton.append(icon('settings'));
   const sectionFilter = element('select', {class: 'ches-keys-section-filter',
-    'aria-label': 'Filter by section', 'aria-controls': 'ches-keys-results'});
-  const filterActions = element('div', {class: 'ches-keys-filter-actions'});
-  filterActions.append(sectionFilter, settingsButton);
-  controls.append(scopes, filterActions);
+    'aria-label': 'Filter commands', 'aria-controls': 'ches-keys-results'});
+  const backToSearch = element('button', {type: 'button', class: 'ches-keys-back', hidden: ''}, 'Back to search');
+  backToSearch.prepend(icon('back'));
+  controls.append(sectionFilter, backToSearch, settingsButton);
   const settings = element('div', {class: 'ches-keys-settings', id: 'ches-keys-settings', hidden: ''});
   const storageNote = element('p', {}, 'Favorites, history, and shortcuts are saved for this site in your browser.');
   const shortcutField = element('div', {class: 'ches-keys-shortcut-field'});
@@ -390,15 +368,6 @@
   }
   document.body.append(dialog);
 
-  const publicTrigger = document.querySelector('[data-public-quick-search]');
-  if (publicTrigger) {
-    publicTrigger.setAttribute('aria-haspopup', 'dialog');
-    publicTrigger.setAttribute('aria-controls', dialog.id);
-    publicTrigger.addEventListener('click', open);
-    publicTrigger.disabled = false;
-    publicTrigger.hidden = false;
-  }
-
   let focusBefore;
   let visibleResults = [];
   let active = -1;
@@ -410,6 +379,8 @@
   let fileRequest;
   let fileResults = [];
   let fileMessage = '';
+  let dismissTimer;
+  let resultsMotion;
 
   let rows = [];
   let pointerPosition;
@@ -445,10 +416,6 @@
     if (scope === 'app') return workingEntries.filter(entry => entry.local);
     if (scope === 'apps') return workingEntries.filter(entry => entry.app);
     if (scope === 'files') return fileResults;
-    if (scope === 'tour') return tourStops.flatMap(([selector, label, detail]) => {
-      const entry = workingEntries.find(item => item.id === `page:${page}:${selector}`);
-      return entry ? [{...entry, label, detail, group: 'Portfolio tour'}] : [];
-    });
     return workingEntries;
   }
 
@@ -460,7 +427,7 @@
       for (const entry of entries) {
         if (!entry || used.has(entry)) continue;
         used.add(entry);
-        collected.push({...entry, section: entry.group, group});
+        collected.push({...entry, group});
         if (collected.length === limit) break;
       }
       return collected;
@@ -470,7 +437,7 @@
     const tools = fromIds(Array.from(appUrls, href => `app:${href}`)).filter(entry => entry?.group === 'Your tools');
     const local = fromIds((primaryActions[page] || []).map(selector => `page:${page}:${selector}`));
     const primary = page === 'portfolio' && tools.length ? collect(tools, 'Your tools') :
-      collect(local.some(Boolean) ? local : matches.filter(entry => entry.local), 'Quick actions', 4);
+      collect(local.some(Boolean) ? local : matches.filter(entry => entry.local), 'Suggested', 4);
     const recent = collect(fromIds(preferences.recent), 'Recent', 3);
     const rest = matches.filter(entry => !used.has(entry)).sort((a, b) => compareSections(a.group, b.group));
     return [...favorites, ...primary, ...recent, ...rest];
@@ -480,42 +447,59 @@
     return (sectionRanks.get(first) ?? sectionOrder.length) - (sectionRanks.get(second) ?? sectionOrder.length);
   }
 
-  function updateSectionFilter(entries) {
-    const groups = [...new Set(entries.map(entry => entry.group))].sort(compareSections);
+  function updateSectionFilter() {
+    const groups = [...new Set(workingEntries.map(entry => entry.group))].sort(compareSections);
     if (selectedSection && !groups.includes(selectedSection)) selectedSection = '';
-    sectionFilter.hidden = scope !== 'all' || editingPins || !settings.hidden || groups.length < 2;
-    const options = ['', ...groups];
+    const browsing = settings.hidden && scope !== 'files';
+    controls.hidden = editingPins;
+    sectionFilter.hidden = !browsing;
+    settingsButton.hidden = !settings.hidden;
+    backToSearch.hidden = browsing;
+    const modes = [['all', 'All']];
+    if (workingEntries.some(entry => entry.local)) modes.push(['app', 'This page']);
+    if (workingEntries.some(entry => entry.app)) modes.push(['apps', 'Apps']);
+    if (workingEntries.some(entry => entry.operation === 'files')) modes.push(['files', 'My files']);
+    const sections = groups.map(group => [`section:${group}`, group]);
+    const options = [...modes, ...sections];
     if (options.length === sectionFilter.options.length &&
-        options.every((value, index) => value === sectionFilter.options[index].value)) {
-      sectionFilter.value = selectedSection;
-      return;
+        options.every(([value], index) => value === sectionFilter.options[index].value)) {
+      sectionFilter.value = selectedSection ? `section:${selectedSection}` : scope;
+    } else {
+      const sectionOptions = element('optgroup', {label: 'Sections'});
+      sectionOptions.append(...sections.map(([value, label]) => new Option(label, value)));
+      sectionFilter.replaceChildren(...modes.map(([value, label]) => new Option(label, value)), sectionOptions);
+      sectionFilter.value = selectedSection ? `section:${selectedSection}` : scope;
     }
-    sectionFilter.replaceChildren(...options.map(group => new Option(group || 'All sections', group)));
-    sectionFilter.value = selectedSection;
+  }
+
+  function normalize(value) {
+    return value.normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+  }
+
+  function matchRank(entry, query, words) {
+    const name = normalize(entry.label);
+    if (name === query) return 0;
+    if (name.startsWith(query)) return 1;
+    if (words.every(word => name.split(' ').some(part => part.startsWith(word)))) return 2;
+    if (words.every(word => name.includes(word))) return 3;
+    const terms = normalize(`${entry.label} ${entry.keywords || ''}`);
+    if (words.every(word => terms.includes(word))) return 4;
+    const category = `${terms} ${normalize(entry.group)}`;
+    return words.every(word => category.includes(word)) ? 5 : Infinity;
   }
 
   function render() {
-    const query = input.value.toLowerCase().trim();
-    const words = query.split(/\s+/).filter(Boolean);
-    const entries = scopedEntries();
-    updateSectionFilter(entries);
-    const matches = entries.filter(({label, group, keywords = ''}) => {
-      if (scope === 'all' && selectedSection && group !== selectedSection) return false;
-      if (scope === 'files') return true;
-      const searchable = `${label} ${group} ${keywords}`.toLowerCase();
-      return words.every(word => searchable.includes(word));
-    });
+    updateSectionFilter();
+    const query = normalize(input.value);
+    const words = query.split(' ');
+    const entries = scopedEntries().filter(entry => !selectedSection || entry.group === selectedSection);
     const groupedEntries = new Map();
-    function rank({label}) {
-      const name = label.toLowerCase();
-      if (name === query) return 0;
-      if (name.startsWith(query)) return 1;
-      return words.every(word => name.includes(word)) ? 2 : 3;
-    }
-    let sorted = matches;
-    if (scope === 'all' && !editingPins && !query && !selectedSection) sorted = prioritized(matches);
-    else if (query && scope !== 'files') sorted = matches.sort((a, b) => rank(a) - rank(b));
-    else if (scope === 'apps') sorted = [...matches.filter(entry => entry.restricted), ...matches.filter(entry => !entry.restricted)];
+    let sorted = entries;
+    if (query && scope !== 'files') sorted = entries.map(entry => ({entry, rank: matchRank(entry, query, words)}))
+      .filter(match => Number.isFinite(match.rank)).sort((a, b) => a.rank - b.rank).map(match => match.entry);
+    else if (scope === 'all' && !editingPins && !selectedSection) sorted = prioritized(entries);
+    else if (scope === 'apps') sorted = entries.sort((a, b) => Number(Boolean(b.restricted)) - Number(Boolean(a.restricted)));
     for (const entry of sorted) {
       if (editingPins && !entry.id) continue;
       if (!groupedEntries.has(entry.group)) groupedEntries.set(entry.group, []);
@@ -534,16 +518,14 @@
         groups.set(entry.group, group);
       }
       const restricted = entry.restricted || entry.group === 'Your tools';
-      const isPublic = ['Demos', 'Public resources', 'Ches sites'].includes(entry.section || entry.group);
       const row = element('div', {
         role: 'option', id: 'ches-keys-option-' + index, 'aria-selected': 'false',
-        class: restricted ? 'ches-option-access' : isPublic ? 'ches-option-public' : 'ches-option-standard',
+        class: restricted ? 'ches-option-access' : 'ches-option-standard',
       });
       const tile = element('span', {class: 'ches-option-tile'});
-      tile.append(icon(restricted ? 'lock' : isPublic ? 'spark' : entry.href ? 'arrow' : 'action'));
-      const caption = element('span', {class: 'ches-option-label'}, entry.label);
-      if (entry.detail) caption.append(element('small', {class: 'ches-option-detail'}, entry.detail));
-      row.append(tile, caption);
+      const iconName = entry.href ? 'arrow' : entry.operation === 'focus' ? 'jump' : 'action';
+      tile.append(icon(restricted ? 'lock' : iconName));
+      row.append(tile, element('span', {class: 'ches-option-label'}, entry.label));
       const pinned = preferences.favorites.includes(entry.id);
       if (pinned || editingPins) {
         if (pinned) row.setAttribute('aria-label', `${entry.label} (favorite)`);
@@ -559,7 +541,7 @@
       rows.push(row);
       groups.get(entry.group).append(row);
     }
-    status.textContent = scope === 'files' ? fileMessage : visibleResults.length ? '' : 'No matching pages or actions.';
+    status.textContent = scope === 'files' ? fileMessage : visibleResults.length ? '' : 'No commands found.';
     status.hidden = !settings.hidden || !status.textContent;
     list.scrollTop = 0;
     activate(visibleResults.length ? 0 : -1, false);
@@ -579,39 +561,45 @@
     settingsButton.setAttribute('aria-expanded', String(open));
     input.hidden = searchIcon.hidden = list.hidden = guide.hidden = open;
     settingsTitle.hidden = !open;
+    updateSectionFilter();
     if (open) {
-      sectionFilter.hidden = true;
       clearHistory.disabled = !preferences.recent.length;
       status.hidden = true;
       (root.classList.contains('ches-no-key-hints') ? editPins : shortcutSelect).focus();
     } else {
       render();
+      revealResults();
       input.focus();
     }
   }
 
-  function setScope(value, focus = true) {
+  function revealResults() {
+    resultsMotion?.cancel();
+    if (reducedMotion.matches || typeof list.animate !== 'function') return;
+    resultsMotion = list.animate([
+      {opacity: .6, transform: 'translateY(4px)'},
+      {opacity: 1, transform: 'translateY(0)'},
+    ], {duration: 145, easing: 'cubic-bezier(.2,.75,.25,1)'});
+  }
+
+  function setScope(value, {section = '', keepQuery = false, focus = true, animate = true} = {}) {
     scope = value;
-    selectedSection = '';
-    editingPins = editingPins && value !== 'tour' && value !== 'files';
+    selectedSection = section;
+    editingPins = editingPins && value !== 'files';
     pinControls.hidden = !editingPins;
-    for (const [name, button] of scopeButtons) button.setAttribute('aria-pressed', String(name === value));
-    scopeButtons.get('tour').hidden = value !== 'tour';
-    updateFilesScope();
-    input.placeholder = value === 'files' ? 'Search your file names…' : 'Search pages and actions…';
-    input.setAttribute('aria-label', value === 'files' ? 'Search your file names' : 'Search pages and actions');
-    input.value = '';
+    input.placeholder = value === 'files' ? 'Search your file names…' : 'Search commands…';
+    input.setAttribute('aria-label', value === 'files' ? 'Search your file names' : 'Search commands');
+    if (!keepQuery) input.value = '';
     pointerPosition = undefined;
     resetFileSearch();
     list.removeAttribute('aria-busy');
     if (value === 'files') fileMessage = 'Enter at least two characters to find a file.';
     if (!settings.hidden) showSettings(false);
-    else render();
+    else {
+      render();
+      if (animate) revealResults();
+    }
     if (focus) input.focus();
-  }
-
-  function updateFilesScope() {
-    scopeButtons.get('files').hidden = page !== 'drop' || !shown(document.querySelector('#files'));
   }
 
   function resetFileSearch() {
@@ -673,7 +661,6 @@
 
   function refreshEntries() {
     const next = entries();
-    updateFilesScope();
     if (next.length === workingEntries.length && next.every((entry, index) => {
       const previous = workingEntries[index];
       return entry.label === previous.label && entry.target === previous.target && entry.href === previous.href;
@@ -710,7 +697,7 @@
     dialog.showModal();
     editingPins = false;
     workingEntries = entries();
-    setScope(initialScope);
+    setScope(initialScope, {animate: false});
     watchAvailability();
     input.focus();
   }
@@ -740,7 +727,7 @@
   }
 
   function choose(entry) {
-    if (!entry) return;
+    if (!entry || dialog.hasAttribute('data-closing')) return;
     if (editingPins) {
       const pinned = preferences.favorites.includes(entry.id);
       if (!pinned && preferences.favorites.length >= 40) {
@@ -762,8 +749,8 @@
       preferences.recent = [entry.id, ...preferences.recent.filter(id => id !== entry.id)].slice(0, 8);
       savePreferences();
     }
-    if (entry.operation === 'tour' || entry.operation === 'files') {
-      setScope(entry.operation);
+    if (entry.operation === 'files') {
+      setScope('files');
       return;
     }
     dialog.close();
@@ -771,6 +758,19 @@
   }
 
   function dismiss() {
+    if (!dialog.open || dialog.hasAttribute('data-closing')) return;
+    if (reducedMotion.matches) {
+      finishDismiss();
+      return;
+    }
+    dialog.setAttribute('data-closing', '');
+    dismissTimer = setTimeout(finishDismiss, 200);
+  }
+
+  function finishDismiss() {
+    clearTimeout(dismissTimer);
+    dialog.removeAttribute('data-closing');
+    if (!dialog.open) return;
     dialog.close();
     if (shown(focusBefore)) focusBefore.focus({preventScroll: true});
   }
@@ -794,10 +794,14 @@
 
   trigger.addEventListener('click', open);
   close.addEventListener('click', dismiss);
+  backToSearch.addEventListener('click', () => {
+    if (!settings.hidden) showSettings(false);
+    else setScope('all');
+  });
   sectionFilter.addEventListener('change', () => {
-    selectedSection = sectionFilter.value;
-    pointerPosition = undefined;
-    render();
+    const value = sectionFilter.value;
+    if (value.startsWith('section:')) setScope('all', {section: value.slice(8), keepQuery: true, focus: false});
+    else setScope(value, {keepQuery: value !== 'files', focus: value === 'files'});
   });
   settingsButton.addEventListener('click', () => showSettings(settings.hidden));
   shortcutSelect.addEventListener('change', () => {
@@ -831,9 +835,15 @@
   updateShortcut();
   dialog.addEventListener('close', () => {
     if (!dialog.open) {
+      clearTimeout(dismissTimer);
+      dialog.removeAttribute('data-closing');
+      resultsMotion?.cancel();
       availabilityObserver.disconnect();
       resetFileSearch();
     }
+  });
+  dialog.addEventListener('animationend', event => {
+    if (event.target === dialog && event.animationName === 'ches-palette-out') finishDismiss();
   });
   dialog.addEventListener('cancel', event => {
     event.preventDefault();
@@ -879,7 +889,7 @@
       }
     } else if (event.key === 'Enter') {
       event.preventDefault();
-      choose(visibleResults[active]);
+      choose(visibleResults[Math.max(0, active)]);
     }
   });
 
