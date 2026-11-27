@@ -54,6 +54,11 @@ body[data-ches-keyboard="cockpit"] .ches-command-bar {
   color: var(--ches-header-ink);
 }
 .ches-command-bar.site-header[data-scrolled] { background-color: var(--bg, var(--ches-chrome-solid)); }
+:root[data-effects="glass"] .ches-command-bar.site-header:not([data-scrolled]) {
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
 body[data-ches-keyboard="cpu"] .ches-command-bar { padding-inline: 3.5vw; margin-bottom: 0; }
 body[data-ches-keyboard="cpu"] .ches-command-bar .brand span { display: inline; }
 .ches-command-bar:is(.topbar, [data-account-enabled]:not(.site-header)):not(body[data-ches-keyboard="cpu"] *) {
