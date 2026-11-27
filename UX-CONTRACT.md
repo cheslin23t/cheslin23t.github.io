@@ -17,8 +17,6 @@ Missing session redirects once to central login with fixed calendar returnTo. A 
 
 Event titles, locations and notes use textContent or form values. Dialogs are native semantic dialog elements, styled with shared tokens. Custom validation owns errors; no native validation bubbles. Fields remain intact on errors. Dirty cancel and destructive delete use app-owned confirmation dialogs with Cancel focused first. Read-only calendars and scheduled invitations cannot be modified. Preserve unrelated iCalendar properties and recurrence exceptions. Event notifications are saved as iCalendar alarms and delivered by calendar clients.
 
-New timed events offer duration buttons and named schedules. A duration sets the end relative to the current start. Applying a schedule block fills Starts and Ends on the chosen date. The manual fields remain editable, and Save event uses the existing validation and calendar API. Schedules store user-entered names and reusable times in the current browser. They contain no event dates, titles, calendar IDs, or notes.
-
 ## Offline and privacy
 
 Never persist private events to localStorage, IndexedDB, caches or service workers. Drafts remain only in current page memory. Offline state disables writes, retains unsaved editor content and permits explicit retry. A lost response may follow a successful iCloud write; reuse the request key for a create retry and refresh to resolve edits. Controls start disabled until JavaScript attaches their handlers. No-JavaScript visitors retain the public portfolio and explanatory calendar text.
